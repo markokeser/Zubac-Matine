@@ -1,0 +1,21 @@
+﻿# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build folders
+bin/
+obj/
+
+# Rider
+.idea/
+
+# User-specific files
+*.log
+*.db
+
+# npm / node_modules (ako koristiš frontend)
+node_modules/
+
+# publish output
+publish/

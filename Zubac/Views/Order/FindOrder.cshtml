@@ -1,0 +1,72 @@
+﻿@model Zubac.Models.FindOrderViewModel
+
+<div class="container my-4">
+
+    <!-- Home dugme -->
+    <div class="mb-3">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
+            🏠 Home
+        </a>
+    </div>
+
+    <div class="card p-4 shadow-sm">
+        <h2 class="mb-4 text-center">🔍 Find Orders</h2>
+
+        <form asp-action="FindOrder" method="post">
+            <div class="row mb-3">
+                <div class="col-md-6 mb-3">
+                    <label>Table Number</label>
+                    <input asp-for="TableNumber" type="number" class="form-control" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>Created By (Waiter)</label>
+                    <select asp-for="CreatedBy" class="form-control">
+                        <option value="">-- Any waiter --</option>
+                        @foreach (var w in Model.Waiters)
+                        {
+                            <option value="@w.Id">@w.Username</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Search</button>
+        </form>
+
+        <hr />
+
+        @if (Model.Orders != null && Model.Orders.Count > 0)
+        {
+            <h3 class="mt-4">Results:</h3>
+
+            <div class="row">
+                @foreach (var order in Model.Orders)
+                {
+                    <div class="col-md-6">
+                        <div class="card p-3 mb-3 shadow-sm">
+                            <h5>Order #@order.Id — Table @order.TableNumber</h5>
+                            <p>Waiter ID: @order.CreatedBy</p>
+                            <p>Created: @order.Created</p>
+
+                            <ul>
+                                @foreach (var item in order.OrderArticles)
+                                {
+                                    <li>@item.Article.Name × @item.Quantity</li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else if (Context.Request.Method == "POST")
+        {
+            <p class="text-muted mt-3">No results found.</p>
+        }
+        else
+        {
+            <p class="text-muted mt-3">Enter filters and click Search.</p>
+        }
+    </div>
+</div>

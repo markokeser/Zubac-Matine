@@ -1,0 +1,138 @@
+﻿@model Zubac.Models.MakeOrderViewModel
+
+@{
+    ViewData["Title"] = "Make Bar Order";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<div class="container my-4">
+
+    <!-- Home dugme -->
+    <div class="mb-3">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
+            🏠 Home
+        </a>
+    </div>
+
+    <div class="card p-4 shadow-sm">
+        <h2 class="mb-4 text-center">🍸 Make a Bar Order</h2>
+
+        <form asp-action="OrderOnBar" method="post" id="orderForm">
+            <div class="row mb-3">
+                <div class="col-md-8 mb-3">
+                    <label>Drink</label>
+                    <select id="drinkSelect" class="form-control w-100">
+                        <option value="">Select a drink</option>
+                        @foreach (var article in Model.Articles)
+                        {
+                            <option value="@article.Id" data-name="@article.Name" data-price="@article.Price">
+                                @article.Name (@article.Price.ToString("F2")€)
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label>Quantity</label>
+                    <input type="number" id="quantityInput" class="form-control" placeholder="Enter quantity" min="1" value="1" />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <button type="button" class="btn btn-info w-100" onclick="addDrink()">➕ Add to List</button>
+            </div>
+
+            <div id="selectedDrinksContainer" class="mb-3"></div>
+
+            <!-- Ukupno -->
+            <div class="mb-3 text-end fw-bold fs-5">
+                Total: <span id="totalAmount">0.00€</span>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">✅ Submit Bar Order</button>
+        </form>
+    </div>
+</div>
+
+<style>
+    .drink-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #dee2e6;
+        border-radius: 0.35rem;
+        margin-bottom: 0.5rem;
+        background-color: #f8f9fa;
+    }
+    .drink-item span {
+        font-weight: 500;
+    }
+    .remove-button {
+        font-size: 0.8rem;
+    }
+    @@media (max-width: 576px){
+        .drink-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .remove-button {
+            margin-top: 0.25rem;
+        }
+    }
+</style>
+
+<script>
+    $(document).ready(function () {
+        $('#drinkSelect').select2({
+            placeholder: "Select a drink",
+            allowClear: true
+        });
+    });
+
+    let nextIndex = 0;
+    let totalAmount = 0;
+
+    function addDrink() {
+        const selected = $('#drinkSelect').find(':selected');
+        const id = selected.val();
+        const name = selected.data("name");
+        const price = parseFloat(selected.data("price"));
+        const quantity = parseInt($('#quantityInput').val());
+
+        if (!id || quantity < 1) {
+            alert("Please select a drink and enter a valid quantity.");
+            return;
+        }
+
+        const itemTotal = (price * quantity).toFixed(2);
+        totalAmount += parseFloat(itemTotal);
+
+        const drinkHtml = `
+            <div class="drink-item d-flex justify-content-between align-items-center mb-2 p-2 border rounded" id="drink-${nextIndex}">
+                <input type="hidden" name="SelectedArticles[${nextIndex}].ArticleId" value="${id}" />
+                <input type="hidden" name="SelectedArticles[${nextIndex}].IsSelected" value="true" />
+                <input type="hidden" name="SelectedArticles[${nextIndex}].Quantity" value="${quantity}" />
+                <input type="hidden" name="SelectedArticles.index" value="${nextIndex}" />
+                <span>${name} × ${quantity} — ${itemTotal}€</span>
+                <button type="button" class="btn btn-sm btn-danger" onclick="removeDrink(${nextIndex}, ${itemTotal})">🗑 Remove</button>
+            </div>
+        `;
+
+        $('#selectedDrinksContainer').append(drinkHtml);
+        $('#totalAmount').text(totalAmount.toFixed(2) + '€');
+
+        nextIndex++;
+        $('#drinkSelect').val(null).trigger('change');
+        $('#quantityInput').val('1');
+    }
+
+    function removeDrink(index, itemTotal) {
+        $('#drink-' + index).remove();
+        totalAmount -= parseFloat(itemTotal);
+        $('#totalAmount').text(totalAmount.toFixed(2) + '€');
+    }
+</script>

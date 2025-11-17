@@ -1,0 +1,72 @@
+﻿@model List<Zubac.Models.Order>
+
+@{
+    ViewData["Title"] = "See Orders";
+    Func<Zubac.Models.Order, decimal> calculateTotal = o => o.OrderArticles.Sum(x => x.Article.Price * x.Quantity);
+    var totalOfAllOrders = Model.Sum(order => calculateTotal(order));
+}
+
+<div class="container my-4">
+
+    <!-- Home dugme -->
+    <div class="mb-3">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
+            🏠 Home
+        </a>
+    </div>
+
+    <h2 class="mb-4 text-center">🧾 Current Orders</h2>
+
+    @if (!Model.Any())
+    {
+        <p class="text-muted text-center">No active orders.</p>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var order in Model)
+            {
+                <div class="col-md-6 mb-3">
+                    <div class="card shadow-sm p-3 order-summary" onclick="toggleDetails('@order.Id')" style="cursor: pointer;">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span><strong>Table #@order.TableNumber</strong></span>
+                            <span>🡇</span>
+                        </div>
+
+                        <div class="order-details" id="details-@order.Id" style="display: none;">
+                            @foreach (var item in order.OrderArticles)
+                            {
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>🥤 @item.Article.Name × @item.Quantity</span>
+                                    <span>@($"{item.Article.Price * item.Quantity:0.00}€")</span>
+                                </div>
+                            }
+
+                            <div class="d-flex justify-content-between mt-2 border-top pt-2">
+                                <strong>Total:</strong>
+                                <strong>@($"{calculateTotal(order):0.00}€")</strong>
+                            </div>
+
+                            <form asp-action="Finish" method="post" class="mt-2">
+                                <input type="hidden" name="id" value="@order.Id" />
+                                <button type="submit" class="btn btn-success w-100">✅ Finish Order</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="mt-4 p-3 bg-light rounded shadow-sm d-flex justify-content-between">
+            <strong>All Orders Total:</strong>
+            <strong>@($"{totalOfAllOrders:0.00}€")</strong>
+        </div>
+    }
+</div>
+
+<script>
+    function toggleDetails(id) {
+        const el = document.getElementById('details-' + id);
+        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+</script>

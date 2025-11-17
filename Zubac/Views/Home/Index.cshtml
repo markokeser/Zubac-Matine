@@ -1,0 +1,38 @@
+﻿@{
+    ViewData["Title"] = "Restaurant";
+}
+@{
+    var userRank = User.FindFirst("UserRank")?.Value;
+    var userName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+    string rankName = UserRanks
+                     .RankNames
+                     .ElementAtOrDefault(Convert.ToInt32(userRank)) ?? "Unknown";
+}
+
+<div class="home-container">
+    <h1>@userName - @rankName</h1>
+    <div class="button-group">
+        @if (userRank == "1" || userRank == "2" || userRank == "3")
+        {
+            <a href="@Url.Action("Index", "Order")" class="menu-button">🧾 Active Orders</a>
+            <a href="@Url.Action("Create", "Order")" class="menu-button">➕ Make Order</a>
+            
+        }
+        @if (userRank == "0" || userRank == "2" || userRank == "3")
+        {
+            <a href="@Url.Action("OrderOnBar", "Order")" class="menu-button">🍸 Bar Order</a>
+        }
+        @if (userRank == "2" || userRank == "3")
+        {
+
+        }
+        @if (userRank == "3")
+        {
+           
+            <a href="@Url.Action("FreeDrink", "Order")" class="menu-button">🎁 Free drink</a>
+            <a href="@Url.Action("FindOrder", "Order")" class="menu-button">🔎 Find Order</a>
+            <a href="@Url.Action("Index", "Statistics")" class="menu-button">📊 Statistics</a>
+            <a href="@Url.Action("Index", "Settings")" class="menu-button">⚙️ Settings</a>
+        }
+    </div>
+</div>

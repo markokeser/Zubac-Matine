@@ -1,0 +1,134 @@
+﻿@model StatisticsViewModel
+@{
+    ViewData["Title"] = "Statistics";
+}
+
+<div class="container my-4">
+
+    <!-- Home dugme -->
+    <div class="mb-3">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
+            🏠 Home
+        </a>
+    </div>
+
+    <h2 class="text-center mb-4">📊 User Statistics</h2>
+
+    <!-- Paid Orders Table -->
+    <div class="card shadow-sm mb-5 p-3">
+        <h4 class="text-success mb-3">💰 Paid Orders by User</h4>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered text-center mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>User</th>
+                        <th>Total Earned (€)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var stat in Model.PaidUserStats)
+                    {
+                        <tr>
+                            <td>@stat.Username</td>
+                            <td>@stat.Earnings.ToString("F2")</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot class="table-light fw-bold">
+                    <tr>
+                        <td>Total Earnings:</td>
+                        <td>@Model.TotalEarnings.ToString("F2")</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- Free Orders Table -->
+    <div class="card shadow-sm mb-5 p-3">
+        <h4 class="text-primary mb-3">🎁 Free Orders by User</h4>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered text-center mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>User</th>
+                        <th>Free Orders Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var stat in Model.FreeUserStats)
+                    {
+                        <tr>
+                            <td>@stat.Username</td>
+                            <td>@stat.FreeOrdersCount</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot class="table-light fw-bold text-danger">
+                    <tr>
+                        <td>Total Free Orders:</td>
+                        <td>@Model.TotalFreeOrders</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- Paid Drinks Table -->
+    <div class="card shadow-sm mb-5 p-3">
+        <h4 class="text-success mb-3">🍹 Paid Drinks Statistics</h4>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered text-center mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Drink</th>
+                        <th>Quantity Sold</th>
+                        <th>Total Earned (€)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var drink in Model.PaidArticles)
+                    {
+                        <tr>
+                            <td>@drink.Name</td>
+                            <td>@drink.Quantity</td>
+                            <td>@drink.Earnings.ToString("F2")</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot class="table-light fw-bold">
+                    <tr>
+                        <td>Total Paid Drinks:</td>
+                        <td>@Model.TotalPaidDrinks</td>
+                        <td>@Model.TotalPaidEarnings.ToString("F2")</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- Free Drinks Table -->
+    <div class="card shadow-sm mb-5 p-3">
+        <h4 class="text-primary mb-3">🎁 Free Drinks Statistics</h4>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered text-center mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Drink</th>
+                        <th>Quantity Given Free</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var drink in Model.FreeArticles)
+                    {
+                        <tr>
+                            <td>@drink.Name</td>
+                            <td>@drink.Quantity</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
