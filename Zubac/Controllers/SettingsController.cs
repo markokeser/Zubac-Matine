@@ -24,7 +24,8 @@ namespace Zubac.Controllers
 
         public async Task<IActionResult> Staff()
         {
-          var response = await _service.GetStaff();
+            int restaurantId = int.Parse(User.FindFirst("restaurantId").Value);
+            var response = await _service.GetStaff(restaurantId);
 
             return View(response);
         }
@@ -70,6 +71,113 @@ namespace Zubac.Controllers
 
             ModelState.AddModelError("", "Unable to set password. Link might be invalid or expired.");
             return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult AddStaff()
+        {
+            return View(new AddStaffViewModel());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddStaff(AddStaffViewModel model)
+        {
+            int restaurantId = int.Parse(User.FindFirst("restaurantId").Value);
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var success = await _service.AddStaffAsync(model.Username, model.UserRank, restaurantId);
+
+            if (!success)
+            {
+                ModelState.AddModelError("", "Username already exists.");
+                return View(model);
+            }
+
+            return RedirectToAction("Staff");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteStaff(int id)
+        {
+            var success = await _service.DeleteStaffAsync(id);
+
+            if (!success)
+                return NotFound();
+
+            return RedirectToAction("Staff"); // ili "Index" ako ti je view za Staff tamo
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> RestaurantSettings()
+        {
+            int restaurantId = int.Parse(User.FindFirst("restaurantId").Value);
+            var model = await _service.GetRestaurantSettingsAsync(restaurantId);
+
+            if (model == null)
+            {
+                var settings = await _service.CreateDefaultSettingsAsync(restaurantId);
+                model = new RestaurantSettingsViewModel
+                {
+                    Id = settings.Id,
+                    AdminId = settings.AdminId,
+                    FoodEnabled = settings.FoodEnabled,
+                    FreeDrinksEnabled = settings.FreeDrinksEnabled,
+                    StartTime = settings.StartTime
+                };
+            }
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveSettings(RestaurantSettingsViewModel model)
+        {
+            if (!ModelState.IsValid) return View("RestaurantSettings", model);
+
+            var success = await _service.SaveRestaurantSettingsAsync(model);
+
+            if (success)
+                return RedirectToAction("RestaurantSettings");
+
+            ModelState.AddModelError("", "Unable to save settings.");
+            return View("RestaurantSettings", model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> FoodSettings()
+        {
+            int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
+            var foodList = await _service.GetArticlesAsync(restaurantId, true); // true = IsFood
+            return View(foodList);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> DrinksSettings()
+        {
+            int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
+            var drinksList = await _service.GetArticlesAsync(restaurantId, false); // false = IsFood
+            return View(drinksList);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddArticle(ArticleViewModel model)
+        {
+            int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
+            model.RestaurantId = restaurantId;
+
+            if (!ModelState.IsValid)
+                return RedirectToAction(model.IsFood ? "FoodSettings" : "DrinksSettings");
+
+            await _service.AddArticleAsync(model);
+            return RedirectToAction(model.IsFood ? "FoodSettings" : "DrinksSettings");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteArticle(int id, bool isFood)
+        {
+            await _service.DeleteArticleAsync(id);
+            return RedirectToAction(isFood ? "FoodSettings" : "DrinksSettings");
         }
     }
 }

@@ -37,5 +37,19 @@ namespace Zubac.Services
 
             return user;
         }
+
+        public async Task<RestaurantData> GetRestaurantData(int id)
+        {
+            RestaurantData response = await _context.RestaurantSettings
+                .Where(x => x.Id == id)
+                .Select(y => new RestaurantData
+                {
+                    Id = y.Id,
+                    FoodEnabled = y.FoodEnabled,
+                    FreeDrinksEnabled = y.FreeDrinksEnabled
+                }).FirstOrDefaultAsync();
+
+            return response;
+        }
     }
 }

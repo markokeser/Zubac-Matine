@@ -1,0 +1,38 @@
+﻿@model Zubac.Models.AddStaffViewModel
+
+<div class="container my-4">
+
+    <div class="d-flex mb-3">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary me-2">🏠 Home</a>
+        <a asp-controller="Settings" asp-action="Index" class="btn btn-secondary">⬅ Back</a>
+    </div>
+
+    <h2 class="text-center mb-4">➕ Add New Staff</h2>
+
+    <form method="post" class="card p-4 shadow">
+
+        <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input asp-for="Username" class="form-control" />
+            <span asp-validation-for="Username" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Uloga (Rank)</label>
+            <select asp-for="UserRank" class="form-control">
+                <option value="0">Bartender</option>
+                <option value="1">Waiter</option>
+                <option value="2">Manager</option>
+                <option value="3">Admin</option>
+            </select>
+            <span asp-validation-for="UserRank" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-success w-100">Add Staff</button>
+
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

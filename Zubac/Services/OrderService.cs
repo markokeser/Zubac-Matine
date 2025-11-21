@@ -17,10 +17,10 @@ namespace Zubac.Services
             _context = context;
         }
 
-        public async Task<List<Order>> GetOrders(int id)
+        public async Task<List<Order>> GetOrders(int id, int restaurantId)
         {
             var orders = await _context.Orders
-                .Where(o => o.Finished == false && o.CreatedBy == id)
+                .Where(o => o.Finished == false && o.CreatedBy == id && o.RestaurantId == restaurantId)
                 .Include(o => o.OrderArticles)
                 .ThenInclude(oa => oa.Article)
                 .OrderByDescending(o => o.Created)
@@ -29,10 +29,10 @@ namespace Zubac.Services
             return orders;
         }
 
-        public async Task<ServiceResult> CreateOrder(MakeOrderViewModel model, int id)
+        public async Task<ServiceResult> CreateOrder(MakeOrderViewModel model, int id, int restaurantId)
         {
             var orderTable = _context.Orders
-                             .Where(o => o.TableNumber == model.TableNumber && o.Finished == false && o.CreatedBy == id)
+                             .Where(o => o.TableNumber == model.TableNumber && o.Finished == false && o.CreatedBy == id && o.RestaurantId == restaurantId)
                              .FirstOrDefault();
 
             // Create new order
@@ -43,20 +43,22 @@ namespace Zubac.Services
                     TableNumber = model.TableNumber,
                     CreatedBy = id,
                     Created = DateTime.Now,
-                    OrderArticles = new List<OrderArticle>()
+                    OrderArticles = new List<OrderArticle>(),
+                    RestaurantId = restaurantId
                 };
 
                 foreach (var selected in model.SelectedArticles)
                 {
                     if (selected.IsSelected && selected.Quantity > 0)
                     {
-                        var articleExists = await _context.Articles.AnyAsync(a => a.Id == selected.ArticleId);
+                        var articleExists = await _context.Articles.AnyAsync(a => a.Id == selected.ArticleId && a.RestaurantId == restaurantId);
                         if (!articleExists) continue;
 
                         order.OrderArticles.Add(new OrderArticle
                         {
                             ArticleId = selected.ArticleId,
-                            Quantity = selected.Quantity
+                            Quantity = selected.Quantity,
+                            RestaurantId = restaurantId
                         });
                     }
                 }
@@ -80,14 +82,15 @@ namespace Zubac.Services
                 {
                     if (selected.IsSelected && selected.Quantity > 0)
                     {
-                        var articleExists = await _context.Articles.AnyAsync(a => a.Id == selected.ArticleId);
+                        var articleExists = await _context.Articles.AnyAsync(a => a.Id == selected.ArticleId && a.RestaurantId == restaurantId);
                         if (!articleExists) continue;
 
                         _context.OrderArticles.Add(new OrderArticle
                         {
                             OrderId = orderTable.Id,
                             ArticleId = selected.ArticleId,
-                            Quantity = selected.Quantity
+                            Quantity = selected.Quantity,
+                            RestaurantId = restaurantId
                         });
                     }
                 }
@@ -101,7 +104,7 @@ namespace Zubac.Services
             };
         }
 
-        public async Task<ServiceResult> OrderOnBar(MakeOrderViewModel model, int id)
+        public async Task<ServiceResult> OrderOnBar(MakeOrderViewModel model, int id, int restaurantId)
         {
             var order = new Order
             {
@@ -109,7 +112,8 @@ namespace Zubac.Services
                 Finished = true,
                 OrderArticles = new List<OrderArticle>(),
                 Created = DateTime.Now,
-                CreatedBy = id
+                CreatedBy = id,
+                RestaurantId = restaurantId
             };
 
             foreach (var selected in model.SelectedArticles)
@@ -122,7 +126,8 @@ namespace Zubac.Services
                     order.OrderArticles.Add(new OrderArticle
                     {
                         ArticleId = selected.ArticleId,
-                        Quantity = selected.Quantity
+                        Quantity = selected.Quantity,
+                        RestaurantId = restaurantId
                     });
                 }
             }
@@ -130,11 +135,14 @@ namespace Zubac.Services
             if (order.OrderArticles.Count == 0)
             {
                 model.Articles = await _context.Articles
+                    .Where(x => x.RestaurantId == restaurantId)
                     .Select(a => new ArticleViewModel
                     {
                         Id = a.Id,
                         Name = a.Name,
-                        Price = a.Price
+                        Price = a.Price,
+                        IsFood = a.IsFood,
+                        RestaurantId = restaurantId
                     }).ToListAsync();
 
                 return new ServiceResult
@@ -154,7 +162,7 @@ namespace Zubac.Services
             };
         }
 
-        public async Task<ServiceResult> CreateFreeDrink(MakeOrderViewModel model, int id)
+        public async Task<ServiceResult> CreateFreeDrink(MakeOrderViewModel model, int id, int restaurantId)
         {
             var order = new Order
             {
@@ -163,20 +171,22 @@ namespace Zubac.Services
                 OrderArticles = new List<OrderArticle>(),
                 Created = DateTime.Now,
                 CreatedBy = id,
-                IsFree = true
+                IsFree = true,
+                RestaurantId = restaurantId
             };
 
             foreach (var selected in model.SelectedArticles)
             {
                 if (selected.IsSelected && selected.Quantity > 0)
                 {
-                    var articleExists = await _context.Articles.AnyAsync(a => a.Id == selected.ArticleId);
+                    var articleExists = await _context.Articles.AnyAsync(a => a.Id == selected.ArticleId && a.RestaurantId == restaurantId);
                     if (!articleExists) continue;
 
                     order.OrderArticles.Add(new OrderArticle
                     {
                         ArticleId = selected.ArticleId,
-                        Quantity = selected.Quantity
+                        Quantity = selected.Quantity,
+                        RestaurantId = restaurantId
                     });
                 }
             }
@@ -184,11 +194,14 @@ namespace Zubac.Services
             if (order.OrderArticles.Count == 0)
             {
                 model.Articles = await _context.Articles
+                    .Where(x => x.RestaurantId == restaurantId)
                     .Select(a => new ArticleViewModel
                     {
                         Id = a.Id,
                         Name = a.Name,
-                        Price = a.Price
+                        Price = a.Price,
+                        IsFood = a.IsFood,
+                        RestaurantId = restaurantId
                     }).ToListAsync();
 
                 return new ServiceResult
@@ -225,35 +238,38 @@ namespace Zubac.Services
             };
         }
 
-        public async Task<List<Article>> GetArticles()
+        public async Task<List<Article>> GetArticles(int restaurantId)
         {
-            List<Article> articles = await _context.Articles.ToListAsync();
+            List<Article> articles = await _context.Articles.Where(x => x.RestaurantId == restaurantId).ToListAsync();
 
             return articles;
         }
 
-        public async Task<List<ArticleViewModel>> GetModelArticles()
+        public async Task<List<ArticleViewModel>> GetModelArticles(int restaurantId)
         {
-            List<ArticleViewModel> modelArticles = await _context.Articles.Select(a => new ArticleViewModel
+            List<ArticleViewModel> modelArticles = await _context.Articles.Where(x => x.RestaurantId == restaurantId).Select(a => new ArticleViewModel
                     {
                         Id = a.Id,
                         Name = a.Name,
-                        Price = a.Price
+                        Price = a.Price,
+                        IsFood = a.IsFood,
+                        RestaurantId = restaurantId
                     }).ToListAsync();
 
             return modelArticles;
         }
 
-        public async Task<List<Users>> GetWaiters()
+        public async Task<List<Users>> GetWaiters(int restaurantId)
         {
-            List<Users> waiters = await _context.Users.ToListAsync();
+            List<Users> waiters = await _context.Users.Where(x => x.RestaurantId == restaurantId).ToListAsync();
 
             return waiters;
         }
 
-        public async Task<List<Order>> SearchOrders(int? tableNumber, int? createdBy)
+        public async Task<List<Order>> SearchOrders(int? tableNumber, int? createdBy, int restaurantId)
         {
             var query = _context.Orders
+                .Where(x => x.RestaurantId == restaurantId)
                 .Include(o => o.OrderArticles)
                 .ThenInclude(oa => oa.Article)
                 .AsQueryable();

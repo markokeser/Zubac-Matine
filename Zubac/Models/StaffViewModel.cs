@@ -10,8 +10,8 @@
         {
             return UserRank switch
             {
-                0 => "Waiter",
-                1 => "Bartender",
+                0 => "Bartender",
+                1 => "Waiter",
                 2 => "Manager",
                 3 => "Admin"
             };

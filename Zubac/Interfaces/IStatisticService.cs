@@ -4,6 +4,6 @@ namespace Zubac.Interfaces
 {
     public interface IStatisticService
     {
-        public Task<StatisticsViewModel> GetStatistic();
+        public Task<StatisticsViewModel> GetStatistic(int adminId);
     }
 }

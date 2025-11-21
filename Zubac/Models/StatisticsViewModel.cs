@@ -3,7 +3,19 @@
     public class UserEarningsViewModel
     {
         public string Username { get; set; }
+        public int UserRank { get; set; }
         public decimal Earnings { get; set; }
+
+        public string GetRankName()
+        {
+            return UserRank switch
+            {
+                0 => "Bartender",
+                1 => "Waiter",
+                2 => "Manager",
+                3 => "Admin"
+            };
+        }
     }
 
     public class UserFreeOrdersViewModel

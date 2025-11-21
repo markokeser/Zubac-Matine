@@ -4,22 +4,22 @@ namespace Zubac.Interfaces
 {
     public interface IOrderService
     {
-        public Task<List<Order>> GetOrders(int id);
+        public Task<List<Order>> GetOrders(int id, int adminId);
 
-        public Task<ServiceResult> CreateOrder(MakeOrderViewModel model, int id);
+        public Task<ServiceResult> CreateOrder(MakeOrderViewModel model, int id, int adminId);
 
-        public Task<ServiceResult> OrderOnBar(MakeOrderViewModel model, int id);
+        public Task<ServiceResult> OrderOnBar(MakeOrderViewModel model, int id, int adminId);
 
-        public Task<ServiceResult> CreateFreeDrink(MakeOrderViewModel model, int id);
+        public Task<ServiceResult> CreateFreeDrink(MakeOrderViewModel model, int id, int adminId);
 
         public Task<ServiceResult> FinishOrder(int id);
 
-        public Task<List<Article>> GetArticles();
+        public Task<List<Article>> GetArticles(int adminId);
 
-        public Task<List<ArticleViewModel>> GetModelArticles();
+        public Task<List<ArticleViewModel>> GetModelArticles(int adminId);
 
-        public Task<List<Users>> GetWaiters();
+        public Task<List<Users>> GetWaiters(int adminId);
 
-        public Task<List<Order>> SearchOrders(int? tableNumber, int? createdBy);
+        public Task<List<Order>> SearchOrders(int? tableNumber, int? createdBy, int adminId);
     }
 }

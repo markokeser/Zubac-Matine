@@ -19,8 +19,9 @@ namespace Zubac.Controllers
         // GET: OrderController
         public async Task<IActionResult> Index()
         {
+            int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
             int id = int.Parse(User.FindFirst("UserId").Value);
-            var orders = await _service.GetOrders(id);
+            var orders = await _service.GetOrders(id, restaurantId);
 
             return View(orders);
         }
@@ -28,15 +29,18 @@ namespace Zubac.Controllers
         // GET: CREATE VIEW PAGE
         public async Task<IActionResult> Create()
         {
-            var articles = await _service.GetArticles();
+            int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
+            var articles = await _service.GetArticles(restaurantId);
 
             var model = new MakeOrderViewModel
             {
-                Articles = articles.Select(a => new ArticleViewModel
+                Articles = articles.Where(x => x.RestaurantId == restaurantId).Select(a => new ArticleViewModel
                 {
                     Id = a.Id,
                     Name = a.Name,
-                    Price = a.Price
+                    Price = a.Price,
+                    IsFood = a.IsFood,
+                    RestaurantId = restaurantId
                 }).ToList()
             };
 
@@ -46,7 +50,8 @@ namespace Zubac.Controllers
         [HttpGet] // GET: FREE DRINK VIEW PAGE
         public async Task<IActionResult> FreeDrink()
         {
-            var articles = await _service.GetModelArticles();
+            int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
+            var articles = await _service.GetModelArticles(restaurantId);
             var model = new MakeOrderViewModel
             {
                 Articles = articles
@@ -58,7 +63,8 @@ namespace Zubac.Controllers
         [HttpGet] // GET: ORDER ON BAR VIEW PAGE
         public async Task<IActionResult> OrderOnBar()
         {
-            var articles = await _service.GetModelArticles();
+            int restaurantId = int.Parse(User.FindFirst("restaurantId").Value);
+            var articles = await _service.GetModelArticles(restaurantId);
             var model = new MakeOrderViewModel
             {
                 Articles = articles
@@ -70,7 +76,8 @@ namespace Zubac.Controllers
         [HttpGet]
         public async Task<IActionResult> FindOrder()
         {
-            var waiters = await _service.GetWaiters();
+            int RestaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
+            var waiters = await _service.GetWaiters(RestaurantId);
 
             var model = new FindOrderViewModel
             {
@@ -83,11 +90,13 @@ namespace Zubac.Controllers
         [HttpPost]
         public async Task<IActionResult> FindOrder(FindOrderViewModel model)
         {
-            model.Waiters = await _service.GetWaiters();
+            int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
+            model.Waiters = await _service.GetWaiters(restaurantId);
 
             model.Orders = await _service.SearchOrders(
                 model.TableNumber,
-                model.CreatedBy
+                model.CreatedBy,
+                restaurantId
             );
 
             return View(model);
@@ -99,16 +108,17 @@ namespace Zubac.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(MakeOrderViewModel model)
         {
+            int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
             if (!ModelState.IsValid || model.SelectedArticles == null || model.SelectedArticles.Count == 0)
             {
-                model.Articles = await _service.GetModelArticles();
+                model.Articles = await _service.GetModelArticles(restaurantId);
 
                 ModelState.AddModelError("", "Please select at least one drink.");
                 return View(model);
             }
 
             int id = int.Parse(User.FindFirst("UserId").Value);
-            var response = await _service.CreateOrder(model, id);
+            var response = await _service.CreateOrder(model, id, restaurantId);
 
             if(response.Success == false)
             {
@@ -122,16 +132,17 @@ namespace Zubac.Controllers
         [HttpPost] // POST: CREATE ORDER ON BAR
         public async Task<IActionResult> OrderOnBar(MakeOrderViewModel model)
         {
+            int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
             if (!ModelState.IsValid || model.SelectedArticles == null || model.SelectedArticles.Count == 0)
             {
-                model.Articles = await _service.GetModelArticles();
+                model.Articles = await _service.GetModelArticles(restaurantId);
 
                 ModelState.AddModelError("", "Please select at least one drink.");
                 return View("OrderOnBar", model); // render the OrderOnBar.cshtml view
             }
 
             int id = int.Parse(User.FindFirst("UserId").Value);
-            var response = await _service.OrderOnBar(model, id);
+            var response = await _service.OrderOnBar(model, id, restaurantId);
 
             if (response.Success == false)
             {
@@ -145,16 +156,17 @@ namespace Zubac.Controllers
         [HttpPost] // POST: CREATE FREE DRINK
         public async Task<IActionResult> FreeDrink(MakeOrderViewModel model)
         {
+            int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
             if (!ModelState.IsValid || model.SelectedArticles == null || model.SelectedArticles.Count == 0)
             {
-                model.Articles = await _service.GetModelArticles();
+                model.Articles = await _service.GetModelArticles(restaurantId);
 
                 ModelState.AddModelError("", "Please select at least one drink.");
                 return View("FreeDrink", model); // render the OrderOnBar.cshtml view
             }
 
             int id = int.Parse(User.FindFirst("UserId").Value);
-            var response = await _service.CreateFreeDrink(model, id);
+            var response = await _service.CreateFreeDrink(model, id, restaurantId);
 
             if (response.Success == false)
             {

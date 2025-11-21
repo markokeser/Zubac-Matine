@@ -4,6 +4,7 @@
 @{
     var userRank = User.FindFirst("UserRank")?.Value;
     var userName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+    bool freeDrinksEnabled = User.HasClaim("FreeDrinksEnabled", "True");
     string rankName = UserRanks
                      .RankNames
                      .ElementAtOrDefault(Convert.ToInt32(userRank)) ?? "Unknown";
@@ -26,10 +27,12 @@
         {
 
         }
-        @if (userRank == "3")
+        @if (freeDrinksEnabled)
         {
-           
             <a href="@Url.Action("FreeDrink", "Order")" class="menu-button">🎁 Free drink</a>
+        }
+        @if (userRank == "3")
+        {   
             <a href="@Url.Action("FindOrder", "Order")" class="menu-button">🔎 Find Order</a>
             <a href="@Url.Action("Index", "Statistics")" class="menu-button">📊 Statistics</a>
             <a href="@Url.Action("Index", "Settings")" class="menu-button">⚙️ Settings</a>

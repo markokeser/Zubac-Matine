@@ -14,5 +14,7 @@ namespace Zubac.Data
         public DbSet<Users> Users { get; set; }
 
         public DbSet<StaffLink> StaffLinks { get; set; }
+
+        public DbSet<RestaurantSettings> RestaurantSettings { get; set; }
     }
 }

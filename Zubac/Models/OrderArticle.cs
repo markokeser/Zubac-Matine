@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Zubac.Models
 {
@@ -16,5 +17,7 @@ namespace Zubac.Models
         public Article Article { get; set; }
 
         public int Quantity { get; set; }
+        [Required]
+        public int RestaurantId { get; set; }
     }
 }

@@ -20,7 +20,8 @@ public class StatisticsController : Controller
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var response = await _service.GetStatistic();
+        int restaurantId = int.Parse(User.FindFirst("restaurantId").Value);
+        var response = await _service.GetStatistic(restaurantId);
 
         return View(response);
     }

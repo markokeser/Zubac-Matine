@@ -15,12 +15,14 @@ namespace Zubac.Services
             _context = context;
         }
 
-        public async Task<StatisticsViewModel> GetStatistic()
+        public async Task<StatisticsViewModel> GetStatistic(int restaurantId)
         {
             var paidStats = await _context.Users
+            .Where(x => x.RestaurantId == restaurantId)
             .Select(u => new UserEarningsViewModel
             {
                 Username = u.Username,
+                UserRank = u.UserRank,
                 Earnings = _context.Orders
                     .Where(o => o.CreatedBy == u.Id && !o.IsFree)
                     .SelectMany(o => o.OrderArticles)
@@ -29,6 +31,7 @@ namespace Zubac.Services
             .ToListAsync();
 
             var freeStats = await _context.Users
+                .Where(x => x.RestaurantId == restaurantId)
                 .Select(u => new UserFreeOrdersViewModel
                 {
                     Username = u.Username,
@@ -50,14 +53,15 @@ namespace Zubac.Services
             };
 
             var paidArticles = await _context.Articles
+                .Where(x => x.RestaurantId == restaurantId)
         .Select(a => new ArticleStatsViewModel
         {
             Name = a.Name,
             Quantity = _context.OrderArticles
-                .Where(oa => oa.ArticleId == a.Id && !oa.Order.IsFree)
+                .Where(oa => oa.ArticleId == a.Id && !oa.Order.IsFree && oa.RestaurantId == restaurantId)
                 .Sum(oa => (int?)oa.Quantity) ?? 0,
             Earnings = _context.OrderArticles
-                .Where(oa => oa.ArticleId == a.Id && !oa.Order.IsFree)
+                .Where(oa => oa.ArticleId == a.Id && !oa.Order.IsFree && oa.RestaurantId == restaurantId)
                 .Sum(oa => (decimal?)oa.Quantity * oa.Article.Price) ?? 0m
         })
         .Where(a => a.Quantity > 0)
@@ -72,6 +76,7 @@ namespace Zubac.Services
 
             // Free articles stats
             var freeArticles = await _context.Articles
+                .Where(x => x.RestaurantId == restaurantId)
                 .Select(a => new ArticleStatsViewModel
                 {
                     Name = a.Name,

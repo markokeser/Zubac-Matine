@@ -24,14 +24,14 @@ namespace Zubac.Controllers
         }
 
         [HttpPost]
-        public IActionResult Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
 
-            var user = _service.Login(model).Result;
+            var user = await _service.Login(model);
 
             if (user == null)
             {
@@ -39,11 +39,16 @@ namespace Zubac.Controllers
                 return View(model);
             }
 
+            RestaurantData restaurantData = await _service.GetRestaurantData(user.RestaurantId);
+
            var claims = new List<Claim>
            {
      new Claim(ClaimTypes.Name, user.Username),
      new Claim("UserId", user.Id.ToString()),
-     new Claim("UserRank", user.UserRank.ToString())
+     new Claim("UserRank", user.UserRank.ToString()),
+     new Claim("RestaurantId", user.RestaurantId.ToString()),
+     new Claim("FoodEnabled", restaurantData.FoodEnabled.ToString()),
+     new Claim("FreeDrinksEnabled", restaurantData.FreeDrinksEnabled.ToString())
            };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

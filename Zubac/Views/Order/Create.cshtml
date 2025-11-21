@@ -2,6 +2,10 @@
 
 @{
     ViewData["Title"] = "Make Order";
+
+    bool foodEnabled = User.HasClaim("FoodEnabled", "True");
+    var foods = Model.Articles.Where(x => x.IsFood).ToList();
+    var drinks = Model.Articles.Where(x => !x.IsFood).ToList();
 }
 
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -10,154 +14,159 @@
 
 <div class="container my-4">
 
-    <!-- Home dugme levo -->
-    <div class="mb-3">
-        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
-            🏠 Home
-        </a>
-    </div>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary mb-3">🏠 Home</a>
 
     <div class="card p-4 shadow-sm">
-        <h2 class="mb-4 text-center">📝 Make a New Order</h2>
+        <h2 class="text-center mb-4">📝 Make a New Order</h2>
 
-        <form asp-action="Create" method="post" id="orderForm">
+        <form asp-action="Create" method="post">
 
-            <div class="row mb-3">
-                <div class="col-md-6 mb-3 mb-md-0">
-                    <label>Table Number</label>
-                    <select id="tableNumber" name="TableNumber" class="form-control w-100">
-                        @for (int i = 1; i <= 20; i++)
-                        {
-                            <option value="@i">@i</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="col-md-6">
-                    <label>Drink</label>
-                    <select id="drinkSelect" class="form-control w-100">
-                        <option value="">Select a drink</option>
-                        @foreach (var article in Model.Articles)
-                        {
-                            <option value="@article.Id" data-name="@article.Name" data-price="@article.Price">
-                                @article.Name (@article.Price.ToString("F2")€)
-                            </option>
-                        }
-                    </select>
-                </div>
+            <!-- TABLE NUMBER -->
+            <div class="mb-4">
+                <label>Table Number</label>
+                <select id="tableNumber" name="TableNumber" class="form-control w-100">
+                    @for (int i = 1; i <= 20; i++)
+                    {
+                        <option value="@i">@i</option>
+                    }
+                </select>
             </div>
 
-            <div class="row mb-3">
-                <div class="col-md-4 mb-3 mb-md-0">
-                    <label>Quantity</label>
-                    <input type="number" id="quantityInput" class="form-control" placeholder="Enter quantity" min="1" value="1" />
+            <!-- FOOD SECTION -->
+   @if(foodEnabled)
+   {
+            <div class="border rounded p-3 mb-4">
+                <h4 class="mb-3">🍔 Food</h4>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label>Select Food</label>
+                        <select id="foodSelect" class="form-control">
+                            <option value="">Select food</option>
+                            @foreach (var f in foods)
+                            {
+                                <option value="@f.Id" data-name="@f.Name" data-price="@f.Price">
+                                    @f.Name (@f.Price.ToString("F2")€)
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label>Quantity</label>
+                        <input type="number" id="foodQty" class="form-control" min="1" value="1" />
+                    </div>
+
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="button" class="btn btn-warning w-100" onclick="addFood()">➕ Add Food</button>
+                    </div>
                 </div>
-                <div class="col-md-8 d-flex align-items-end">
-                    <button type="button" class="btn btn-info w-100" onclick="addDrink()">➕ Add to List</button>
+
+                <div id="selectedFoodContainer"></div>
+            </div>
+            }
+
+            <!-- DRINK SECTION -->
+            <div class="border rounded p-3 mb-4">
+                <h4 class="mb-3">🍺 Drinks</h4>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label>Select Drink</label>
+                        <select id="drinkSelect" class="form-control">
+                            <option value="">Select drink</option>
+                            @foreach (var d in drinks)
+                            {
+                                <option value="@d.Id" data-name="@d.Name" data-price="@d.Price">
+                                    @d.Name (@d.Price.ToString("F2")€)
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label>Quantity</label>
+                        <input type="number" id="drinkQty" class="form-control" min="1" value="1" />
+                    </div>
+
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="button" class="btn btn-info w-100" onclick="addDrink()">➕ Add Drink</button>
+                    </div>
                 </div>
+
+                <div id="selectedDrinkContainer"></div>
             </div>
 
-            <div id="selectedDrinksContainer" class="mb-3"></div>
-
-            <!-- VEĆI TOTAL -->
-            <div class="mb-3 text-end fw-bold fs-5">
+            <!-- TOTAL -->
+            <div class="text-end fw-bold fs-4 mb-3">
                 Total: <span id="totalPrice">0.00</span>€
             </div>
 
             <button type="submit" class="btn btn-success w-100">✅ Submit Order</button>
+
         </form>
     </div>
 </div>
 
 <style>
-    .drink-item {
+    .item-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 0.5rem 0.75rem;
-        border: 1px solid #dee2e6;
+        padding: 0.6rem 0.9rem;
+        border: 1px solid #ddd;
+        background: #fafafa;
         border-radius: 0.35rem;
         margin-bottom: 0.5rem;
-        background-color: #f8f9fa;
-    }
-
-    .drink-item span {
-        font-weight: 500;
-    }
-
-    .remove-button {
-        font-size: 0.8rem;
-    }
-
-    @@media (max-width: 576px){
-        .drink-item {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .remove-button {
-            margin-top: 0.25rem;
-        }
     }
 </style>
 
 <script>
     $(document).ready(function () {
-        $('#drinkSelect').select2({
-            placeholder: "Select a drink",
-            allowClear: true
-        });
-
-        $('#tableNumber').select2({
-            tags: true,
-            placeholder: "Select or type table number"
-        });
+        $('#tableNumber, #foodSelect, #drinkSelect').select2({ allowClear: true });
     });
 
-    let nextIndex = 0;
+    let index = 0;
     let total = 0;
 
-    function addDrink() {
-        const selected = $('#drinkSelect').find(':selected');
-        const id = selected.val();
-        const name = selected.data("name");
-        const price = parseFloat(selected.data("price"));
-        const quantity = parseInt($('#quantityInput').val());
+    function addItem(container, selectId, qtyId) {
+        const sel = $(selectId).find(':selected');
+        const id = sel.val();
+        const name = sel.data("name");
+        const price = parseFloat(sel.data("price"));
+        const qty = parseInt($(qtyId).val());
 
-        if (!id || quantity < 1) {
-            alert("Please select a drink and enter a valid quantity.");
-            return;
-        }
+        if (!id || qty <= 0) return alert("Select item and quantity.");
 
-        const lineTotal = price * quantity;
-        total += lineTotal;
+        const sum = price * qty;
+        total += sum;
 
-        const drinkHtml = `
-            <div class="drink-item" id="drink-${nextIndex}">
-                <input type="hidden" name="SelectedArticles[${nextIndex}].ArticleId" value="${id}" />
-                <input type="hidden" name="SelectedArticles[${nextIndex}].IsSelected" value="true" />
-                <input type="hidden" name="SelectedArticles[${nextIndex}].Quantity" value="${quantity}" />
-                <input type="hidden" name="SelectedArticles.index" value="${nextIndex}" />
+        const html = `
+                <div class="item-row" id="row-${index}">
+                    <input type="hidden" name="SelectedArticles[${index}].ArticleId" value="${id}" />
+                    <input type="hidden" name="SelectedArticles[${index}].IsSelected" value="true" />
+                    <input type="hidden" name="SelectedArticles[${index}].Quantity" value="${qty}" />
 
-                <span>${name} × ${quantity} — ${lineTotal.toFixed(2)}€</span>
+                    <span>${name} × ${qty} — ${sum.toFixed(2)}€</span>
 
-                <button type="button" class="btn btn-sm btn-danger" onclick="removeDrink(${nextIndex}, ${lineTotal})">
-                    🗑 Remove
-                </button>
-            </div>
-        `;
+                    <button type="button" class="btn btn-sm btn-danger" onclick="removeItem(${index}, ${sum})">🗑 Remove</button>
+                </div>
+            `;
 
-        $('#selectedDrinksContainer').append(drinkHtml);
-        nextIndex++;
+        $(container).append(html);
+        index++;
 
-        $('#drinkSelect').val(null).trigger('change');
-        $('#quantityInput').val('1');
+        $(selectId).val(null).trigger('change');
+        $(qtyId).val(1);
         $('#totalPrice').text(total.toFixed(2));
     }
 
-    function removeDrink(index, lineTotal) {
-        $('#drink-' + index).remove();
-        total -= lineTotal;
+    function addFood() { addItem("#selectedFoodContainer", "#foodSelect", "#foodQty"); }
+    function addDrink() { addItem("#selectedDrinkContainer", "#drinkSelect", "#drinkQty"); }
+
+    function removeItem(i, sum) {
+        $("#row-" + i).remove();
+        total -= sum;
         $('#totalPrice').text(total.toFixed(2));
     }
 </script>

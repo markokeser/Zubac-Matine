@@ -11,12 +11,13 @@ namespace Zubac.Models
         [Required]
         public string Username { get; set; }
 
-        [Required]
-        public string Password { get; set; }
+        public string? Password { get; set; }
 
         public bool LoggedIn { get; set; }
 
         public int UserRank { get; set; }
+        [Required]
+        public int RestaurantId { get; set; }
     }
 
 }
