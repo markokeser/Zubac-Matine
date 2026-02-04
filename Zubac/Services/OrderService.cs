@@ -58,7 +58,8 @@ namespace Zubac.Services
                         {
                             ArticleId = selected.ArticleId,
                             Quantity = selected.Quantity,
-                            RestaurantId = restaurantId
+                            RestaurantId = restaurantId,
+                            Created = order.Created
                         });
                     }
                 }
@@ -90,7 +91,8 @@ namespace Zubac.Services
                             OrderId = orderTable.Id,
                             ArticleId = selected.ArticleId,
                             Quantity = selected.Quantity,
-                            RestaurantId = restaurantId
+                            RestaurantId = restaurantId,
+                            Created = orderTable.Created
                         });
                     }
                 }
@@ -127,7 +129,8 @@ namespace Zubac.Services
                     {
                         ArticleId = selected.ArticleId,
                         Quantity = selected.Quantity,
-                        RestaurantId = restaurantId
+                        RestaurantId = restaurantId,
+                        Created = order.Created
                     });
                 }
             }
@@ -186,7 +189,8 @@ namespace Zubac.Services
                     {
                         ArticleId = selected.ArticleId,
                         Quantity = selected.Quantity,
-                        RestaurantId = restaurantId
+                        RestaurantId = restaurantId,
+                        Created = order.Created
                     });
                 }
             }
@@ -240,14 +244,30 @@ namespace Zubac.Services
 
         public async Task<List<Article>> GetArticles(int restaurantId)
         {
-            List<Article> articles = await _context.Articles.Where(x => x.RestaurantId == restaurantId).ToListAsync();
+            List<Article> articles = await _context.Articles.Where(x => x.RestaurantId == restaurantId)
+                .OrderBy(x => x.Type == "Cocktail" ? 1 :
+                  x.Type == "Red Wine" ? 2 :
+                  x.Type == "White Wine" ? 3 :
+                  x.Type == "Rose Wine" ? 4 :
+                  x.Type == "Beer" ? 5 :
+                  x.Type == "Spirit" ? 6 :
+                  x.Type == "NonAlcoholic" ? 7 :
+                  999).ToListAsync();
 
             return articles;
         }
 
         public async Task<List<ArticleViewModel>> GetModelArticles(int restaurantId)
         {
-            List<ArticleViewModel> modelArticles = await _context.Articles.Where(x => x.RestaurantId == restaurantId).Select(a => new ArticleViewModel
+            List<ArticleViewModel> modelArticles = await _context.Articles.Where(x => x.RestaurantId == restaurantId && x.IsAvailable)
+                .OrderBy(x => x.Type == "Cocktail" ? 1 :
+                  x.Type == "Red Wine" ? 2 :
+                  x.Type == "White Wine" ? 3 :
+                  x.Type == "Rose Wine" ? 4 :
+                  x.Type == "Beer" ? 5 :
+                  x.Type == "Spirit" ? 6 :
+                  x.Type == "NonAlcoholic" ? 7 :
+                  999).Select(a => new ArticleViewModel
                     {
                         Id = a.Id,
                         Name = a.Name,

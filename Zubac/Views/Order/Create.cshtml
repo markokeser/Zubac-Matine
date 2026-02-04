@@ -11,162 +11,604 @@
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-<div class="container my-4">
+<style>
+    body {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%) !important;
+        min-height: 100vh;
+        color: rgba(255, 255, 255, 0.9);
+        font-family: 'Inter', sans-serif;
+    }
 
-    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary mb-3">🏠 Home</a>
+    .home-btn {
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-weight: 500;
+        background: rgba(212, 175, 55, 0.1);
+        color: #d4af37;
+        border: 1px solid rgba(212, 175, 55, 0.3);
+    }
 
-    <div class="card p-4 shadow-sm">
-        <h2 class="text-center mb-4">📝 Make a New Order</h2>
+    .home-btn:hover {
+        background: rgba(212, 175, 55, 0.2) !important;
+        transform: scale(1.05);
+        color: #d4af37;
+        text-decoration: none;
+    }
 
+    .main-container {
+        background: rgba(45, 45, 68, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .section-header span:first-child {
+        font-size: 2rem;
+    }
+
+    .section-header h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+        color: #d4af37;
+        font-family: 'Playfair Display', serif;
+    }
+
+    .form-control, select.select2 {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(212, 175, 55, 0.3) !important;
+        color: rgba(255, 255, 255, 0.9) !important;
+        border-radius: 8px !important;
+        padding: 10px 12px !important;
+        font-family: 'Inter', sans-serif !important;
+        transition: all 0.2s ease !important;
+        width: 100% !important;
+    }
+
+    .form-control:focus, select.select2:focus {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border-color: #d4af37 !important;
+        box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1) !important;
+        color: rgba(255, 255, 255, 0.9) !important;
+        outline: none !important;
+    }
+
+    .form-label {
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: 'Inter', sans-serif;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .add-btn {
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        font-family: 'Inter', sans-serif;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    .add-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .food-btn {
+        background: #FFA726 !important;
+        color: white !important;
+    }
+
+    .food-btn:hover {
+        background: #ff9800 !important;
+    }
+
+    .drinks-btn {
+        background: #29B6F6 !important;
+        color: white !important;
+    }
+
+    .drinks-btn:hover {
+        background: #0288d1 !important;
+    }
+
+    .item-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-radius: 8px;
+        margin-bottom: 8px;
+        animation: slideIn 0.3s ease;
+        font-family: 'Inter', sans-serif;
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .item-info {
+        flex: 1;
+    }
+
+    .item-name {
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .item-details {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.9rem;
+    }
+
+    .item-price {
+        color: #d4af37;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin: 0 20px;
+        font-family: 'Courier New', monospace;
+        min-width: 80px;
+        text-align: right;
+    }
+
+    .remove-btn {
+        background: #F44336;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 1.2rem;
+        padding: 0;
+    }
+
+    .remove-btn:hover {
+        background: #D32F2F;
+        transform: scale(1.1);
+    }
+
+    .total-section {
+        padding: 20px;
+        border-top: 2px solid rgba(212, 175, 55, 0.3);
+        margin-top: 24px;
+        text-align: right;
+    }
+
+    .total-label {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.95rem;
+        font-family: 'Inter', sans-serif;
+        margin-bottom: 8px;
+    }
+
+    .total-amount {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #d4af37;
+        font-family: 'Courier New', monospace;
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, #4CAF50, #66BB6A);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 14px 24px;
+        font-weight: 700;
+        font-size: 1rem;
+        width: 100%;
+        margin-top: 24px;
+        transition: all 0.2s ease;
+        font-family: 'Inter', sans-serif;
+        cursor: pointer;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(76, 175, 80, 0.3);
+        color: white;
+    }
+
+    .submit-btn:active {
+        transform: translateY(0);
+    }
+
+    select option {
+        background: #16213e;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Select2 customization */
+    .select2-container--default .select2-selection--single {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(212, 175, 55, 0.3) !important;
+        border-radius: 8px !important;
+        height: 42px !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: rgba(255, 255, 255, 0.9) !important;
+        line-height: 42px !important;
+        font-family: 'Inter', sans-serif !important;
+        padding-left: 12px !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 42px !important;
+    }
+
+    .select2-container--default .select2-results__option {
+        background: #16213e !important;
+        color: rgba(255, 255, 255, 0.9) !important;
+        font-family: 'Inter', sans-serif !important;
+    }
+
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background: rgba(212, 175, 55, 0.3) !important;
+        color: #d4af37 !important;
+    }
+
+    .select2-dropdown {
+        background: #16213e !important;
+        border: 1px solid rgba(212, 175, 55, 0.3) !important;
+        border-radius: 8px !important;
+    }
+
+    /* Toast notification */
+    .toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+        z-index: 9999;
+        animation: fadeInOut 2s ease-in-out;
+    }
+
+    @@keyframes fadeInOut {
+        0%, 100% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+        10%, 90% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    .toast-success {
+        background: #4CAF50;
+        color: white;
+    }
+
+    .toast-error {
+        background: #F44336;
+        color: white;
+    }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        color: rgba(255, 255, 255, 0.5);
+        font-family: 'Inter', sans-serif;
+        padding: 40px 0;
+    }
+
+    /* Header */
+    .page-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .page-title {
+        font-family: 'Playfair Display', serif;
+        color: #d4af37;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+    }
+</style>
+
+<div class="container py-4">
+    <div class="mb-4">
+        <a asp-controller="Home" asp-action="Index" class="home-btn">
+            <span style="font-size: 1.2rem;">🏠</span>
+            <span>Home</span>
+        </a>
+    </div>
+
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <span style="font-size: 2.5rem;">🧾</span>
+            Make Order
+        </h1>
+    </div>
+
+    <!-- Main Content Container -->
+    <div class="main-container">
         <form asp-action="Create" method="post">
 
             <!-- TABLE NUMBER -->
-            <div class="mb-4">
-                <label>Table Number</label>
-                <select id="tableNumber" name="TableNumber" class="form-control w-100">
+            <div class="mb-8">
+                <label class="form-label">Table Number</label>
+                <select id="tableNumber" name="TableNumber" class="form-control" required>
+                    <option value="" disabled selected>Select a table...</option>
                     @for (int i = 1; i <= 20; i++)
                     {
-                        <option value="@i">@i</option>
+                        <option value="@i">Table @i</option>
                     }
                 </select>
             </div>
 
             <!-- FOOD SECTION -->
-   @if(foodEnabled)
-   {
-            <div class="border rounded p-3 mb-4">
-                <h4 class="mb-3">🍔 Food</h4>
-
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label>Select Food</label>
-                        <select id="foodSelect" class="form-control">
-                            <option value="">Select food</option>
-                            @foreach (var f in foods)
-                            {
-                                <option value="@f.Id" data-name="@f.Name" data-price="@f.Price">
-                                    @f.Name (@f.Price.ToString("F2")€)
-                                </option>
-                            }
-                        </select>
+            @if (foodEnabled && foods.Any())
+            {
+                <div class="mb-8 pb-8" style="border-bottom: 2px solid rgba(212, 175, 55, 0.2);">
+                    <div class="section-header">
+                        <span>🍔</span>
+                        <h3>Food</h3>
                     </div>
 
-                    <div class="col-md-3">
-                        <label>Quantity</label>
-                        <input type="number" id="foodQty" class="form-control" min="1" value="1" />
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div class="md:col-span-2">
+                            <label class="form-label">Select Food</label>
+                            <select id="foodSelect" class="form-control">
+                                <option value="" selected>Choose food...</option>
+                                @foreach (var f in foods)
+                                {
+                                    <option value="@f.Id" data-name="@f.Name" data-price="@f.Price">
+                                        @f.Name (@f.Price.ToString("F2")€)
+                                    </option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="md:col-span-1">
+                            <label class="form-label">Quantity</label>
+                            <input type="number" id="foodQty" class="form-control" min="1" value="1" max="99" />
+                        </div>
                     </div>
 
-                    <div class="col-md-3 d-flex align-items-end">
-                        <button type="button" class="btn btn-warning w-100" onclick="addFood()">➕ Add Food</button>
+                    <div class="md:col-span-3">
+                        <button type="button" class="add-btn food-btn" onclick="addFood()">
+                            <span style="margin-right: 8px;">➕</span>
+                            Add Food
+                        </button>
+                    </div>
+
+                    <div id="selectedFoodContainer" class="mt-4">
+                        <div class="empty-state">No food items added yet...</div>
                     </div>
                 </div>
-
-                <div id="selectedFoodContainer"></div>
-            </div>
             }
 
             <!-- DRINK SECTION -->
-            <div class="border rounded p-3 mb-4">
-                <h4 class="mb-3">🍺 Drinks</h4>
-
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label>Select Drink</label>
-                        <select id="drinkSelect" class="form-control">
-                            <option value="">Select drink</option>
-                            @foreach (var d in drinks)
-                            {
-                                <option value="@d.Id" data-name="@d.Name" data-price="@d.Price">
-                                    @d.Name (@d.Price.ToString("F2")€)
-                                </option>
-                            }
-                        </select>
+            @if (drinks.Any())
+            {
+                <div class="mb-8">
+                    <div class="section-header">
+                        <span>🍺</span>
+                        <h3>Drinks</h3>
                     </div>
 
-                    <div class="col-md-3">
-                        <label>Quantity</label>
-                        <input type="number" id="drinkQty" class="form-control" min="1" value="1" />
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div class="md:col-span-2">
+                            <label class="form-label">Select Drink</label>
+                            <select id="drinkSelect" class="form-control">
+                                <option value="" selected>Choose drink...</option>
+                                @foreach (var d in drinks)
+                                {
+                                    <option value="@d.Id" data-name="@d.Name" data-price="@d.Price">
+                                        @d.Name (@d.Price.ToString("F2")€)
+                                    </option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="md:col-span-1">
+                            <label class="form-label">Quantity</label>
+                            <input type="number" id="drinkQty" class="form-control" min="1" value="1" max="99" />
+                        </div>
                     </div>
 
-                    <div class="col-md-3 d-flex align-items-end">
-                        <button type="button" class="btn btn-info w-100" onclick="addDrink()">➕ Add Drink</button>
+                    <div class="md:col-span-3">
+                        <button type="button" class="add-btn drinks-btn" onclick="addDrink()">
+                            <span style="margin-right: 8px;">➕</span>
+                            Add Drink
+                        </button>
+                    </div>
+
+                    <div id="selectedDrinkContainer" class="mt-4">
+                        <div class="empty-state">No drink items added yet...</div>
                     </div>
                 </div>
-
-                <div id="selectedDrinkContainer"></div>
-            </div>
+            }
 
             <!-- TOTAL -->
-            <div class="text-end fw-bold fs-4 mb-3">
-                Total: <span id="totalPrice">0.00</span>€
+            <div class="total-section">
+                <div class="total-label">
+                    Order Total:
+                </div>
+                <div class="total-amount" id="totalPrice">
+                    0.00€
+                </div>
             </div>
 
-            <button type="submit" class="btn btn-success w-100">✅ Submit Order</button>
-
+            <!-- SUBMIT BUTTON -->
+            <button type="submit" class="submit-btn">
+                <span style="margin-right: 8px;">✅</span>
+                Submit Order
+            </button>
         </form>
     </div>
 </div>
 
-<style>
-    .item-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.6rem 0.9rem;
-        border: 1px solid #ddd;
-        background: #fafafa;
-        border-radius: 0.35rem;
-        margin-bottom: 0.5rem;
-    }
-</style>
-
 <script>
     $(document).ready(function () {
-        $('#tableNumber, #foodSelect, #drinkSelect').select2({ allowClear: true });
+        // Initialize Select2
+        $('#tableNumber, #foodSelect, #drinkSelect').select2({
+            allowClear: true,
+            placeholder: "Select...",
+            width: '100%'
+        });
+
+        // Set default table if needed
+        $('#tableNumber').val('').trigger('change');
     });
 
     let index = 0;
     let total = 0;
 
-    function addItem(container, selectId, qtyId) {
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 2000);
+    }
+
+    function updateEmptyStates() {
+        const foodContainer = $('#selectedFoodContainer');
+        const drinkContainer = $('#selectedDrinkContainer');
+        
+        if (foodContainer.children('.item-row').length === 0) {
+            foodContainer.html('<div class="empty-state">No food items added yet...</div>');
+        }
+        
+        if (drinkContainer.children('.item-row').length === 0) {
+            drinkContainer.html('<div class="empty-state">No drink items added yet...</div>');
+        }
+    }
+
+    function addItem(container, selectId, qtyId, icon) {
         const sel = $(selectId).find(':selected');
         const id = sel.val();
         const name = sel.data("name");
         const price = parseFloat(sel.data("price"));
         const qty = parseInt($(qtyId).val());
 
-        if (!id || qty <= 0) return alert("Select item and quantity.");
+        if (!id || qty <= 0) {
+            showToast("Please select an item and quantity.", 'error');
+            return;
+        }
 
         const sum = price * qty;
         total += sum;
 
+        // Remove empty state if present
+        if ($(container).find('.empty-state').length > 0) {
+            $(container).empty();
+        }
+
         const html = `
-                <div class="item-row" id="row-${index}">
-                    <input type="hidden" name="SelectedArticles[${index}].ArticleId" value="${id}" />
-                    <input type="hidden" name="SelectedArticles[${index}].IsSelected" value="true" />
-                    <input type="hidden" name="SelectedArticles[${index}].Quantity" value="${qty}" />
-
-                    <span>${name} × ${qty} — ${sum.toFixed(2)}€</span>
-
-                    <button type="button" class="btn btn-sm btn-danger" onclick="removeItem(${index}, ${sum})">🗑 Remove</button>
+            <div class="item-row" id="row-${index}">
+                <div class="item-info">
+                    <div class="item-name">${icon} ${name}</div>
+                    <div class="item-details">Quantity: ${qty}</div>
                 </div>
-            `;
+                <div class="item-price">${sum.toFixed(2)}€</div>
+                <button type="button" class="remove-btn" onclick="removeItem(${index}, ${sum})">🗑️</button>
+                
+                <!-- Hidden fields for form submission -->
+                <input type="hidden" name="SelectedArticles[${index}].ArticleId" value="${id}" />
+                <input type="hidden" name="SelectedArticles[${index}].IsSelected" value="true" />
+                <input type="hidden" name="SelectedArticles[${index}].Quantity" value="${qty}" />
+            </div>
+        `;
 
         $(container).append(html);
         index++;
 
+        // Reset inputs
         $(selectId).val(null).trigger('change');
         $(qtyId).val(1);
-        $('#totalPrice').text(total.toFixed(2));
+        
+        // Update total
+        $('#totalPrice').text(total.toFixed(2) + '€');
+        
+        // Show success message
+        showToast(`Added ${qty}x ${name}`, 'success');
     }
 
-    function addFood() { addItem("#selectedFoodContainer", "#foodSelect", "#foodQty"); }
-    function addDrink() { addItem("#selectedDrinkContainer", "#drinkSelect", "#drinkQty"); }
+    function addFood() {
+        addItem("#selectedFoodContainer", "#foodSelect", "#foodQty", "🍔");
+    }
+
+    function addDrink() {
+        addItem("#selectedDrinkContainer", "#drinkSelect", "#drinkQty", "🍺");
+    }
 
     function removeItem(i, sum) {
-        $("#row-" + i).remove();
+        $(`#row-${i}`).remove();
         total -= sum;
-        $('#totalPrice').text(total.toFixed(2));
+        $('#totalPrice').text(total.toFixed(2) + '€');
+        updateEmptyStates();
+        showToast('Item removed', 'success');
     }
+
+    // Form submission validation
+    $('form').on('submit', function(e) {
+        const tableNumber = $('#tableNumber').val();
+        const hasItems = $('.item-row').length > 0;
+        
+        if (!tableNumber) {
+            e.preventDefault();
+            showToast('Please select a table number.', 'error');
+            return false;
+        }
+        
+        if (!hasItems) {
+            e.preventDefault();
+            showToast('Please add at least one item to your order.', 'error');
+            return false;
+        }
+        
+        showToast('Submitting order...', 'success');
+        return true;
+    });
 </script>

@@ -1,0 +1,358 @@
+﻿@model Zubac.Models.AiSommelierViewModel
+
+@{
+    ViewData["Title"] = "AI Sommelier";
+}
+
+<html>
+ <head>
+  <style>@@view-transition { navigation: auto; }</style>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+</head>
+
+<body>
+  <style>
+    body {
+        font-family: 'Playfair Display', Georgia, serif;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        min-height: 100%;
+    }
+
+    .sommelier-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 48px 32px;
+    }
+
+    .back-button {
+        background: rgba(255, 255, 255, 0.1);
+        color: #d4af37;
+        border: 2px solid #d4af37;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-block;
+        margin-bottom: 32px;
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+
+    .back-button:hover {
+        background: rgba(212, 175, 55, 0.2);
+        color: #d4af37;
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+
+    .sommelier-header {
+        text-align: center;
+        margin-bottom: 48px;
+    }
+
+    .restaurant-name {
+        font-size: 18px;
+        font-weight: 400;
+        color: #d4af37;
+        margin: 0 0 8px 0;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        opacity: 0.9;
+    }
+
+    .sommelier-title {
+        font-size: 48px;
+        font-weight: 700;
+        color: #f5f5f5;
+        margin: 0 0 12px 0;
+        letter-spacing: 2px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .sommelier-subtitle {
+        font-size: 18px;
+        color: #d4af37;
+        margin: 0;
+        font-style: italic;
+        font-weight: 300;
+    }
+
+    .sommelier-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 16px;
+        padding: 40px 32px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(10px);
+    }
+
+    .form-label {
+        display: block;
+        font-size: 16px;
+        font-weight: 600;
+        color: #1a1a2e;
+        margin-bottom: 12px;
+    }
+
+    #foodSelect {
+        width: 100%;
+        padding: 16px 20px;
+        font-size: 16px;
+        font-family: 'Playfair Display', Georgia, serif;
+        color: #1a1a2e;
+        background: white;
+        border: 2px solid #d4af37;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    #foodSelect:hover {
+        border-color: #b8960f;
+        box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
+    }
+
+    #foodSelect:focus {
+        outline: none;
+        border-color: #d4af37;
+        box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+    }
+
+    /* Select2 Custom Styling */
+    .select2-container--default .select2-selection--single {
+        height: 54px !important;
+        padding: 16px 20px !important;
+        border: 2px solid #d4af37 !important;
+        border-radius: 8px !important;
+        background: white !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 22px !important;
+        padding-left: 0 !important;
+        color: #1a1a2e !important;
+        font-size: 16px !important;
+        font-family: 'Playfair Display', Georgia, serif !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 52px !important;
+        right: 10px !important;
+    }
+
+    .select2-dropdown {
+        border: 2px solid #d4af37 !important;
+        border-radius: 8px !important;
+    }
+
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: #d4af37 !important;
+    }
+
+    #recommendBtn {
+        width: 100%;
+        padding: 18px 32px;
+        font-size: 18px;
+        font-weight: 600;
+        font-family: 'Playfair Display', Georgia, serif;
+        color: white;
+        background: linear-gradient(135deg, #d4af37 0%, #b8960f 100%);
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        letter-spacing: 1px;
+        margin-top: 24px;
+    }
+
+    #recommendBtn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+    }
+
+    #recommendBtn:active {
+        transform: translateY(0);
+    }
+
+    #recommendBtn:disabled {
+        background: #cccccc;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    #recommendationContainer {
+        margin-top: 32px;
+        padding: 32px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px;
+        border-left: 4px solid #d4af37;
+        animation: slideIn 0.5s ease;
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .recommendation-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+        text-align: center;
+    }
+
+    #recommendationMessage {
+        font-size: 16px;
+        line-height: 1.8;
+        color: #495057;
+        font-family: 'Georgia', serif;
+        display: block;
+        margin-bottom: 20px;
+    }
+
+    #addDrinkBtn {
+        padding: 12px 24px;
+        font-size: 16px;
+        font-weight: 600;
+        font-family: 'Playfair Display', Georgia, serif;
+        color: white;
+        background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        display: block;
+        margin: 0 auto;
+    }
+
+    #addDrinkBtn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(40, 167, 69, 0.4);
+    }
+
+    @@media (max-width: 640px) {
+        .sommelier-container {
+            padding: 24px 16px;
+        }
+
+        .restaurant-name {
+            font-size: 12px;
+            letter-spacing: 3px;
+        }
+
+        .sommelier-title {
+            font-size: 28px;
+            letter-spacing: 1px;
+        }
+
+        .sommelier-subtitle {
+            font-size: 13px;
+        }
+
+        .sommelier-card {
+            padding: 24px 18px;
+        }
+
+        .form-label {
+            font-size: 13px;
+        }
+
+        #foodSelect {
+            font-size: 14px;
+            padding: 14px 16px;
+        }
+
+        #recommendBtn {
+            font-size: 15px;
+            padding: 16px 24px;
+        }
+
+        #recommendationContainer {
+            padding: 20px;
+        }
+
+        #recommendationMessage {
+            font-size: 13px;
+        }
+    }
+</style>
+  <div class="sommelier-container">
+
+        <!--     <div class="mb-3"><a asp-controller="Home" asp-action="Index" class="back-button">🏠 Home</a></div>   -->
+
+           <header class="sommelier-header">
+    <p class="restaurant-name">Druga Priča</p>
+    <h1 class="sommelier-title">AI Sommelier</h1>
+    <p class="sommelier-subtitle">Perfect wine pairing for every dish</p>
+   </header>
+   <div class="sommelier-card">
+    <form id="sommelierForm">
+     @Html.AntiForgeryToken() 
+     <div class="mb-3"><label class="form-label">Izaberite glavno jelo</label> <select id="foodSelect" class="form-control w-100"> <option value="">Izaberite jelo</option> @foreach (var article in Model.FoodArticles) { <option value="@article.Id" data-name="@article.Name">@article.Name</option> } </select>
+     </div>
+     <div><button type="button" class="btn" id="recommendBtn">🍷 Preporuči piće</button>
+     </div>
+    </form>
+    <div id="recommendationContainer" style="display:none;">
+     <div class="recommendation-icon">
+      🍷
+     </div><span id="recommendationMessage"></span>
+    </div>
+   </div>
+  </div>
+
+<script>
+    console.log("SCRIPT LOADED");
+
+    $(document).ready(function () {
+
+        console.log("JS LOADED");
+
+        $('#recommendBtn').click(function () {
+
+            console.log("CLICK REGISTERED");
+
+            const foodId = $('#foodSelect').val();
+
+            $.ajax({
+                url: '@Url.Action("GetRecommendation", "AiSommelier")',
+                type: 'POST',
+                data: { foodId: foodId },
+                headers: {
+                    "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function (response) {
+                    console.log("RESPONSE", response);
+
+                    if (response.success) {
+                        $('#recommendationMessage').text(response.message);
+                        $('#addDrinkBtn').data('drinkId', response.drinkId);
+                        $('#recommendationContainer').show();
+                    } else {
+                        $('#recommendationContainer').hide();
+                        alert(response.message);
+                    }
+
+                },
+                error: function (xhr) {
+                    console.error("AJAX ERROR:", xhr);
+                }
+            });
+        });
+
+        $('#addDrinkBtn').click(function () {
+            const drinkId = $(this).data('drinkId');
+            alert("Piće sa ID " + drinkId + " dodato u korpu!");
+        });
+
+    });
+</script>
+</body>

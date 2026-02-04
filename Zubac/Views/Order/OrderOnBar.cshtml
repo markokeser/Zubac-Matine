@@ -4,128 +4,518 @@
     ViewData["Title"] = "Make Order";
 
     bool foodEnabled = User.HasClaim("FoodEnabled", "True");
+    var foods = Model.Articles.Where(x => x.IsFood).ToList();
+    var drinks = Model.Articles.Where(x => !x.IsFood).ToList();
 }
 
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-<div class="container my-4">
-
-    <!-- Home dugme -->
-    <div class="mb-3">
-        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
-            🏠 Home
-        </a>
-    </div>
-
-    <div class="card p-4 shadow-sm">
-        <h2 class="mb-4 text-center">📝 Make a New Order</h2>
-
-        <form asp-action="Create" method="post" id="orderForm">
-
-
-            <!-- Food (if enabled) -->
-            @if (foodEnabled)
-            {
-                <div class="row mb-3">
-                    <div class="col-md-8 mb-3">
-                        <label>Food</label>
-                        <select id="foodSelect" class="form-control w-100">
-                            <option value="">Select a food item</option>
-                            @foreach (var article in Model.Articles.Where(a => a.IsFood))
-                            {
-                                <option value="@article.Id" data-name="@article.Name" data-price="@article.Price">
-                                    @article.Name (@article.Price.ToString("F2")€)
-                                </option>
-                            }
-                        </select>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label>Quantity</label>
-                        <input type="number" id="foodQuantityInput" class="form-control" placeholder="Enter quantity" min="1" value="1" />
-                    </div>
-                    <div class="col-12 mb-3">
-                        <button type="button" class="btn btn-info w-100" onclick="addFood()">➕ Add Food</button>
-                    </div>
-                </div>
-            }
-
-            <!-- Drinks -->
-            <div class="row mb-3">
-                <div class="col-md-8 mb-3">
-                    <label>Drink</label>
-                    <select id="drinkSelect" class="form-control w-100">
-                        <option value="">Select a drink</option>
-                        @foreach (var article in Model.Articles.Where(a => !a.IsFood))
-                        {
-                            <option value="@article.Id" data-name="@article.Name" data-price="@article.Price">
-                                @article.Name (@article.Price.ToString("F2")€)
-                            </option>
-                        }
-                    </select>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label>Quantity</label>
-                    <input type="number" id="drinkQuantityInput" class="form-control" placeholder="Enter quantity" min="1" value="1" />
-                </div>
-                <div class="col-12 mb-3">
-                    <button type="button" class="btn btn-info w-100" onclick="addDrink()">➕ Add Drink</button>
-                </div>
-            </div>
-
-            <!-- Selected Items -->
-            <div id="selectedItemsContainer" class="mb-3"></div>
-
-            <!-- Total -->
-            <div class="mb-3 text-end fw-bold fs-5">
-                Total: <span id="totalAmount">0.00€</span>
-            </div>
-
-            <button type="submit" class="btn btn-success w-100">✅ Submit Order</button>
-        </form>
-    </div>
-</div>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
+    body {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%) !important;
+        min-height: 100vh;
+        color: rgba(255, 255, 255, 0.9);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .home-btn {
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-weight: 500;
+        background: rgba(212, 175, 55, 0.1);
+        color: #d4af37;
+        border: 1px solid rgba(212, 175, 55, 0.3);
+    }
+
+    .home-btn:hover {
+        background: rgba(212, 175, 55, 0.2) !important;
+        transform: scale(1.05);
+        color: #d4af37;
+        text-decoration: none;
+    }
+
+    .main-container {
+        background: rgba(45, 45, 68, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid rgba(212, 175, 55, 0.2);
+    }
+
+    .section-header span:first-child {
+        font-size: 1.8rem;
+    }
+
+    .section-header h3 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin: 0;
+        color: #d4af37;
+        font-family: 'Playfair Display', serif;
+    }
+
+    .form-control, select.select2 {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(212, 175, 55, 0.3) !important;
+        color: rgba(255, 255, 255, 0.9) !important;
+        border-radius: 8px !important;
+        padding: 10px 12px !important;
+        font-family: 'Inter', sans-serif !important;
+        transition: all 0.2s ease !important;
+        width: 100% !important;
+    }
+
+    .form-control:focus, select.select2:focus {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border-color: #d4af37 !important;
+        box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1) !important;
+        color: rgba(255, 255, 255, 0.9) !important;
+        outline: none !important;
+    }
+
+    .form-label {
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: 'Inter', sans-serif;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .add-btn {
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        font-family: 'Inter', sans-serif;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    .add-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .food-btn {
+        background: #FFA726 !important;
+        color: white !important;
+    }
+
+    .food-btn:hover {
+        background: #ff9800 !important;
+    }
+
+    .drinks-btn {
+        background: #29B6F6 !important;
+        color: white !important;
+    }
+
+    .drinks-btn:hover {
+        background: #0288d1 !important;
+    }
+
     .item {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 0.5rem 0.75rem;
-        border: 1px solid #dee2e6;
-        border-radius: 0.35rem;
-        margin-bottom: 0.5rem;
-        background-color: #f8f9fa;
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-radius: 8px;
+        margin-bottom: 8px;
+        animation: slideIn 0.3s ease;
+        font-family: 'Inter', sans-serif;
     }
 
-        .item span {
-            font-weight: 500;
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
         }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 
-    @@media (max-width: 576px) {
-        .item {
-            flex-direction: column;
-            align-items: flex-start;
+    .item-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .item-name {
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .item-price {
+        color: #d4af37;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin: 0 20px;
+        font-family: 'Courier New', monospace;
+        min-width: 80px;
+        text-align: right;
+    }
+
+    .remove-btn {
+        background: #F44336;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 1.2rem;
+        padding: 0;
+    }
+
+    .remove-btn:hover {
+        background: #D32F2F;
+        transform: scale(1.1);
+    }
+
+    .total-section {
+        padding: 20px;
+        border-top: 2px solid rgba(212, 175, 55, 0.3);
+        margin-top: 24px;
+        text-align: right;
+    }
+
+    .total-label {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.95rem;
+        font-family: 'Inter', sans-serif;
+        margin-bottom: 8px;
+    }
+
+    .total-amount {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #d4af37;
+        font-family: 'Courier New', monospace;
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, #4CAF50, #66BB6A);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 14px 24px;
+        font-weight: 700;
+        font-size: 1rem;
+        width: 100%;
+        margin-top: 24px;
+        transition: all 0.2s ease;
+        font-family: 'Inter', sans-serif;
+        cursor: pointer;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(76, 175, 80, 0.3);
+        color: white;
+    }
+
+    .submit-btn:active {
+        transform: translateY(0);
+    }
+
+    select option {
+        background: #16213e;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Select2 customization */
+    .select2-container--default .select2-selection--single {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(212, 175, 55, 0.3) !important;
+        border-radius: 8px !important;
+        height: 42px !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: rgba(255, 255, 255, 0.9) !important;
+        line-height: 42px !important;
+        font-family: 'Inter', sans-serif !important;
+        padding-left: 12px !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 42px !important;
+    }
+
+    .select2-container--default .select2-results__option {
+        background: #16213e !important;
+        color: rgba(255, 255, 255, 0.9) !important;
+        font-family: 'Inter', sans-serif !important;
+    }
+
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background: rgba(212, 175, 55, 0.3) !important;
+        color: #d4af37 !important;
+    }
+
+    .select2-dropdown {
+        background: #16213e !important;
+        border: 1px solid rgba(212, 175, 55, 0.3) !important;
+        border-radius: 8px !important;
+    }
+
+    /* Toast notification */
+    .toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+        z-index: 9999;
+        animation: fadeInOut 2s ease-in-out;
+    }
+
+    @@keyframes fadeInOut {
+        0%, 100% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+        10%, 90% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    .toast-success {
+        background: #4CAF50;
+        color: white;
+    }
+
+    .toast-error {
+        background: #F44336;
+        color: white;
+    }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        color: rgba(255, 255, 255, 0.5);
+        font-family: 'Inter', sans-serif;
+        padding: 40px 0;
+    }
+
+    /* Header */
+    .page-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .page-title {
+        font-family: 'Playfair Display', serif;
+        color: #d4af37;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    /* Grid adjustments */
+    .grid-form {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    @@media (min-width: 768px) {
+        .grid-form {
+            grid-template-columns: 2fr 1fr;
+        }
+        
+        .add-btn-container {
+            grid-column: span 2;
         }
     }
 </style>
 
+<div class="container py-4">
+    <div class="mb-4">
+        <a asp-controller="Home" asp-action="Index" class="home-btn">
+            <span style="font-size: 1.2rem;">🏠</span>
+            <span>Home</span>
+        </a>
+    </div>
+
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <span style="font-size: 2.5rem;">🍸</span>
+            Make Bar Order
+        </h1>
+    </div>
+
+    <!-- Main Content Container -->
+    <div class="main-container">
+        <form asp-action="OrderOnBar" method="post" id="orderForm">
+
+            <!-- FOOD SECTION -->
+            @if (foodEnabled && foods.Any())
+            {
+                <div class="mb-8 pb-8" style="border-bottom: 2px solid rgba(212, 175, 55, 0.2);">
+                    <div class="section-header">
+                        <span>🍔</span>
+                        <h3>Food</h3>
+                    </div>
+
+                    <div class="grid-form mb-4">
+                        <div>
+                            <label class="form-label">Select Food</label>
+                            <select id="foodSelect" class="form-control">
+                                <option value="" selected>Choose food...</option>
+                                @foreach (var article in foods)
+                                {
+                                    <option value="@article.Id" data-name="@article.Name" data-price="@article.Price">
+                                        @article.Name (@article.Price.ToString("F2")€)
+                                    </option>
+                                }
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="form-label">Quantity</label>
+                            <input type="number" id="foodQuantityInput" class="form-control" placeholder="Enter quantity" min="1" value="1" max="99" />
+                        </div>
+
+                        <div class="add-btn-container">
+                            <button type="button" class="add-btn food-btn" onclick="addFood()">
+                                <span style="margin-right: 8px;">➕</span>
+                                Add Food
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- DRINK SECTION -->
+            @if (drinks.Any())
+            {
+                <div class="mb-8">
+                    <div class="section-header">
+                        <span>🍺</span>
+                        <h3>Drinks</h3>
+                    </div>
+
+                    <div class="grid-form mb-4">
+                        <div>
+                            <label class="form-label">Select Drink</label>
+                            <select id="drinkSelect" class="form-control">
+                                <option value="" selected>Choose drink...</option>
+                                @foreach (var article in drinks)
+                                {
+                                    <option value="@article.Id" data-name="@article.Name" data-price="@article.Price">
+                                        @article.Name (@article.Price.ToString("F2")€)
+                                    </option>
+                                }
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="form-label">Quantity</label>
+                            <input type="number" id="drinkQuantityInput" class="form-control" placeholder="Enter quantity" min="1" value="1" max="99" />
+                        </div>
+
+                        <div class="add-btn-container">
+                            <button type="button" class="add-btn drinks-btn" onclick="addDrink()">
+                                <span style="margin-right: 8px;">➕</span>
+                                Add Drink
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Selected Items -->
+            <div id="selectedItemsContainer" class="mb-8">
+                <div class="empty-state">No items added yet...</div>
+            </div>
+
+            <!-- TOTAL -->
+            <div class="total-section">
+                <div class="total-label">
+                    Order Total:
+                </div>
+                <div class="total-amount" id="totalAmount">
+                    0.00€
+                </div>
+            </div>
+
+            <!-- SUBMIT BUTTON -->
+            <button type="submit" class="submit-btn">
+                <span style="margin-right: 8px;">✅</span>
+                Submit Order
+            </button>
+        </form>
+    </div>
+</div>
+
 <script>
     $(document).ready(function () {
+        // Initialize Select2
         $('#drinkSelect, #foodSelect').select2({
             placeholder: "Select an item",
-            allowClear: true
-        });
-
-        $('#tableNumber').select2({
-            tags: true,
-            placeholder: "Select or type table number"
+            allowClear: true,
+            width: '100%'
         });
     });
 
     let nextIndex = 0;
     let totalAmount = 0;
+
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 2000);
+    }
+
+    function updateEmptyState() {
+        const container = $('#selectedItemsContainer');
+        if (container.children('.item').length === 0) {
+            container.html('<div class="empty-state">No items added yet...</div>');
+        }
+    }
 
     function addFood() {
         const selected = $('#foodSelect').find(':selected');
@@ -135,29 +525,43 @@
         const quantity = parseInt($('#foodQuantityInput').val());
 
         if (!id || quantity < 1) {
-            alert("Please select a food and enter a valid quantity.");
+            showToast("Please select a food and enter a valid quantity.", 'error');
             return;
         }
 
         const itemTotal = (price * quantity).toFixed(2);
         totalAmount += parseFloat(itemTotal);
 
+        // Remove empty state if present
+        if ($('#selectedItemsContainer').find('.empty-state').length > 0) {
+            $('#selectedItemsContainer').empty();
+        }
+
         const html = `
-                <div class="item" id="item-${nextIndex}">
-                    <input type="hidden" name="SelectedArticles[${nextIndex}].ArticleId" value="${id}" />
-                    <input type="hidden" name="SelectedArticles[${nextIndex}].IsSelected" value="true" />
-                    <input type="hidden" name="SelectedArticles[${nextIndex}].Quantity" value="${quantity}" />
-                    <input type="hidden" name="SelectedArticles.index" value="${nextIndex}" />
-                    <span>${name} × ${quantity} — ${itemTotal}€</span>
-                    <button type="button" class="btn btn-sm btn-danger" onclick="removeItem(${nextIndex}, ${itemTotal})">🗑 Remove</button>
+            <div class="item" id="item-${nextIndex}">
+                <div class="item-info">
+                    <div class="item-name">🍔 ${name}</div>
+                    <div style="color: rgba(255, 255, 255, 0.6); font-size: 0.9rem;">Quantity: ${quantity}</div>
                 </div>
-            `;
+                <div class="item-price">${itemTotal}€</div>
+                <button type="button" class="remove-btn" onclick="removeItem(${nextIndex}, ${itemTotal})">🗑️</button>
+                
+                <!-- Hidden fields for form submission -->
+                <input type="hidden" name="SelectedArticles[${nextIndex}].ArticleId" value="${id}" />
+                <input type="hidden" name="SelectedArticles[${nextIndex}].IsSelected" value="true" />
+                <input type="hidden" name="SelectedArticles[${nextIndex}].Quantity" value="${quantity}" />
+            </div>
+        `;
 
         $('#selectedItemsContainer').append(html);
         $('#totalAmount').text(totalAmount.toFixed(2) + '€');
         nextIndex++;
+        
+        // Reset inputs
         $('#foodSelect').val(null).trigger('change');
         $('#foodQuantityInput').val('1');
+        
+        showToast(`Added ${quantity}x ${name}`, 'success');
     }
 
     function addDrink() {
@@ -168,34 +572,64 @@
         const quantity = parseInt($('#drinkQuantityInput').val());
 
         if (!id || quantity < 1) {
-            alert("Please select a drink and enter a valid quantity.");
+            showToast("Please select a drink and enter a valid quantity.", 'error');
             return;
         }
 
         const itemTotal = (price * quantity).toFixed(2);
         totalAmount += parseFloat(itemTotal);
 
+        // Remove empty state if present
+        if ($('#selectedItemsContainer').find('.empty-state').length > 0) {
+            $('#selectedItemsContainer').empty();
+        }
+
         const html = `
-                <div class="item" id="item-${nextIndex}">
-                    <input type="hidden" name="SelectedArticles[${nextIndex}].ArticleId" value="${id}" />
-                    <input type="hidden" name="SelectedArticles[${nextIndex}].IsSelected" value="true" />
-                    <input type="hidden" name="SelectedArticles[${nextIndex}].Quantity" value="${quantity}" />
-                    <input type="hidden" name="SelectedArticles.index" value="${nextIndex}" />
-                    <span>${name} × ${quantity} — ${itemTotal}€</span>
-                    <button type="button" class="btn btn-sm btn-danger" onclick="removeItem(${nextIndex}, ${itemTotal})">🗑 Remove</button>
+            <div class="item" id="item-${nextIndex}">
+                <div class="item-info">
+                    <div class="item-name">🍺 ${name}</div>
+                    <div style="color: rgba(255, 255, 255, 0.6); font-size: 0.9rem;">Quantity: ${quantity}</div>
                 </div>
-            `;
+                <div class="item-price">${itemTotal}€</div>
+                <button type="button" class="remove-btn" onclick="removeItem(${nextIndex}, ${itemTotal})">🗑️</button>
+                
+                <!-- Hidden fields for form submission -->
+                <input type="hidden" name="SelectedArticles[${nextIndex}].ArticleId" value="${id}" />
+                <input type="hidden" name="SelectedArticles[${nextIndex}].IsSelected" value="true" />
+                <input type="hidden" name="SelectedArticles[${nextIndex}].Quantity" value="${quantity}" />
+            </div>
+        `;
 
         $('#selectedItemsContainer').append(html);
         $('#totalAmount').text(totalAmount.toFixed(2) + '€');
         nextIndex++;
+        
+        // Reset inputs
         $('#drinkSelect').val(null).trigger('change');
         $('#drinkQuantityInput').val('1');
+        
+        showToast(`Added ${quantity}x ${name}`, 'success');
     }
 
     function removeItem(index, itemTotal) {
         $('#item-' + index).remove();
         totalAmount -= parseFloat(itemTotal);
         $('#totalAmount').text(totalAmount.toFixed(2) + '€');
+        updateEmptyState();
+        showToast('Item removed', 'success');
     }
+
+    // Form submission validation
+    $('#orderForm').on('submit', function(e) {
+        const hasItems = $('.item').length > 0;
+        
+        if (!hasItems) {
+            e.preventDefault();
+            showToast('Please add at least one item to your order.', 'error');
+            return false;
+        }
+        
+        showToast('Submitting order...', 'success');
+        return true;
+    });
 </script>

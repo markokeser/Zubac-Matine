@@ -4,38 +4,350 @@
 @{
     var userRank = User.FindFirst("UserRank")?.Value;
     var userName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+    var restaurantName = User.FindFirst("RestaurantName")?.Value;
     bool freeDrinksEnabled = User.HasClaim("FreeDrinksEnabled", "True");
     string rankName = UserRanks
                      .RankNames
                      .ElementAtOrDefault(Convert.ToInt32(userRank)) ?? "Unknown";
 }
 
-<div class="home-container">
-    <h1>@userName - @rankName</h1>
-    <div class="button-group">
-        @if (userRank == "1" || userRank == "2" || userRank == "3")
-        {
-            <a href="@Url.Action("Index", "Order")" class="menu-button">🧾 Active Orders</a>
-            <a href="@Url.Action("Create", "Order")" class="menu-button">➕ Make Order</a>
-            
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Menu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
         }
-        @if (userRank == "0" || userRank == "2" || userRank == "3")
-        {
-            <a href="@Url.Action("OrderOnBar", "Order")" class="menu-button">🍸 Bar Order</a>
-        }
-        @if (userRank == "2" || userRank == "3")
-        {
 
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            min-height: 100vh;
+            color: rgba(255, 255, 255, 0.9);
+            font-family: 'Inter', sans-serif;
         }
-        @if (freeDrinksEnabled)
-        {
-            <a href="@Url.Action("FreeDrink", "Order")" class="menu-button">🎁 Free drink</a>
+
+        .menu-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: block;
+            text-decoration: none;
         }
-        @if (userRank == "3")
-        {   
-            <a href="@Url.Action("FindOrder", "Order")" class="menu-button">🔎 Find Order</a>
-            <a href="@Url.Action("Index", "Statistics")" class="menu-button">📊 Statistics</a>
-            <a href="@Url.Action("Index", "Settings")" class="menu-button">⚙️ Settings</a>
+
+            .menu-btn:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            }
+
+            .menu-btn:active {
+                transform: translateY(-2px);
+            }
+
+        .rank-badge {
+            animation: pulse-soft 2s ease-in-out infinite;
         }
+
+        @@keyframes pulse-soft {
+            0%, 100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        .gradient-border {
+            position: relative;
+        }
+
+            .gradient-border::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: inherit;
+                padding: 2px;
+                background: linear-gradient(135deg, #d4af37, #f4e4ba, #d4af37);
+                -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+                -webkit-mask-composite: xor;
+                mask-composite: exclude;
+            }
+
+        /* Responsive adjustments */
+        @@media (max-width: 640px) {
+            .header-container {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .user-card {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .menu-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.75rem;
+                padding: 0 0.5rem;
+            }
+
+                .menu-grid > a {
+                    padding: 1rem !important;
+                }
+
+                .menu-grid span.text-4xl {
+                    font-size: 2rem;
+                    margin-bottom: 0.5rem;
+                }
+
+                .menu-grid span.text-sm {
+                    font-size: 0.75rem;
+                }
+
+            .debug-panel {
+                margin-top: 1rem;
+                padding: 0.75rem;
+            }
+
+                .debug-panel > div {
+                    flex-direction: column;
+                    gap: 0.5rem;
+                }
+        }
+
+        @@media (max-width: 480px) {
+            .menu-grid {
+                grid-template-columns: repeat(1, 1fr) !important;
+                max-width: 280px;
+            }
+
+            #restaurant-title {
+                font-size: 1.5rem;
+            }
+
+            .user-card {
+                padding: 0.75rem !important;
+            }
+
+            .user-info {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .rank-badge {
+                margin-top: 0.25rem;
+            }
+        }
+
+        /* FIX: Remove overflow restrictions */
+        .content-wrapper {
+            min-height: 100vh;
+            width: 100%;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }
+
+        /* Ensure content can grow */
+        .main-content {
+            min-height: calc(100vh - 40px);
+            padding-bottom: 2rem; /* Space at bottom */
+        }
+    </style>
+</head>
+<body>
+    <div class="content-wrapper">
+        <div class="main-content w-full flex flex-col items-center py-6 px-4 sm:px-6 lg:px-8">
+            <!-- Header Section -->
+            <div class="w-full max-w-7xl mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 px-4 header-container">
+                <!-- Restaurant Name -->
+                <div class="inline-flex items-center gap-2 flex-shrink-0">
+                    <span class="text-2xl sm:text-3xl">🍽️</span>
+                    <h1 id="restaurant-title" class="text-2xl sm:text-3xl md:text-4xl font-bold" style="font-family: 'Playfair Display', serif; color: #d4af37;">
+                        @restaurantName
+                    </h1>
+                </div>
+
+                <!-- User Info Card -->
+                <div class="gradient-border rounded-2xl user-card" style="background: rgba(255,255,255,0.05); backdrop-filter: blur(10px);">
+                    <div class="px-4 sm:px-6 py-3 sm:py-4 rounded-2xl">
+                        <div class="flex items-center gap-3 user-info">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-lg sm:text-xl flex-shrink-0" style="background: linear-gradient(135deg, #d4af37, #f4e4ba);">
+                                👤
+                            </div>
+                            <div class="text-left">
+                                <p id="user-name-display" class="text-base sm:text-lg font-semibold truncate max-w-[150px] sm:max-w-none" style="font-family: 'Inter', sans-serif; color: #ffffff;">
+                                    @userName
+                                </p>
+                                <span id="rank-badge" class="rank-badge inline-flex items-center gap-1 px-2 sm:px-3 py-1 rounded-full text-xs font-medium mt-1" style="background: rgba(212, 175, 55, 0.2); color: #d4af37; font-family: 'Inter', sans-serif;">
+                                    <span id="rank-icon">
+                                        @if (userRank == "0")
+                                        {
+                                            <text>🍸</text>
+                                        }
+                                        else if (userRank == "1")
+                                        {
+                                            <text>🍽️</text>
+                                        }
+                                        else if (userRank == "2")
+                                        {
+                                            <text>👔</text>
+                                        }
+                                        else if (userRank == "3")
+                                        {
+                                            <text>👑</text>
+                                        }
+                                        else
+                                        {
+                                            <text>👤</text>
+                                        }
+                                    </span>
+                                    <span id="rank-text" class="truncate">@rankName</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menu Buttons Grid -->
+            <div id="menu-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full max-w-7xl px-4 menu-grid">
+                <!-- Dynamic buttons based on Razor logic -->
+                @if (userRank == "1" || userRank == "2" || userRank == "3")
+                {
+                    <a href="@Url.Action("Index", "Order")" class="menu-btn gradient-border rounded-2xl block h-full" style="background: #2d2d44;">
+                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center">
+                            <span class="text-3xl sm:text-4xl mb-2 sm:mb-3 block">🧾</span>
+                            <span class="text-xs sm:text-sm font-semibold block" style="color: #ffffff; font-family: 'Inter', sans-serif;">
+                                Active Orders
+                            </span>
+                        </div>
+                    </a>
+
+                    <a href="@Url.Action("Create", "Order")" class="menu-btn gradient-border rounded-2xl block h-full" style="background: #2d2d44;">
+                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center">
+                            <span class="text-3xl sm:text-4xl mb-2 sm:mb-3 block">➕</span>
+                            <span class="text-xs sm:text-sm font-semibold block" style="color: #ffffff; font-family: 'Inter', sans-serif;">
+                                Make Order
+                            </span>
+                        </div>
+                    </a>
+                }
+
+                @if (userRank == "0" || userRank == "2" || userRank == "3")
+                {
+                    <a href="@Url.Action("OrderOnBar", "Order")" class="menu-btn gradient-border rounded-2xl block h-full" style="background: #2d2d44;">
+                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center">
+                            <span class="text-3xl sm:text-4xl mb-2 sm:mb-3 block">🍸</span>
+                            <span class="text-xs sm:text-sm font-semibold block" style="color: #ffffff; font-family: 'Inter', sans-serif;">
+                                Make Bar Order
+                            </span>
+                        </div>
+                    </a>
+                }
+
+                @if (freeDrinksEnabled)
+                {
+                    <a href="@Url.Action("FreeDrink", "Order")" class="menu-btn gradient-border rounded-2xl block h-full" style="background: #2d2d44;">
+                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center">
+                            <span class="text-3xl sm:text-4xl mb-2 sm:mb-3 block">🎁</span>
+                            <span class="text-xs sm:text-sm font-semibold block" style="color: #ffffff; font-family: 'Inter', sans-serif;">
+                                Free Drink
+                            </span>
+                        </div>
+                    </a>
+                }
+
+                @if (userRank == "3")
+                {
+                    <a href="@Url.Action("FindOrder", "Order")" class="menu-btn gradient-border rounded-2xl block h-full" style="background: #2d2d44;">
+                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center">
+                            <span class="text-3xl sm:text-4xl mb-2 sm:mb-3 block">🔎</span>
+                            <span class="text-xs sm:text-sm font-semibold block" style="color: #ffffff; font-family: 'Inter', sans-serif;">
+                                Find Order
+                            </span>
+                        </div>
+                    </a>
+
+                    <a href="@Url.Action("Index", "Statistics")" class="menu-btn gradient-border rounded-2xl block h-full" style="background: #2d2d44;">
+                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center">
+                            <span class="text-3xl sm:text-4xl mb-2 sm:mb-3 block">📊</span>
+                            <span class="text-xs sm:text-sm font-semibold block" style="color: #ffffff; font-family: 'Inter', sans-serif;">
+                                Statistics
+                            </span>
+                        </div>
+                    </a>
+
+                    <a href="@Url.Action("Index", "Settings")" class="menu-btn gradient-border rounded-2xl block h-full" style="background: #2d2d44;">
+                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center">
+                            <span class="text-3xl sm:text-4xl mb-2 sm:mb-3 block">⚙️</span>
+                            <span class="text-xs sm:text-sm font-semibold block" style="color: #ffffff; font-family: 'Inter', sans-serif;">
+                                Settings
+                            </span>
+                        </div>
+                    </a>
+                }
+            </div>
+
+            <!-- Debug panel (remove this in production) -->
+            <div class="mt-6 sm:mt-10 p-3 sm:p-4 rounded-xl w-full max-w-7xl debug-panel" style="background: rgba(255,255,255,0.05);">
+                <p class="text-xs sm:text-sm mb-2 sm:mb-3" style="color: rgba(255,255,255,0.6); font-family: 'Inter', sans-serif;">
+                    Current Permissions Debug:
+                </p>
+                <div class="flex flex-wrap gap-2 justify-center">
+                    <div class="px-3 sm:px-4 py-1 sm:py-2 rounded-lg text-xs sm:text-sm font-medium" style="background: rgba(212, 175, 55, 0.2); color: #d4af37; font-family: 'Inter', sans-serif;">
+                        Rank: @rankName
+                    </div>
+                    <div class="px-3 sm:px-4 py-1 sm:py-2 rounded-lg text-xs sm:text-sm font-medium" style="background: rgba(212, 175, 55, 0.2); color: #d4af37; font-family: 'Inter', sans-serif;">
+                        User: @userName
+                    </div>
+                    <div class="px-3 sm:px-4 py-1 sm:py-2 rounded-lg text-xs sm:text-sm font-medium" style="background: rgba(212, 175, 55, 0.2); color: #d4af37; font-family: 'Inter', sans-serif;">
+                        Free Drinks: @(freeDrinksEnabled ? "Enabled" : "Disabled")
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
+
+    <script>
+        // Optional: Add hover effects and animations
+        document.addEventListener('DOMContentLoaded', function () {
+            const menuButtons = document.querySelectorAll('.menu-btn');
+
+            menuButtons.forEach(button => {
+                button.addEventListener('mouseenter', function () {
+                    this.style.transform = 'translateY(-4px)';
+                    this.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.2)';
+                });
+
+                button.addEventListener('mouseleave', function () {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = 'none';
+                });
+            });
+
+            // Adjust layout on window resize
+            function adjustLayout() {
+                const screenWidth = window.innerWidth;
+
+                if (screenWidth < 640) {
+                    // Mobile optimizations
+                    document.querySelector('.content-wrapper').style.padding = '0';
+                } else {
+                    document.querySelector('.content-wrapper').style.padding = '';
+                }
+            }
+
+            window.addEventListener('resize', adjustLayout);
+            adjustLayout();
+        });
+    </script>
+</body>
+</html>

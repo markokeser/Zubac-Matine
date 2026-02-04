@@ -2,7 +2,7 @@
 
 namespace Zubac.Interfaces
 {
-    public interface IAcccountService
+    public interface IAccountService
     {
         public Task<Users> Login(LoginViewModel model);
 

@@ -19,5 +19,7 @@ namespace Zubac.Models
         public int Quantity { get; set; }
         [Required]
         public int RestaurantId { get; set; }
+
+        public DateTime Created {  get; set; }
     }
 }

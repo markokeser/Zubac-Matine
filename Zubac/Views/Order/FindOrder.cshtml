@@ -1,27 +1,391 @@
 ﻿@model Zubac.Models.FindOrderViewModel
 
-<div class="container my-4">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <!-- Home dugme -->
-    <div class="mb-3">
-        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
-            🏠 Home
-        </a>
+<style>
+    body {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%) !important;
+        min-height: 100vh;
+        color: rgba(255, 255, 255, 0.9);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .home-btn {
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-weight: 500;
+        background: rgba(212, 175, 55, 0.1);
+        color: #d4af37;
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        margin-bottom: 2rem;
+    }
+
+        .home-btn:hover {
+            background: rgba(212, 175, 55, 0.2) !important;
+            transform: scale(1.05);
+            color: #d4af37;
+            text-decoration: none;
+        }
+
+    .main-container {
+        background: rgba(45, 45, 68, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-family: 'Playfair Display', serif;
+        color: #d4af37;
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .form-control, select {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(212, 175, 55, 0.3) !important;
+        color: rgba(255, 255, 255, 0.9) !important;
+        border-radius: 8px !important;
+        padding: 10px 12px !important;
+        font-family: 'Inter', sans-serif !important;
+        transition: all 0.2s ease !important;
+        width: 100% !important;
+    }
+
+        .form-control:focus, select:focus {
+            background: rgba(255, 255, 255, 0.1) !important;
+            border-color: #d4af37 !important;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1) !important;
+            color: rgba(255, 255, 255, 0.9) !important;
+            outline: none !important;
+        }
+
+    .form-label {
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: 'Inter', sans-serif;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .search-btn {
+        background: linear-gradient(135deg, #29B6F6, #0288d1);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 14px 24px;
+        font-weight: 600;
+        font-size: 1rem;
+        width: 100%;
+        transition: all 0.2s ease;
+        font-family: 'Inter', sans-serif;
+        cursor: pointer;
+        margin-top: 1rem;
+    }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(41, 182, 246, 0.3);
+            color: white;
+        }
+
+    .divider {
+        border-top: 2px solid rgba(212, 175, 55, 0.2);
+        margin: 2rem 0;
+    }
+
+    .results-header {
+        font-family: 'Playfair Display', serif;
+        color: #d4af37;
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .order-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        animation: fadeIn 0.5s ease;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .order-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        border-color: rgba(212, 175, 55, 0.4);
+    }
+
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+
+    .order-title {
+        font-family: 'Inter', sans-serif;
+        font-weight: 700;
+        font-size: 1.3rem;
+        color: #d4af37;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .order-table {
+        background: rgba(212, 175, 55, 0.1);
+        color: #d4af37;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .order-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .info-label {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.85rem;
+        font-family: 'Inter', sans-serif;
+        margin-bottom: 4px;
+    }
+
+    .info-value {
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 600;
+        font-size: 1rem;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .items-section {
+        margin-top: 1rem;
+    }
+
+    .items-title {
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .item-list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 1rem 0;
+    }
+
+        .item-list li {
+            padding: 0.6rem 0.8rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-family: 'Inter', sans-serif;
+            border-left: 3px solid #d4af37;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+    .total-price {
+        text-align: right;
+        padding: 1rem;
+        background: rgba(212, 175, 55, 0.1);
+        border-radius: 8px;
+        margin-top: 1rem;
+        border: 1px solid rgba(212, 175, 55, 0.2);
+    }
+
+    .total-label {
+        color: rgba(255, 255, 255, 0.7);
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .total-amount {
+        color: #d4af37;
+        font-weight: 700;
+        font-size: 1.4rem;
+        font-family: 'Courier New', monospace;
+    }
+
+    .no-results {
+        text-align: center;
+        color: rgba(255, 255, 255, 0.5);
+        font-family: 'Inter', sans-serif;
+        padding: 3rem 0;
+        font-size: 1.1rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        color: rgba(255, 255, 255, 0.5);
+        font-family: 'Inter', sans-serif;
+        padding: 3rem 0;
+        font-size: 1.1rem;
+    }
+
+    /* Grid system */
+    .search-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    @@media (min-width: 768px) {
+        .search-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    /* Dropdown menu fixes */
+    select option {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        font-family: 'Inter', sans-serif !important;
+        padding: 10px !important;
+    }
+
+        select option:checked,
+        select option:focus,
+        select option:hover {
+            background-color: #f0f0f0 !important;
+            color: #000000 !important;
+        }
+
+    /* Custom dropdown for better visibility */
+    .custom-select-wrapper {
+        position: relative;
+    }
+
+    .custom-select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        padding-right: 2.5rem !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23d4af37' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 12px center !important;
+        background-size: 16px !important;
+    }
+
+    /* Toast notification */
+    .toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+        z-index: 9999;
+        animation: fadeInOut 2s ease-in-out;
+    }
+
+    @@keyframes fadeInOut {
+        0%, 100% {
+            opacity: 0;
+            transform: translateX(-50%) translateY(10px);
+        }
+
+        10%, 90% {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    }
+
+    .toast-info {
+        background: #29B6F6;
+        color: white;
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Home Button -->
+    <a asp-controller="Home" asp-action="Index" class="home-btn">
+        <span style="font-size: 1.2rem;">🏠</span>
+        <span>Home</span>
+    </a>
+
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <span style="font-size: 2.2rem;">🔍</span>
+            Find Orders
+        </h1>
     </div>
 
-    <div class="card p-4 shadow-sm">
-        <h2 class="mb-4 text-center">🔍 Find Orders</h2>
-
+    <!-- Main Container -->
+    <div class="main-container">
         <form asp-action="FindOrder" method="post">
-            <div class="row mb-3">
-                <div class="col-md-6 mb-3">
-                    <label>Table Number</label>
-                    <input asp-for="TableNumber" type="number" class="form-control" />
+            <!-- Search Form -->
+            <div class="search-grid">
+                <div>
+                    <label class="form-label">Table Number</label>
+                    <select asp-for="TableNumber" class="form-control custom-select">
+                        <option value="">-- Any table --</option>
+                        @for (int i = 0; i <= 20; i++)
+                        {
+                            <option value="@i">Table @i</option>
+                        }
+                    </select>
                 </div>
 
-                <div class="col-md-6 mb-3">
-                    <label>Created By (Waiter)</label>
-                    <select asp-for="CreatedBy" class="form-control">
+                <div class="custom-select-wrapper">
+                    <label class="form-label">Created By (Waiter)</label>
+                    <select asp-for="CreatedBy" class="form-control custom-select">
                         <option value="">-- Any waiter --</option>
                         @foreach (var w in Model.Waiters)
                         {
@@ -31,30 +395,75 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100">Search</button>
+            <!-- Search Button -->
+            <button type="submit" class="search-btn">
+                <span style="margin-right: 8px;">🔍</span>
+                Search Orders
+            </button>
         </form>
 
-        <hr />
+        <!-- Divider -->
+        <div class="divider"></div>
 
+        <!-- Results Section -->
         @if (Model.Orders != null && Model.Orders.Count > 0)
         {
-            <h3 class="mt-4">Results:</h3>
+            <h3 class="results-header">Search Results</h3>
 
-            <div class="row">
+            <div class="orders-grid">
                 @foreach (var order in Model.Orders)
                 {
-                    <div class="col-md-6">
-                        <div class="card p-3 mb-3 shadow-sm">
-                            <h5>Order #@order.Id — Table @order.TableNumber</h5>
-                            <p>Waiter ID: @order.CreatedBy</p>
-                            <p>Created: @order.Created</p>
+                    // Calculate total price for this order
+                    decimal orderTotal = 0;
+                    @foreach (var item in order.OrderArticles)
+                    {
+                        orderTotal += item.Article.Price * item.Quantity;
+                    }
 
-                            <ul>
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div class="order-title">
+                                <span>📋</span>
+                                Order #@order.Id
+                            </div>
+                            <div class="order-table">
+                                Table @order.TableNumber
+                            </div>
+                        </div>
+
+                        <div class="order-info">
+                            <div class="info-item">
+                                <span class="info-label">Waiter ID:</span>
+                                <span class="info-value">@order.CreatedBy</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Created:</span>
+                                <span class="info-value">@order.Created.ToString("dd.MM.yyyy HH:mm")</span>
+                            </div>
+                        </div>
+
+                        <div class="items-section">
+                            <div class="items-title">
+                                <span>🍽️</span>
+                                Order Items
+                            </div>
+                            <ul class="item-list">
                                 @foreach (var item in order.OrderArticles)
                                 {
-                                    <li>@item.Article.Name × @item.Quantity</li>
+                                    <li>
+                                        <span>@item.Article.Name × @item.Quantity</span>
+                                        <span style="color: #d4af37; font-weight: 600;">
+                                            @((item.Article.Price * item.Quantity).ToString("F2"))€
+                                        </span>
+                                    </li>
                                 }
                             </ul>
+
+                            <!-- Total Price Display -->
+                            <div class="total-price">
+                                <div class="total-label">Order Total:</div>
+                                <div class="total-amount">@orderTotal.ToString("F2")€</div>
+                            </div>
                         </div>
                     </div>
                 }
@@ -62,11 +471,97 @@
         }
         else if (Context.Request.Method == "POST")
         {
-            <p class="text-muted mt-3">No results found.</p>
+            <div class="no-results">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+                <h3 style="color: rgba(255, 255, 255, 0.7); margin-bottom: 0.5rem;">No Orders Found</h3>
+                <p>Try different search criteria.</p>
+            </div>
         }
         else
         {
-            <p class="text-muted mt-3">Enter filters and click Search.</p>
+            <div class="empty-state">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
+                <h3 style="color: rgba(255, 255, 255, 0.7); margin-bottom: 0.5rem;">Search for Orders</h3>
+                <p>Enter table number and/or select a waiter to find orders.</p>
+            </div>
         }
     </div>
 </div>
+
+<script>
+    // Form submission animation
+    document.querySelector('form').addEventListener('submit', function (e) {
+        const searchBtn = document.querySelector('.search-btn');
+        const originalText = searchBtn.innerHTML;
+
+        // Show loading state
+        searchBtn.innerHTML = '<span>⏳</span> Searching...';
+        searchBtn.disabled = true;
+        searchBtn.style.opacity = '0.8';
+
+        // Re-enable button after 3 seconds (in case of error)
+        setTimeout(() => {
+            searchBtn.innerHTML = originalText;
+            searchBtn.disabled = false;
+            searchBtn.style.opacity = '1';
+        }, 3000);
+    });
+
+    // Toast notification function
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 2000);
+    }
+
+    // Show toast on page load if coming from search
+    @if (Context.Request.Method == "POST")
+    {
+        <text>
+            document.addEventListener('DOMContentLoaded', function () {
+                setTimeout(() => {
+                    showToast('Search completed', 'info');
+                }, 500);
+            });
+        </text>
+    }
+
+        // Initialize table dropdown on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            // Add custom arrow to dropdowns
+            const selects = document.querySelectorAll('.custom-select');
+            selects.forEach(select => {
+                // Ensure proper styling
+                select.style.backgroundImage = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23d4af37' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E\")";
+                select.style.backgroundRepeat = "no-repeat";
+                select.style.backgroundPosition = "right 12px center";
+                select.style.backgroundSize = "16px";
+
+                // Force black text on options
+                const options = select.options;
+                for (let i = 0; i < options.length; i++) {
+                    options[i].style.backgroundColor = "#ffffff";
+                    options[i].style.color = "#000000";
+                }
+            });
+        });
+
+    // Fix for dropdown options on change
+    document.querySelectorAll('select').forEach(select => {
+        select.addEventListener('click', function () {
+            // Force black text when dropdown opens
+            setTimeout(() => {
+                const options = document.querySelectorAll('option');
+                options.forEach(option => {
+                    option.style.backgroundColor = "#ffffff !important";
+                    option.style.color = "#000000 !important";
+                });
+            }, 10);
+        });
+    });
+</script>

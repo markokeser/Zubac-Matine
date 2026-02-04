@@ -6,67 +6,480 @@
     var totalOfAllOrders = Model.Sum(order => calculateTotal(order));
 }
 
-<div class="container my-4">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <!-- Home dugme -->
-    <div class="mb-3">
-        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
-            🏠 Home
-        </a>
+<style>
+    body {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%) !important;
+        min-height: 100vh;
+        color: rgba(255, 255, 255, 0.9);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .home-btn {
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-weight: 500;
+        background: rgba(212, 175, 55, 0.1);
+        color: #d4af37;
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        margin-bottom: 2rem;
+    }
+
+        .home-btn:hover {
+            background: rgba(212, 175, 55, 0.2) !important;
+            transform: scale(1.05);
+            color: #d4af37;
+            text-decoration: none;
+        }
+
+    .main-container {
+        background: rgba(45, 45, 68, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 2rem;
+        max-width: 1000px;
+        margin: 0 auto;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-family: 'Playfair Display', serif;
+        color: #d4af37;
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .order-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        animation: fadeIn 0.5s ease;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .order-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        border-color: rgba(212, 175, 55, 0.4);
+    }
+
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .table-number {
+        font-family: 'Inter', sans-serif;
+        font-weight: 700;
+        font-size: 1.4rem;
+        color: #d4af37;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .toggle-arrow {
+        color: #d4af37;
+        font-size: 1.5rem;
+        transition: transform 0.3s ease;
+    }
+
+    .order-details {
+        padding-top: 1rem;
+        border-top: 1px solid rgba(212, 175, 55, 0.2);
+        animation: slideDown 0.3s ease;
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .item-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.8rem 0.5rem;
+        margin-bottom: 0.5rem;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 8px;
+        border-left: 3px solid #29B6F6;
+    }
+
+    .item-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .item-icon {
+        font-size: 1.1rem;
+    }
+
+    .item-name {
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+    }
+
+    .item-quantity {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.9rem;
+    }
+
+    .item-price {
+        color: #d4af37;
+        font-weight: 600;
+        font-family: 'Courier New', monospace;
+    }
+
+    .order-total {
+        text-align: right;
+        padding: 1rem;
+        background: rgba(212, 175, 55, 0.1);
+        border-radius: 8px;
+        margin: 1rem 0;
+        border: 1px solid rgba(212, 175, 55, 0.2);
+    }
+
+    .total-label {
+        color: rgba(255, 255, 255, 0.7);
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .total-amount {
+        color: #d4af37;
+        font-weight: 700;
+        font-size: 1.4rem;
+        font-family: 'Courier New', monospace;
+    }
+
+    .finish-btn {
+        background: linear-gradient(135deg, #4CAF50, #66BB6A);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 20px;
+        font-weight: 600;
+        font-size: 1rem;
+        width: 100%;
+        transition: all 0.2s ease;
+        font-family: 'Inter', sans-serif;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+        .finish-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(76, 175, 80, 0.3);
+            color: white;
+        }
+
+        .finish-btn:active {
+            transform: translateY(0);
+        }
+
+    .orders-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    @@media (min-width: 768px) {
+        .orders-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+    }
+
+    .all-orders-total {
+        background: rgba(212, 175, 55, 0.1);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        text-align: center;
+        animation: fadeIn 0.8s ease;
+    }
+
+    .all-total-label {
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .all-total-amount {
+        color: #d4af37;
+        font-weight: 800;
+        font-size: 1.8rem;
+        font-family: 'Courier New', monospace;
+    }
+
+    .empty-state {
+        text-align: center;
+        color: rgba(255, 255, 255, 0.5);
+        font-family: 'Inter', sans-serif;
+        padding: 4rem 0;
+        font-size: 1.1rem;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.7;
+    }
+
+    /* Toast notification */
+    .toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+        z-index: 9999;
+        animation: fadeInOut 2s ease-in-out;
+    }
+
+    @@keyframes fadeInOut {
+        0%, 100% {
+            opacity: 0;
+            transform: translateX(-50%) translateY(10px);
+        }
+
+        10%, 90% {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    }
+
+    .toast-success {
+        background: #4CAF50;
+        color: white;
+    }
+
+    .toast-info {
+        background: #29B6F6;
+        color: white;
+    }
+
+    /* Arrow rotation animation */
+    .rotate-180 {
+        transform: rotate(180deg);
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Home Button -->
+    <a asp-controller="Home" asp-action="Index" class="home-btn">
+        <span style="font-size: 1.2rem;">🏠</span>
+        <span>Home</span>
+    </a>
+
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <span style="font-size: 2.2rem;">🧾</span>
+            Active Orders
+        </h1>
     </div>
 
-    <h2 class="mb-4 text-center">🧾 Current Orders</h2>
+    <!-- Main Container -->
+    <div class="main-container">
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                <h3 style="color: rgba(255, 255, 255, 0.7); margin-bottom: 0.5rem;">
+                    No Active Orders
+                </h3>
+                <p>There are currently no orders to display.</p>
+            </div>
+        }
+        else
+        {
+            <div class="orders-grid">
+                @foreach (var order in Model)
+                {
+                    var orderTotal = calculateTotal(order);
 
-    @if (!Model.Any())
-    {
-        <p class="text-muted text-center">No active orders.</p>
-    }
-    else
-    {
-        <div class="row">
-            @foreach (var order in Model)
-            {
-                <div class="col-md-6 mb-3">
-                    <div class="card shadow-sm p-3 order-summary" onclick="toggleDetails('@order.Id')" style="cursor: pointer;">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span><strong>Table #@order.TableNumber</strong></span>
-                            <span>🡇</span>
+                    <div class="order-card" onclick="toggleDetails('@order.Id', this)">
+                        <div class="order-header">
+                            <div class="table-number">
+                                <span>🪑</span>
+                                Table #@order.TableNumber
+                            </div>
+                            <div class="toggle-arrow" id="arrow-@order.Id">▼</div>
                         </div>
 
                         <div class="order-details" id="details-@order.Id" style="display: none;">
-                            @foreach (var item in order.OrderArticles)
-                            {
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span>🥤 @item.Article.Name × @item.Quantity</span>
-                                    <span>@($"{item.Article.Price * item.Quantity:0.00}€")</span>
-                                </div>
-                            }
+                            <!-- Order Items -->
+                            <div class="items-list">
+                                @foreach (var item in order.OrderArticles)
+                                {
+                                    var itemIcon = item.Article.IsFood ? "🍔" : "🥤";
+                                    var itemTotal = item.Article.Price * item.Quantity;
 
-                            <div class="d-flex justify-content-between mt-2 border-top pt-2">
-                                <strong>Total:</strong>
-                                <strong>@($"{calculateTotal(order):0.00}€")</strong>
+                                    <div class="item-row">
+                                        <div class="item-info">
+                                            <span class="item-icon">@itemIcon</span>
+                                            <span class="item-name">@item.Article.Name</span>
+                                            <span class="item-quantity">× @item.Quantity</span>
+                                        </div>
+                                        <div class="item-price">
+                                            @itemTotal.ToString("F2")€
+                                        </div>
+                                    </div>
+                                }
                             </div>
 
-                            <form asp-action="Finish" method="post" class="mt-2">
+                            <!-- Order Total -->
+                            <div class="order-total">
+                                <div class="total-label">Order Total</div>
+                                <div class="total-amount">@orderTotal.ToString("F2")€</div>
+                            </div>
+
+                            <!-- Finish Order Form -->
+                            <form asp-action="Finish" method="post">
                                 <input type="hidden" name="id" value="@order.Id" />
-                                <button type="submit" class="btn btn-success w-100">✅ Finish Order</button>
+                                <button type="submit" class="finish-btn" onclick="event.stopPropagation(); showFinishToast('@order.Id')">
+                                    <span>✅</span>
+                                    Finish Order
+                                </button>
                             </form>
                         </div>
                     </div>
-                </div>
-            }
-        </div>
+                }
+            </div>
 
-        <div class="mt-4 p-3 bg-light rounded shadow-sm d-flex justify-content-between">
-            <strong>All Orders Total:</strong>
-            <strong>@($"{totalOfAllOrders:0.00}€")</strong>
-        </div>
-    }
+            <!-- All Orders Total -->
+            <div class="all-orders-total">
+                <div class="all-total-label">Total Value of All Active Orders</div>
+                <div class="all-total-amount">@totalOfAllOrders.ToString("F2")€</div>
+            </div>
+        }
+    </div>
 </div>
 
 <script>
-    function toggleDetails(id) {
-        const el = document.getElementById('details-' + id);
-        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    // Toggle order details
+    function toggleDetails(orderId, cardElement) {
+        const detailsEl = document.getElementById('details-' + orderId);
+        const arrowEl = document.getElementById('arrow-' + orderId);
+
+        if (detailsEl.style.display === 'none' || detailsEl.style.display === '') {
+            // Show details
+            detailsEl.style.display = 'block';
+            arrowEl.classList.add('rotate-180');
+            showToast('Order details expanded', 'info');
+        } else {
+            // Hide details
+            detailsEl.style.display = 'none';
+            arrowEl.classList.remove('rotate-180');
+        }
+
+        // Prevent form submission when clicking on card
+        event.stopPropagation();
     }
+
+    // Toast notification function
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 2000);
+    }
+
+    // Show finish order confirmation
+    function showFinishToast(orderId) {
+        showToast('Finishing order...', 'success');
+
+        // Optional: Add delay for better UX
+        setTimeout(() => {
+            const card = document.querySelector(`#details-${orderId}`).closest('.order-card');
+            card.style.opacity = '0.5';
+            card.style.transition = 'opacity 0.3s ease';
+        }, 100);
+    }
+
+    // Initialize all cards with hidden details
+    document.addEventListener('DOMContentLoaded', function () {
+    @foreach (var order in Model)
+    {
+        <text>
+                    // Ensure all details are hidden on page load
+                    const detailsEl = document.getElementById('details-@order.Id');
+            const arrowEl = document.getElementById('arrow-@order.Id');
+            if (detailsEl) detailsEl.style.display = 'none';
+            if (arrowEl) arrowEl.classList.remove('rotate-180');
+        </text>
+    }
+
+            // Show welcome message
+            if (@Model.Count > 0) {
+            setTimeout(() => {
+                showToast(`Loaded ${@Model.Count} active orders`, 'info');
+            }, 500);
+        }
+    });
+
+    // Prevent form submission from bubbling up to card click
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('click', function (e) {
+            e.stopPropagation();
+        });
+    });
 </script>

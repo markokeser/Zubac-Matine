@@ -1,37 +1,445 @@
 ﻿@model Zubac.Models.AddStaffViewModel
 
-<div class="container my-4">
+@Html.AntiForgeryToken()
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <div class="d-flex mb-3">
-        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary me-2">🏠 Home</a>
-        <a asp-controller="Settings" asp-action="Index" class="btn btn-secondary">⬅ Back</a>
+<style>
+    body {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%) !important;
+        min-height: 100vh;
+        color: rgba(255, 255, 255, 0.9);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .nav-buttons {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .nav-btn {
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-weight: 500;
+        background: rgba(212, 175, 55, 0.1);
+        color: #d4af37;
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        font-family: 'Inter', sans-serif;
+    }
+
+        .nav-btn:hover {
+            background: rgba(212, 175, 55, 0.2) !important;
+            transform: scale(1.05);
+            color: #d4af37;
+            text-decoration: none;
+        }
+
+    .main-container {
+        background: rgba(45, 45, 68, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        animation: fadeIn 0.6s ease;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-family: 'Playfair Display', serif;
+        color: #d4af37;
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .add-form {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-radius: 12px;
+        padding: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 600;
+        font-size: 0.95rem;
+        font-family: 'Inter', sans-serif;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .form-control {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        color: rgba(255, 255, 255, 0.9);
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-family: 'Inter', sans-serif;
+        transition: all 0.2s ease;
+        width: 100%;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+    }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #d4af37;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+            outline: none;
+        }
+
+        /* DROPDOWN FIX: Crna slova na beloj pozadini */
+        .form-control option {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            font-family: 'Inter', sans-serif !important;
+            padding: 10px !important;
+        }
+
+            .form-control option:hover,
+            .form-control option:focus,
+            .form-control option:checked {
+                background-color: #f0f0f0 !important;
+                color: #000000 !important;
+            }
+
+        /* Custom dropdown arrow */
+        .form-control[type="select"],
+        .form-control select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23d4af37' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") !important;
+            background-repeat: no-repeat !important;
+            background-position: right 12px center !important;
+            background-size: 16px !important;
+            padding-right: 40px !important;
+        }
+
+    .add-btn {
+        background: linear-gradient(135deg, #4CAF50, #66BB6A);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        font-family: 'Inter', sans-serif;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        justify-content: center;
+        margin-top: 1rem;
+    }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(76, 175, 80, 0.3);
+            color: white;
+        }
+
+    .text-danger {
+        color: #f44336 !important;
+        font-size: 0.85rem;
+        margin-top: 4px;
+        display: block;
+    }
+
+    .rank-badges {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+    }
+
+    .rank-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .rank-bartender {
+        background: rgba(33, 150, 243, 0.2);
+        color: #2196F3;
+    }
+
+    .rank-waiter {
+        background: rgba(76, 175, 80, 0.2);
+        color: #4CAF50;
+    }
+
+    .rank-manager {
+        background: rgba(255, 152, 0, 0.2);
+        color: #FF9800;
+    }
+
+    .rank-admin {
+        background: rgba(156, 39, 176, 0.2);
+        color: #9C27B0;
+    }
+
+    .info-box {
+        background: rgba(212, 175, 55, 0.1);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+        .info-box p {
+            color: rgba(255, 255, 255, 0.8);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+    /* Toast notification */
+    .toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+        z-index: 9999;
+        animation: fadeInOut 2s ease-in-out;
+    }
+
+    @@keyframes fadeInOut {
+        0%, 100% {
+            opacity: 0;
+            transform: translateX(-50%) translateY(10px);
+        }
+
+        10%, 90% {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    }
+
+    .toast-success {
+        background: #4CAF50;
+        color: white;
+    }
+
+    .toast-error {
+        background: #F44336;
+        color: white;
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Navigation Buttons -->
+    <div class="nav-buttons">
+        <a asp-controller="Home" asp-action="Index" class="nav-btn">
+            <span style="font-size: 1.2rem;">🏠</span>
+            <span>Home</span>
+        </a>
+        <a asp-controller="Settings" asp-action="Index" class="nav-btn">
+            <span style="font-size: 1.2rem;">⬅</span>
+            <span>Back</span>
+        </a>
     </div>
 
-    <h2 class="text-center mb-4">➕ Add New Staff</h2>
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <span style="font-size: 2.2rem;">👥</span>
+            Add New Staff Member
+        </h1>
+    </div>
 
-    <form method="post" class="card p-4 shadow">
-
-        <div class="mb-3">
-            <label class="form-label">Username</label>
-            <input asp-for="Username" class="form-control" />
-            <span asp-validation-for="Username" class="text-danger"></span>
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Info Box -->
+        <div class="info-box">
+            <p>
+                <span style="font-size: 1.1rem;">ℹ️</span>
+                <span>Add a new staff member to the system. Each staff member will receive login credentials based on their rank.</span>
+            </p>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">Uloga (Rank)</label>
-            <select asp-for="UserRank" class="form-control">
-                <option value="0">Bartender</option>
-                <option value="1">Waiter</option>
-                <option value="2">Manager</option>
-                <option value="3">Admin</option>
-            </select>
-            <span asp-validation-for="UserRank" class="text-danger"></span>
+        <!-- Add Staff Form -->
+        <form method="post" class="add-form">
+            <div class="form-group">
+                <label class="form-label">
+                    <span style="margin-right: 8px;">👤</span>
+                    Username
+                </label>
+                <input asp-for="Username" class="form-control" placeholder="Enter staff username..." />
+                <span asp-validation-for="Username" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <span style="margin-right: 8px;">🎖️</span>
+                    Role (Rank)
+                </label>
+                <select asp-for="UserRank" class="form-control">
+                    <option value="">-- Select Role --</option>
+                    <option value="0">Bartender</option>
+                    <option value="1">Waiter</option>
+                    <option value="2">Manager</option>
+                    <option value="3">Admin</option>
+                </select>
+                <span asp-validation-for="UserRank" class="text-danger"></span>
+
+                <!-- Rank Badges Preview -->
+                <div class="rank-badges">
+                    <span class="rank-badge rank-bartender">Bartender</span>
+                    <span class="rank-badge rank-waiter">Waiter</span>
+                    <span class="rank-badge rank-manager">Manager</span>
+                    <span class="rank-badge rank-admin">Admin</span>
+                </div>
+            </div>
+
+            <button type="submit" class="add-btn">
+                <span style="font-size: 1.2rem;">➕</span>
+                <span>Add Staff Member</span>
+            </button>
+        </form>
+
+        <!-- Role Descriptions -->
+        <div class="info-box mt-4">
+            <p style="font-weight: 600; color: #d4af37; margin-bottom: 8px;">
+                📋 Role Permissions:
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                <div>
+                    <span class="rank-badge rank-bartender" style="display: inline-block; margin-bottom: 4px;">Bartender</span>
+                    <p style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.7); margin: 0;">
+                        Can manage drinks, view orders
+                    </p>
+                </div>
+                <div>
+                    <span class="rank-badge rank-waiter" style="display: inline-block; margin-bottom: 4px;">Waiter</span>
+                    <p style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.7); margin: 0;">
+                        Can take orders, view menu
+                    </p>
+                </div>
+                <div>
+                    <span class="rank-badge rank-manager" style="display: inline-block; margin-bottom: 4px;">Manager</span>
+                    <p style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.7); margin: 0;">
+                        Can manage menu, staff, view reports
+                    </p>
+                </div>
+                <div>
+                    <span class="rank-badge rank-admin" style="display: inline-block; margin-bottom: 4px;">Admin</span>
+                    <p style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.7); margin: 0;">
+                        Full system access, all permissions
+                    </p>
+                </div>
+            </div>
         </div>
-
-        <button type="submit" class="btn btn-success w-100">Add Staff</button>
-
-    </form>
+    </div>
 </div>
+
+<script>
+    // Toast notification function
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 2000);
+    }
+
+    // Add form submission loading
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                const btn = this.querySelector('.add-btn');
+                if (btn) {
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<span>⏳</span> Adding Staff Member...';
+                    btn.disabled = true;
+                    btn.style.opacity = '0.8';
+
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                    }, 3000);
+                }
+            });
+        }
+
+        // Force black text in dropdown options
+        const selects = document.querySelectorAll('select.form-control');
+        selects.forEach(select => {
+            select.addEventListener('click', function () {
+                setTimeout(() => {
+                    const options = this.options;
+                    for (let i = 0; i < options.length; i++) {
+                        options[i].style.backgroundColor = "#ffffff";
+                        options[i].style.color = "#000000";
+                    }
+                }, 10);
+            });
+
+            // Apply on page load
+            const options = select.options;
+            for (let i = 0; i < options.length; i++) {
+                options[i].style.backgroundColor = "#ffffff";
+                options[i].style.color = "#000000";
+            }
+        });
+
+        // Display toast on page load if there are validation errors
+        const validationErrors = document.querySelectorAll('.text-danger');
+        if (validationErrors.length > 0) {
+            setTimeout(() => {
+                showToast('Please fix the errors in the form', 'error');
+            }, 500);
+        }
+    });
+</script>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

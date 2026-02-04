@@ -10,9 +10,9 @@ namespace Zubac.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly IAcccountService _service;
+        private readonly IAccountService _service;
 
-        public AccountController(IAcccountService service)
+        public AccountController(IAccountService service)
         {
             _service = service;
         }
@@ -47,6 +47,7 @@ namespace Zubac.Controllers
      new Claim("UserId", user.Id.ToString()),
      new Claim("UserRank", user.UserRank.ToString()),
      new Claim("RestaurantId", user.RestaurantId.ToString()),
+     new Claim("RestaurantName", restaurantData.Name),
      new Claim("FoodEnabled", restaurantData.FoodEnabled.ToString()),
      new Claim("FreeDrinksEnabled", restaurantData.FreeDrinksEnabled.ToString())
            };

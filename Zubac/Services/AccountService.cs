@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Zubac.Services
 {
-    public class AccountService : IAcccountService
+    public class AccountService : IAccountService
     {
         private readonly ApplicationDbContext _context;
 
@@ -45,6 +45,7 @@ namespace Zubac.Services
                 .Select(y => new RestaurantData
                 {
                     Id = y.Id,
+                    Name = y.Name,
                     FoodEnabled = y.FoodEnabled,
                     FreeDrinksEnabled = y.FreeDrinksEnabled
                 }).FirstOrDefaultAsync();

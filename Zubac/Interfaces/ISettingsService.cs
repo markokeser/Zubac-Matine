@@ -29,5 +29,15 @@ namespace Zubac.Interfaces
         public Task AddArticleAsync(ArticleViewModel model);
 
         public Task DeleteArticleAsync(int id);
+
+        bool ToggleSommelier(int articleId, bool enabled);
+        bool ToggleAvailable(int articleId, bool enabled);
+
+        public Task UpdateArticleAsync(Article updatedArticle);
+
+        Task<bool> UpdateStaffAsync(StaffViewModel model);
+
+        Task<List<AiMenuItemViewModel>> ParseMenuFromImageAsync(IFormFile image);
+        Task SaveAiMenuAsync(int restaurantId, List<AiMenuItemViewModel> items);
     }
 }

@@ -3,132 +3,546 @@
     ViewData["Title"] = "Statistics";
 }
 
-<div class="container my-4">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <!-- Home dugme -->
-    <div class="mb-3">
-        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
-            🏠 Home
-        </a>
+<style>
+    body {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%) !important;
+        min-height: 100vh;
+        color: rgba(255, 255, 255, 0.9);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .home-btn {
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-weight: 500;
+        background: rgba(212, 175, 55, 0.1);
+        color: #d4af37;
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        margin-bottom: 2rem;
+    }
+
+        .home-btn:hover {
+            background: rgba(212, 175, 55, 0.2) !important;
+            transform: scale(1.05);
+            color: #d4af37;
+            text-decoration: none;
+        }
+
+    .main-container {
+        background: rgba(45, 45, 68, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .page-title {
+        font-family: 'Playfair Display', serif;
+        color: #d4af37;
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .stats-section {
+        margin-bottom: 2.5rem;
+        animation: fadeIn 0.6s ease;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+    }
+
+    .section-icon {
+        font-size: 2rem;
+    }
+
+    .section-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #d4af37;
+        margin: 0;
+    }
+
+    .stats-table {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-radius: 12px;
+        overflow: hidden;
+        animation: slideIn 0.4s ease;
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .table-header {
+        background: rgba(212, 175, 55, 0.15);
+        padding: 1rem 1.5rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+        border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+
+    .table-header-cell {
+        color: #d4af37;
+        font-weight: 700;
+        font-size: 1rem;
+        text-align: center;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .table-row {
+        padding: 1rem 1.5rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+        align-items: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.2s ease;
+    }
+
+        .table-row:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+    .table-cell {
+        text-align: center;
+        color: rgba(255, 255, 255, 0.9);
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+    }
+
+    .table-footer {
+        background: rgba(212, 175, 55, 0.1);
+        padding: 1.2rem 1.5rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+        border-top: 2px solid rgba(212, 175, 55, 0.3);
+    }
+
+    .footer-label {
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 700;
+        font-size: 1rem;
+        text-align: center;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .footer-value {
+        color: #d4af37;
+        font-weight: 800;
+        font-size: 1.1rem;
+        text-align: center;
+        font-family: 'Courier New', monospace;
+    }
+
+    /* Specific styling for earnings */
+    .earnings-value {
+        color: #4CAF50;
+        font-weight: 700;
+        font-family: 'Courier New', monospace;
+    }
+
+    .count-value {
+        color: #29B6F6;
+        font-weight: 700;
+        font-family: 'Courier New', monospace;
+    }
+
+    .paid-icon {
+        color: #4CAF50;
+    }
+
+    .free-icon {
+        color: #29B6F6;
+    }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 0;
+        color: rgba(255, 255, 255, 0.5);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.7;
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .table-header,
+        .table-row,
+        .table-footer {
+            grid-template-columns: 1fr;
+            text-align: center;
+            gap: 0.5rem;
+        }
+
+        .table-header-cell,
+        .footer-label,
+        .footer-value {
+            text-align: center;
+        }
+
+        .main-container {
+            padding: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+        }
+    }
+
+    /* Stats highlights */
+    .highlight-box {
+        background: rgba(212, 175, 55, 0.1);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        animation: fadeIn 0.8s ease;
+    }
+
+    .highlight-title {
+        color: #d4af37;
+        font-weight: 700;
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+        text-align: center;
+        font-family: 'Playfair Display', serif;
+    }
+
+    .highlight-content {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        text-align: center;
+    }
+
+    .highlight-item {
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+    }
+
+    .highlight-label {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .highlight-number {
+        color: #d4af37;
+        font-weight: 800;
+        font-size: 1.8rem;
+        font-family: 'Courier New', monospace;
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Home Button -->
+    <a asp-controller="Home" asp-action="Index" class="home-btn">
+        <span style="font-size: 1.2rem;">🏠</span>
+        <span>Home</span>
+    </a>
+
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <span style="font-size: 2.2rem;">📊</span>
+            Statistics Dashboard
+        </h1>
     </div>
 
-    <h2 class="text-center mb-4">📊 User Statistics</h2>
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- 1. Paid Orders by User -->
+        <div class="stats-section">
+            <div class="section-header">
+                <span class="section-icon paid-icon">💰</span>
+                <h2 class="section-title">Paid Orders by User</h2>
+            </div>
 
-    <!-- Paid Orders Table -->
-    <div class="card shadow-sm mb-5 p-3">
-        <h4 class="text-success mb-3">💰 Paid Orders by User</h4>
-        <div class="table-responsive">
-            <table class="table table-striped table-bordered text-center mb-0">
-                <thead class="table-dark">
-                    <tr>
-                        <th>User</th>
-                        <th>Total Earned (€)</th>
-                    </tr>
-                </thead>
-                <tbody>
+            @if (Model.PaidUserStats.Any())
+            {
+                <div class="stats-table">
+                    <div class="table-header">
+                        <div class="table-header-cell">User</div>
+                        <div class="table-header-cell">Total Earned (€)</div>
+                    </div>
+
                     @foreach (var stat in Model.PaidUserStats)
                     {
-                        <tr>
-                            <td>@stat.Username</td>
-                            <td>@stat.Earnings.ToString("F2")</td>
-                        </tr>
+                        <div class="table-row">
+                            <div class="table-cell">@stat.Username</div>
+                            <div class="table-cell earnings-value">@stat.Earnings.ToString("F2")€</div>
+                        </div>
                     }
-                </tbody>
-                <tfoot class="table-light fw-bold">
-                    <tr>
-                        <td>Total Earnings:</td>
-                        <td>@Model.TotalEarnings.ToString("F2")</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-    </div>
 
-    <!-- Free Orders Table -->
-    <div class="card shadow-sm mb-5 p-3">
-        <h4 class="text-primary mb-3">🎁 Free Orders by User</h4>
-        <div class="table-responsive">
-            <table class="table table-striped table-bordered text-center mb-0">
-                <thead class="table-dark">
-                    <tr>
-                        <th>User</th>
-                        <th>Free Orders Count</th>
-                    </tr>
-                </thead>
-                <tbody>
+                    <div class="table-footer">
+                        <div class="footer-label">Total Earnings:</div>
+                        <div class="footer-value earnings-value">@Model.TotalEarnings.ToString("F2")€</div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <p>No paid orders found.</p>
+                </div>
+            }
+        </div>
+
+        <!-- 2. Free Orders by User -->
+        <div class="stats-section">
+            <div class="section-header">
+                <span class="section-icon free-icon">🎁</span>
+                <h2 class="section-title">Free Orders by User</h2>
+            </div>
+
+            @if (Model.FreeUserStats.Any())
+            {
+                <div class="stats-table">
+                    <div class="table-header">
+                        <div class="table-header-cell">User</div>
+                        <div class="table-header-cell">Free Orders Count</div>
+                    </div>
+
                     @foreach (var stat in Model.FreeUserStats)
                     {
-                        <tr>
-                            <td>@stat.Username</td>
-                            <td>@stat.FreeOrdersCount</td>
-                        </tr>
+                        <div class="table-row">
+                            <div class="table-cell">@stat.Username</div>
+                            <div class="table-cell count-value">@stat.FreeOrdersCount</div>
+                        </div>
                     }
-                </tbody>
-                <tfoot class="table-light fw-bold text-danger">
-                    <tr>
-                        <td>Total Free Orders:</td>
-                        <td>@Model.TotalFreeOrders</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-    </div>
 
-    <!-- Paid Drinks Table -->
-    <div class="card shadow-sm mb-5 p-3">
-        <h4 class="text-success mb-3">🍹 Paid Drinks Statistics</h4>
-        <div class="table-responsive">
-            <table class="table table-striped table-bordered text-center mb-0">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Drink</th>
-                        <th>Quantity Sold</th>
-                        <th>Total Earned (€)</th>
-                    </tr>
-                </thead>
-                <tbody>
+                    <div class="table-footer">
+                        <div class="footer-label">Total Free Orders:</div>
+                        <div class="footer-value count-value">@Model.TotalFreeOrders</div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <div class="empty-icon">🎁</div>
+                    <p>No free orders found.</p>
+                </div>
+            }
+        </div>
+
+        <!-- 3. Paid Drinks Statistics -->
+        <div class="stats-section">
+            <div class="section-header">
+                <span class="section-icon paid-icon">🍹</span>
+                <h2 class="section-title">Paid Drinks Statistics</h2>
+            </div>
+
+            @if (Model.PaidArticles.Any())
+            {
+                <div class="stats-table">
+                    <div class="table-header">
+                        <div class="table-header-cell">Drink</div>
+                        <div class="table-header-cell">Quantity Sold</div>
+                        <div class="table-header-cell">Total Earned (€)</div>
+                    </div>
+
                     @foreach (var drink in Model.PaidArticles)
                     {
-                        <tr>
-                            <td>@drink.Name</td>
-                            <td>@drink.Quantity</td>
-                            <td>@drink.Earnings.ToString("F2")</td>
-                        </tr>
+                        <div class="table-row">
+                            <div class="table-cell">@drink.Name</div>
+                            <div class="table-cell count-value">@drink.Quantity</div>
+                            <div class="table-cell earnings-value">@drink.Earnings.ToString("F2")€</div>
+                        </div>
                     }
-                </tbody>
-                <tfoot class="table-light fw-bold">
-                    <tr>
-                        <td>Total Paid Drinks:</td>
-                        <td>@Model.TotalPaidDrinks</td>
-                        <td>@Model.TotalPaidEarnings.ToString("F2")</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-    </div>
 
-    <!-- Free Drinks Table -->
-    <div class="card shadow-sm mb-5 p-3">
-        <h4 class="text-primary mb-3">🎁 Free Drinks Statistics</h4>
-        <div class="table-responsive">
-            <table class="table table-striped table-bordered text-center mb-0">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Drink</th>
-                        <th>Quantity Given Free</th>
-                    </tr>
-                </thead>
-                <tbody>
+                    <div class="table-footer">
+                        <div class="footer-label">Total Paid Drinks:</div>
+                        <div class="footer-value count-value">@Model.TotalPaidDrinks</div>
+                        <div class="footer-value earnings-value">@Model.TotalPaidEarnings.ToString("F2")€</div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <div class="empty-icon">🍺</div>
+                    <p>No paid drinks statistics available.</p>
+                </div>
+            }
+        </div>
+
+        <!-- 4. Free Drinks Statistics -->
+        <div class="stats-section">
+            <div class="section-header">
+                <span class="section-icon free-icon">🎁</span>
+                <h2 class="section-title">Free Drinks Statistics</h2>
+            </div>
+
+            @if (Model.FreeArticles.Any())
+            {
+                <div class="stats-table">
+                    <div class="table-header">
+                        <div class="table-header-cell">Drink</div>
+                        <div class="table-header-cell">Quantity Given Free</div>
+                    </div>
+
                     @foreach (var drink in Model.FreeArticles)
                     {
-                        <tr>
-                            <td>@drink.Name</td>
-                            <td>@drink.Quantity</td>
-                        </tr>
+                        <div class="table-row">
+                            <div class="table-cell">@drink.Name</div>
+                            <div class="table-cell count-value">@drink.Quantity</div>
+                        </div>
                     }
-                </tbody>
-            </table>
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <div class="empty-icon">🥤</div>
+                    <p>No free drinks statistics available.</p>
+                </div>
+            }
+        </div>
+
+        <!-- Summary Highlights -->
+        <div class="highlight-box">
+            <div class="highlight-title">📈 Quick Summary</div>
+            <div class="highlight-content">
+                <div class="highlight-item">
+                    <div class="highlight-label">Total Earnings</div>
+                    <div class="highlight-number earnings-value">@Model.TotalEarnings.ToString("F2")€</div>
+                </div>
+                <div class="highlight-item">
+                    <div class="highlight-label">Total Free Orders</div>
+                    <div class="highlight-number count-value">@Model.TotalFreeOrders</div>
+                </div>
+                <div class="highlight-item">
+                    <div class="highlight-label">Total Paid Drinks</div>
+                    <div class="highlight-number count-value">@Model.TotalPaidDrinks</div>
+                </div>
+                <div class="highlight-item">
+                    <div class="highlight-label">Paid Drinks Revenue</div>
+                    <div class="highlight-number earnings-value">@Model.TotalPaidEarnings.ToString("F2")€</div>
+                </div>
+            </div>
         </div>
     </div>
-
 </div>
+
+<script>
+    // Add animations on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        // Animate stats sections sequentially
+        const sections = document.querySelectorAll('.stats-section');
+        sections.forEach((section, index) => {
+            setTimeout(() => {
+                section.style.animation = 'fadeIn 0.6s ease forwards';
+            }, index * 200);
+        });
+
+        // Add hover effects to table rows
+        const tableRows = document.querySelectorAll('.table-row');
+        tableRows.forEach(row => {
+            row.addEventListener('mouseenter', function () {
+                this.style.transform = 'translateX(5px)';
+                this.style.transition = 'transform 0.2s ease';
+            });
+
+            row.addEventListener('mouseleave', function () {
+                this.style.transform = 'translateX(0)';
+            });
+        });
+
+        // Show loading message
+        setTimeout(() => {
+            const statsCount = document.querySelectorAll('.table-row').length;
+            if (statsCount > 0) {
+                console.log(`Loaded ${statsCount} statistics records`);
+            }
+        }, 1000);
+    });
+
+    // Print friendly function
+    function printStatistics() {
+        window.print();
+    }
+
+    // Add print button functionality (optional)
+    document.addEventListener('DOMContentLoaded', function () {
+        const printBtn = document.createElement('button');
+        printBtn.innerHTML = '🖨️ Print Report';
+        printBtn.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                padding: 10px 16px;
+                background: rgba(212, 175, 55, 0.2);
+                color: #d4af37;
+                border: 1px solid rgba(212, 175, 55, 0.3);
+                border-radius: 8px;
+                font-family: 'Inter', sans-serif;
+                cursor: pointer;
+                z-index: 1000;
+            `;
+        printBtn.addEventListener('click', printStatistics);
+        document.body.appendChild(printBtn);
+    });
+</script>

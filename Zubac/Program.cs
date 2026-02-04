@@ -14,12 +14,14 @@ namespace Zubac
             var builder = WebApplication.CreateBuilder(args);
 
 
-            builder.Services.AddScoped<IAcccountService, AccountService>();
+            builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<IStatisticService, StatisticService>();
             builder.Services.AddScoped<ISettingsService, SettingsService>();
             builder.Services.AddScoped<IPasswordHasher<Users>, PasswordHasher<Users>>();
-            // Add services to the container.
+            builder.Services.AddScoped<IAiSommelierService, AiSommelierService>();
+            builder.Services.AddHttpClient();
+
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddAuthentication("Cookies")
@@ -40,7 +42,7 @@ namespace Zubac
             new MySqlServerVersion(new Version(8, 0, 36)) // change to your MySQL version
     )
 );
-            builder.Services.AddScoped<IAcccountService, AccountService>();
+            builder.Services.AddScoped<IAccountService, AccountService>();
 
             var app = builder.Build();
 

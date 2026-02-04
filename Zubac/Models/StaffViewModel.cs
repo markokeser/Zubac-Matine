@@ -16,5 +16,17 @@
                 3 => "Admin"
             };
         }
+
+        public int GetRankValue(string rankName)
+        {
+            return rankName switch
+            {
+                "Bartender" => 0,
+                "Waiter" => 1,
+                "Manager" => 2,
+                "Admin" => 3,
+                _ => -1
+            };
+        }
     }
 }

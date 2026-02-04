@@ -1,52 +1,1065 @@
 ﻿@model List<Zubac.Models.ArticleViewModel>
 
-<div class="container my-4">
-    <!-- Home i Back dugmad -->
-    <div class="d-flex mb-3">
-        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary me-2">🏠 Home</a>
-        <a asp-controller="Settings" asp-action="Index" class="btn btn-secondary">⬅ Back</a>
-    </div>
-<div class="container my-4">
-    <h2 class="mb-4">Drinks Menu</h2>
+@Html.AntiForgeryToken()
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>@item.Name</td>
-                    <td>@item.Price</td>
-                    <td>
-                        <form asp-action="DeleteArticle" method="post" style="display:inline;">
-                            <input type="hidden" name="id" value="@item.Id" />
-                            <input type="hidden" name="isFood" value="false" />
-                            <button class="btn btn-danger btn-sm">Delete</button>
-                        </form>
-                    </td>
-                </tr>
+<style>
+    body {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%) !important;
+        min-height: 100vh;
+        color: rgba(255, 255, 255, 0.9);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .nav-buttons {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .nav-btn {
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-weight: 500;
+        background: rgba(212, 175, 55, 0.1);
+        color: #d4af37;
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        font-family: 'Inter', sans-serif;
+    }
+
+        .nav-btn:hover {
+            background: rgba(212, 175, 55, 0.2) !important;
+            transform: scale(1.05);
+            color: #d4af37;
+            text-decoration: none;
+        }
+
+    .main-container {
+        background: rgba(45, 45, 68, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-family: 'Playfair Display', serif;
+        color: #d4af37;
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    /* Articles Table */
+    .articles-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1.5rem 0;
+        animation: fadeIn 0.6s ease;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .table-header {
+        background: rgba(212, 175, 55, 0.15);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        border-radius: 10px 10px 0 0;
+        overflow: hidden;
+    }
+
+    .table-header-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1.5fr 1fr 1fr 200px;
+        padding: 1rem 1.5rem;
+    }
+
+    @@media (max-width: 1200px) {
+        .table-header-row {
+            grid-template-columns: 2fr 1fr 1.5fr 1fr 1fr 180px;
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .table-header-row {
+            grid-template-columns: 2fr 1fr 1.5fr 1fr 1fr 160px;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .table-header-row {
+            display: none;
+        }
+    }
+
+    .header-cell {
+        color: #d4af37;
+        font-weight: 700;
+        font-size: 1rem;
+        font-family: 'Inter', sans-serif;
+        text-align: left;
+        padding: 0.5rem;
+    }
+
+    .table-body {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-top: none;
+        border-radius: 0 0 10px 10px;
+    }
+
+    .table-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1.5fr 1fr 1fr 200px;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+        align-items: center;
+    }
+
+        .table-row:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(5px);
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+    @@media (max-width: 1200px) {
+        .table-row {
+            grid-template-columns: 2fr 1fr 1.5fr 1fr 1fr 180px;
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .table-row {
+            grid-template-columns: 2fr 1fr 1.5fr 1fr 1fr 160px;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .table-row {
+            grid-template-columns: 1fr;
+            gap: 12px;
+            padding: 1rem;
+        }
+    }
+
+    .table-cell {
+        color: rgba(255, 255, 255, 0.9);
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+        padding: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    @@media (max-width: 768px) {
+        .table-cell {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 10px;
+            align-items: center;
+        }
+
+            .table-cell::before {
+                content: attr(data-label);
+                color: #d4af37;
+                font-weight: 600;
+                font-size: 0.9rem;
             }
-        </tbody>
-    </table>
+    }
 
-    <h4 class="mt-4">Add New Drink</h4>
-    <form asp-action="AddArticle" method="post">
-        <input type="hidden" name="IsFood" value="false" />
-        <input type="hidden" name="AdminId" value="1" /> <!-- TODO: zameni stvarnim AdminId -->
-        <div class="mb-3">
-            <label>Name</label>
-            <input name="Name" class="form-control" required />
+    .name-cell {
+        font-weight: 600;
+        color: #ffffff;
+    }
+
+    .price-cell {
+        color: #d4af37;
+        font-weight: 700;
+        font-family: 'Courier New', monospace;
+    }
+
+    .type-cell {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .type-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        background: rgba(41, 182, 246, 0.2);
+        color: #29B6F6;
+    }
+
+    /* Switch styling */
+    .switch-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(255, 255, 255, 0.1);
+        transition: .4s;
+        border-radius: 34px;
+        border: 1px solid rgba(212, 175, 55, 0.3);
+    }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 3px;
+            background-color: rgba(255, 255, 255, 0.7);
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+    input:checked + .slider {
+        background-color: #4CAF50;
+    }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+            background-color: white;
+        }
+
+    .switch-label {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .ai-switch .slider {
+        background-color: rgba(156, 39, 176, 0.2);
+    }
+
+    .ai-switch input:checked + .slider {
+        background-color: #9C27B0;
+    }
+
+    .actions-cell {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-family: 'Inter', sans-serif;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+    }
+
+    .btn-update {
+        background: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+        border: 1px solid rgba(255, 193, 7, 0.3);
+    }
+
+        .btn-update:hover {
+            background: rgba(255, 193, 7, 0.3);
+            transform: translateY(-2px);
+        }
+
+    .btn-delete {
+        background: rgba(220, 53, 69, 0.2);
+        color: #dc3545;
+        border: 1px solid rgba(220, 53, 69, 0.3);
+    }
+
+        .btn-delete:hover {
+            background: rgba(220, 53, 69, 0.3);
+            transform: translateY(-2px);
+        }
+
+    /* Add Drink Form */
+    .add-form-section {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 2px solid rgba(212, 175, 55, 0.3);
+        animation: fadeIn 0.8s ease;
+    }
+
+    .form-title {
+        font-family: 'Playfair Display', serif;
+        color: #d4af37;
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .add-form {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 600;
+        font-size: 0.95rem;
+        font-family: 'Inter', sans-serif;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .form-input {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        color: rgba(255, 255, 255, 0.9);
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-family: 'Inter', sans-serif;
+        transition: all 0.2s ease;
+        width: 100%;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+    }
+
+        .form-input:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #d4af37;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+            outline: none;
+        }
+
+        /* DROPDOWN FIX: Crna slova na beloj pozadini */
+        .form-input option {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            font-family: 'Inter', sans-serif !important;
+            padding: 10px !important;
+        }
+
+            .form-input option:hover,
+            .form-input option:focus,
+            .form-input option:checked {
+                background-color: #f0f0f0 !important;
+                color: #000000 !important;
+            }
+
+    /* Modal dropdown fix */
+    .modal-content .form-input option {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+    }
+
+        .modal-content .form-input option:checked,
+        .modal-content .form-input option:hover {
+            background-color: #f0f0f0 !important;
+            color: #000000 !important;
+        }
+
+    .form-checkbox-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-radius: 8px;
+        margin-bottom: 12px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+        .form-checkbox-container:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(212, 175, 55, 0.4);
+        }
+
+    .form-checkbox {
+        width: 20px;
+        height: 20px;
+        accent-color: #d4af37;
+        cursor: pointer;
+    }
+
+    .form-checkbox-label {
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+        font-family: 'Inter', sans-serif;
+        cursor: pointer;
+        flex: 1;
+    }
+
+    .add-btn {
+        background: linear-gradient(135deg, #4CAF50, #66BB6A);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        font-family: 'Inter', sans-serif;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        justify-content: center;
+    }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(76, 175, 80, 0.3);
+            color: white;
+        }
+
+    /* Modal Styling */
+    .modal-content {
+        background: rgba(45, 45, 68, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        border-radius: 12px;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .modal-header {
+        border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        padding: 1.5rem;
+    }
+
+    .modal-title {
+        color: #d4af37;
+        font-family: 'Playfair Display', serif;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .modal-footer {
+        border-top: 1px solid rgba(212, 175, 55, 0.2);
+        padding: 1rem 1.5rem;
+    }
+
+    .btn-close {
+        filter: invert(1);
+    }
+
+    /* Type colors */
+    .type-red-wine {
+        background: rgba(220, 53, 69, 0.2) !important;
+        color: #dc3545 !important;
+    }
+
+    .type-white-wine {
+        background: rgba(255, 193, 7, 0.2) !important;
+        color: #ffc107 !important;
+    }
+
+    .type-rose-wine {
+        background: rgba(253, 126, 20, 0.2) !important;
+        color: #fd7e14 !important;
+    }
+
+    .type-beer {
+        background: rgba(13, 110, 253, 0.2) !important;
+        color: #0d6efd !important;
+    }
+
+    .type-cocktail {
+        background: rgba(111, 66, 193, 0.2) !important;
+        color: #6f42c1 !important;
+    }
+
+    .type-spirit {
+        background: rgba(32, 201, 151, 0.2) !important;
+        color: #20c997 !important;
+    }
+
+    .type-nonalcoholic {
+        background: rgba(108, 117, 125, 0.2) !important;
+        color: #6c757d !important;
+    }
+
+    .type-other {
+        background: rgba(13, 202, 240, 0.2) !important;
+        color: #0dcaf0 !important;
+    }
+
+    /* Toast notification */
+    .toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+        z-index: 9999;
+        animation: fadeInOut 2s ease-in-out;
+    }
+
+    @@keyframes fadeInOut {
+        0%, 100% {
+            opacity: 0;
+            transform: translateX(-50%) translateY(10px);
+        }
+
+        10%, 90% {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    }
+
+    .toast-success {
+        background: #4CAF50;
+        color: white;
+    }
+
+    .toast-info {
+        background: #29B6F6;
+        color: white;
+    }
+
+    .toast-error {
+        background: #F44336;
+        color: white;
+    }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 0;
+        color: rgba(255, 255, 255, 0.5);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.7;
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Navigation Buttons -->
+    <div class="nav-buttons">
+        <a asp-controller="Home" asp-action="Index" class="nav-btn">
+            <span style="font-size: 1.2rem;">🏠</span>
+            <span>Home</span>
+        </a>
+        <a asp-controller="Settings" asp-action="Index" class="nav-btn">
+            <span style="font-size: 1.2rem;">⬅</span>
+            <span>Back</span>
+        </a>
+    </div>
+
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <span style="font-size: 2.2rem;">🍹</span>
+            Drinks Menu Management
+        </h1>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-icon">🍹</div>
+                <h3 style="color: rgba(255, 255, 255, 0.7); margin-bottom: 0.5rem;">
+                    No Drinks Available
+                </h3>
+                <p>Add your first drink to get started.</p>
+            </div>
+        }
+        else
+        {
+            <!-- Drinks Table -->
+            <div class="articles-table">
+                <div class="table-header">
+                    <div class="table-header-row">
+                        <div class="header-cell">Name</div>
+                        <div class="header-cell">Price</div>
+                        <div class="header-cell">Type</div>
+                        <div class="header-cell">Available</div>
+                        <div class="header-cell">AI Sommelier</div>
+                        <div class="header-cell">Actions</div>
+                    </div>
+                </div>
+
+                <div class="table-body">
+                    @foreach (var item in Model)
+                    {
+                        <div class="table-row">
+                            <div class="table-cell name-cell" data-label="Name">
+                                @item.Name
+                            </div>
+                            <div class="table-cell price-cell" data-label="Price">
+                                @item.Price.ToString("F2")€
+                            </div>
+                            <div class="table-cell type-cell" data-label="Type">
+                                @{
+                                    var typeClass = "";
+                                    switch (item.Type)
+                                    {
+                                        case "Red Wine":
+                                            typeClass = "type-red-wine";
+                                            break;
+                                        case "White Wine":
+                                            typeClass = "type-white-wine";
+                                            break;
+                                        case "Rose Wine":
+                                            typeClass = "type-rose-wine";
+                                            break;
+                                        case "Beer":
+                                            typeClass = "type-beer";
+                                            break;
+                                        case "Cocktail":
+                                            typeClass = "type-cocktail";
+                                            break;
+                                        case "Spirit":
+                                            typeClass = "type-spirit";
+                                            break;
+                                        case "NonAlcoholic":
+                                            typeClass = "type-nonalcoholic";
+                                            break;
+                                        default:
+                                            typeClass = "type-other";
+                                            break;
+                                    }
+                                }
+                                <span class="type-badge @typeClass">@item.Type</span>
+                            </div>
+                            <div class="table-cell" data-label="Available">
+                                <div class="switch-container">
+                                    <label class="switch">
+                                        <input type="checkbox"
+                                               class="av-toggle"
+                                               data-id="@item.Id"
+                                        @(item.IsAvailable ? "checked" : "") />
+                                        <span class="slider"></span>
+                                    </label>
+                                    <span class="switch-label">@(item.IsAvailable ? "Yes" : "No")</span>
+                                </div>
+                            </div>
+                            <div class="table-cell" data-label="AI Sommelier">
+                                <div class="switch-container">
+                                    <label class="switch ai-switch">
+                                        <input type="checkbox"
+                                               class="ai-toggle"
+                                               data-id="@item.Id"
+                                        @(item.AiSommelierEnabled ? "checked" : "") />
+                                        <span class="slider"></span>
+                                    </label>
+                                    <span class="switch-label">@(item.AiSommelierEnabled ? "Enabled" : "Disabled")</span>
+                                </div>
+                            </div>
+                            <div class="table-cell actions-cell" data-label="Actions">
+                                <button class="action-btn btn-update update-btn"
+                                        data-id="@item.Id"
+                                        data-name="@item.Name"
+                                        data-price="@item.Price"
+                                        data-type="@item.Type"
+                                        data-available="@item.IsAvailable"
+                                        data-ai="@item.AiSommelierEnabled">
+                                    <span>✏️</span>
+                                    <span>Update</span>
+                                </button>
+                                <form asp-action="DeleteArticle" method="post"
+                                      onsubmit="return confirmDelete()"
+                                      style="display: inline;">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <input type="hidden" name="isFood" value="false" />
+                                    <button type="submit" class="action-btn btn-delete">
+                                        <span>🗑</span>
+                                        <span>Delete</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Add New Drink Form -->
+        <div class="add-form-section">
+            <h2 class="form-title">
+                <span>➕</span>
+                Add New Drink
+            </h2>
+
+            <form asp-action="AddArticle" method="post" class="add-form">
+                <input type="hidden" name="IsFood" value="false" />
+                <input type="hidden" name="RestaurantId" value="1" />
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <span style="margin-right: 8px;">📝</span>
+                        Name
+                    </label>
+                    <input name="Name" class="form-input" required
+                           placeholder="Enter drink name..." />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <span style="margin-right: 8px;">💰</span>
+                        Price (€)
+                    </label>
+                    <input name="Price" type="number" step="0.01" class="form-input" required
+                           placeholder="0.00" min="0" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <span style="margin-right: 8px;">🏷️</span>
+                        Type
+                    </label>
+                    <select name="Type" class="form-input" required>
+                        <option value="">-- Select Type --</option>
+                        <option value="Red Wine">Red Wine</option>
+                        <option value="White Wine">White Wine</option>
+                        <option value="Rose Wine">Rose Wine</option>
+                        <option value="Beer">Beer</option>
+                        <option value="Cocktail">Cocktail</option>
+                        <option value="Spirit">Spirit (Whiskey, Vodka...)</option>
+                        <option value="NonAlcoholic">Non-alcoholic</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-checkbox-container">
+                    <input type="checkbox" name="AiSommelierEnabled" value="true"
+                           class="form-checkbox" id="sommelierCheck" />
+                    <div style="flex: 1; display: flex; align-items: center;">
+                        <span style="margin-right: 8px; font-size: 1.1rem;">🤖</span>
+                        <label class="form-checkbox-label" for="sommelierCheck">
+                            Enable AI Sommelier for this drink
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="add-btn">
+                    <span>➕</span>
+                    <span>Add Drink</span>
+                </button>
+            </form>
         </div>
-        <div class="mb-3">
-            <label>Price</label>
-            <input name="Price" type="number" step="0.01" class="form-control" required />
-        </div>
-        <button type="submit" class="btn btn-success">Add Drink</button>
-    </form>
+    </div>
 </div>
+
+<!-- Update Modal -->
+<div class="modal fade" id="updateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="updateForm" method="post" asp-action="UpdateArticle">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <span>✏️</span>
+                        Update Drink
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="Id" id="modalId" />
+                    <input type="hidden" name="IsFood" id="modalIsFood" value="false" />
+
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" name="Name" id="modalName" class="form-input" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Price (€)</label>
+                        <input type="number" name="Price" id="modalPrice" step="0.01"
+                               class="form-input" required min="0" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Type</label>
+                        <select name="Type" id="modalType" class="form-input" required>
+                            <option value="">-- Select Type --</option>
+                            <option value="Red Wine">Red Wine</option>
+                            <option value="White Wine">White Wine</option>
+                            <option value="Rose Wine">Rose Wine</option>
+                            <option value="Beer">Beer</option>
+                            <option value="Cocktail">Cocktail</option>
+                            <option value="Spirit">Spirit (Whiskey, Vodka...)</option>
+                            <option value="NonAlcoholic">Non-alcoholic</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-checkbox-container">
+                        <input type="hidden" name="IsAvailable" value="false" />
+                        <input type="checkbox" name="IsAvailable" value="true"
+                               class="form-checkbox" id="modalAvailable" />
+                        <div style="flex: 1; display: flex; align-items: center;">
+                            <span style="margin-right: 8px; font-size: 1.1rem;">✅</span>
+                            <label class="form-checkbox-label" for="modalAvailable">
+                                Available
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-checkbox-container">
+                        <input type="hidden" name="AiSommelierEnabled" value="false" />
+                        <input type="checkbox" name="AiSommelierEnabled" value="true"
+                               class="form-checkbox" id="modalAi" />
+                        <div style="flex: 1; display: flex; align-items: center;">
+                            <span style="margin-right: 8px; font-size: 1.1rem;">🤖</span>
+                            <label class="form-checkbox-label" for="modalAi">
+                                Enable AI Sommelier
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success" style="padding: 8px 16px;">
+                        <span style="margin-right: 8px;">💾</span>
+                        Save Changes
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Toast notification function
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 2000);
+    }
+
+    // Toggle Available
+    document.querySelectorAll('.av-toggle').forEach(cb => {
+        cb.addEventListener('change', function () {
+            const articleId = this.getAttribute('data-id');
+            const newValue = this.checked;
+            const label = this.closest('.switch-container').querySelector('.switch-label');
+
+            // Update label immediately for better UX
+            label.textContent = newValue ? "Yes" : "No";
+
+            showToast(newValue ? 'Drink set as available' : 'Drink set as unavailable', 'info');
+
+            fetch('/Settings/ToggleAvailable', {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json",
+                    "RequestVerificationToken": document.querySelector("input[name='__RequestVerificationToken']").value
+                },
+                body: JSON.stringify({
+                    id: articleId,
+                    enabled: newValue
+                })
+            }).catch(err => {
+                // Revert on error
+                this.checked = !newValue;
+                label.textContent = !newValue ? "Yes" : "No";
+                showToast('Error updating availability', 'error');
+            });
+        });
+    });
+
+    // Toggle AI Sommelier
+    document.querySelectorAll('.ai-toggle').forEach(cb => {
+        cb.addEventListener('change', function () {
+            const articleId = this.getAttribute('data-id');
+            const newValue = this.checked;
+            const label = this.closest('.switch-container').querySelector('.switch-label');
+
+            // Update label immediately for better UX
+            label.textContent = newValue ? "Enabled" : "Disabled";
+
+            showToast(newValue ? 'AI Sommelier enabled' : 'AI Sommelier disabled', 'info');
+
+            fetch('/Settings/ToggleSommelier', {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json",
+                    "RequestVerificationToken": document.querySelector("input[name='__RequestVerificationToken']").value
+                },
+                body: JSON.stringify({
+                    id: articleId,
+                    enabled: newValue
+                })
+            }).catch(err => {
+                // Revert on error
+                this.checked = !newValue;
+                label.textContent = !newValue ? "Enabled" : "Disabled";
+                showToast('Error updating AI Sommelier', 'error');
+            });
+        });
+    });
+
+    // Update button functionality
+    document.querySelectorAll('.update-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const id = this.dataset.id;
+            const name = this.dataset.name;
+            const price = this.dataset.price;
+            const type = this.dataset.type;
+            const available = this.dataset.available === "True";
+            const ai = this.dataset.ai === "True";
+
+            document.getElementById('modalId').value = id;
+            document.getElementById('modalName').value = name;
+            document.getElementById('modalPrice').value = price;
+            document.getElementById('modalType').value = type;
+            document.getElementById('modalAvailable').checked = available;
+            document.getElementById('modalAi').checked = ai;
+
+            var modal = new bootstrap.Modal(document.getElementById('updateModal'));
+            modal.show();
+        });
+    });
+
+    // Confirm delete
+    function confirmDelete() {
+        return confirm('Are you sure you want to delete this drink? This action cannot be undone.');
+    }
+
+    // Add responsive labels for mobile
+    document.addEventListener('DOMContentLoaded', function () {
+        if (window.innerWidth <= 768) {
+            const cells = document.querySelectorAll('.table-cell');
+            cells.forEach(cell => {
+                const label = cell.classList.contains('name-cell') ? 'Name' :
+                    cell.classList.contains('price-cell') ? 'Price' :
+                        cell.classList.contains('type-cell') ? 'Type' :
+                            cell.hasAttribute('data-label') ? cell.getAttribute('data-label') : '';
+                cell.setAttribute('data-label', label);
+            });
+        }
+
+        // Animate rows on load
+        const rows = document.querySelectorAll('.table-row');
+        rows.forEach((row, index) => {
+            setTimeout(() => {
+                row.style.opacity = '1';
+                row.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+
+        // Add form submission loading
+        document.querySelector('.add-form').addEventListener('submit', function (e) {
+            const btn = this.querySelector('.add-btn');
+            const originalText = btn.innerHTML;
+
+            btn.innerHTML = '<span>⏳</span> Adding...';
+            btn.disabled = true;
+            btn.style.opacity = '0.8';
+
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                btn.style.opacity = '1';
+            }, 3000);
+        });
+
+        // Force black text in dropdown options
+        const selects = document.querySelectorAll('select.form-input');
+        selects.forEach(select => {
+            select.addEventListener('click', function () {
+                setTimeout(() => {
+                    const options = document.querySelectorAll('option');
+                    options.forEach(option => {
+                        option.style.backgroundColor = "#ffffff";
+                        option.style.color = "#000000";
+                    });
+                }, 10);
+            });
+
+            // Apply on page load
+            const options = select.options;
+            for (let i = 0; i < options.length; i++) {
+                options[i].style.backgroundColor = "#ffffff";
+                options[i].style.color = "#000000";
+            }
+        });
+    });
+</script>

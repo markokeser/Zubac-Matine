@@ -12,6 +12,9 @@ namespace Zubac.Models
         public bool IsFood { get; set; }
         [Required]
         public int RestaurantId { get; set; }
+        public string? Type { get; set; }
+        public bool AiSommelierEnabled { get; set; } = false;
+        public bool IsAvailable { get; set; } = true;
         public ICollection<OrderArticle> OrderArticles { get; set; } = new List<OrderArticle>();
     }
 }

@@ -16,7 +16,8 @@ namespace Zubac.Controllers
         {
             _service = service;
         }
-        // GET: OrderController
+
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
@@ -26,7 +27,7 @@ namespace Zubac.Controllers
             return View(orders);
         }
 
-        // GET: CREATE VIEW PAGE
+        [HttpGet]
         public async Task<IActionResult> Create()
         {
             int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
@@ -34,7 +35,7 @@ namespace Zubac.Controllers
 
             var model = new MakeOrderViewModel
             {
-                Articles = articles.Where(x => x.RestaurantId == restaurantId).Select(a => new ArticleViewModel
+                Articles = articles.Where(x => x.RestaurantId == restaurantId && x.IsAvailable).Select(a => new ArticleViewModel
                 {
                     Id = a.Id,
                     Name = a.Name,
@@ -47,7 +48,7 @@ namespace Zubac.Controllers
             return View(model);
         }
 
-        [HttpGet] // GET: FREE DRINK VIEW PAGE
+        [HttpGet]
         public async Task<IActionResult> FreeDrink()
         {
             int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
@@ -60,10 +61,10 @@ namespace Zubac.Controllers
             return View(model);
         }
 
-        [HttpGet] // GET: ORDER ON BAR VIEW PAGE
+        [HttpGet]
         public async Task<IActionResult> OrderOnBar()
         {
-            int restaurantId = int.Parse(User.FindFirst("restaurantId").Value);
+            int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
             var articles = await _service.GetModelArticles(restaurantId);
             var model = new MakeOrderViewModel
             {
@@ -102,7 +103,7 @@ namespace Zubac.Controllers
             return View(model);
         }
 
-        // POST: CREATE ORDER
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         [HttpPost]
@@ -129,7 +130,7 @@ namespace Zubac.Controllers
             return RedirectToAction("Index", "Home"); // or wherever your order list is
         }
 
-        [HttpPost] // POST: CREATE ORDER ON BAR
+        [HttpPost]
         public async Task<IActionResult> OrderOnBar(MakeOrderViewModel model)
         {
             int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
@@ -153,7 +154,7 @@ namespace Zubac.Controllers
             return RedirectToAction("OrderOnBar");
         }
 
-        [HttpPost] // POST: CREATE FREE DRINK
+        [HttpPost]
         public async Task<IActionResult> FreeDrink(MakeOrderViewModel model)
         {
             int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
@@ -174,11 +175,10 @@ namespace Zubac.Controllers
                 return View(model);
             }
 
-            // POST-Redirect-GET: avoid resubmission on refresh
             return RedirectToAction("Index", "Home");
         }
 
-        [HttpPost] // POST: FINISH ORDER
+        [HttpPost]
         public async Task<IActionResult> Finish(int id)
         {
             var response = await _service.FinishOrder(id);

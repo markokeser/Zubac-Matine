@@ -1,0 +1,909 @@
+﻿@model List<Zubac.Models.AiMenuItemViewModel>
+
+@{
+    ViewData["Title"] = "AI Menu Builder";
+}
+
+@Html.AntiForgeryToken()
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%) !important;
+        min-height: 100vh;
+        color: rgba(255, 255, 255, 0.9);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .nav-buttons {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .nav-btn {
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-weight: 500;
+        background: rgba(212, 175, 55, 0.1);
+        color: #d4af37;
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        font-family: 'Inter', sans-serif;
+    }
+
+        .nav-btn:hover {
+            background: rgba(212, 175, 55, 0.2) !important;
+            transform: scale(1.05);
+            color: #d4af37;
+            text-decoration: none;
+        }
+
+    .main-container {
+        background: rgba(45, 45, 68, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        animation: fadeIn 0.6s ease;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-family: 'Playfair Display', serif;
+        color: #d4af37;
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    /* Upload Section */
+    .upload-section {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-family: 'Inter', sans-serif;
+        color: #d4af37;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .upload-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .file-input-container {
+        position: relative;
+    }
+
+    .file-input {
+        width: 100%;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px dashed rgba(212, 175, 55, 0.3);
+        border-radius: 8px;
+        color: rgba(255, 255, 255, 0.7);
+        font-family: 'Inter', sans-serif;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .file-input:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(212, 175, 55, 0.5);
+        }
+
+        .file-input::file-selector-button {
+            background: rgba(212, 175, 55, 0.2);
+            color: #d4af37;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 6px;
+            padding: 8px 16px;
+            margin-right: 12px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+            .file-input::file-selector-button:hover {
+                background: rgba(212, 175, 55, 0.3);
+            }
+
+    .upload-btn {
+        background: linear-gradient(135deg, #2196F3, #21CBF3);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        font-family: 'Inter', sans-serif;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        justify-content: center;
+    }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(33, 150, 243, 0.3);
+            color: white;
+        }
+
+    /* AI Result Section */
+    .ai-result-section {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-radius: 12px;
+        padding: 2rem;
+        margin-top: 2rem;
+    }
+
+    .ai-title {
+        font-family: 'Inter', sans-serif;
+        color: #4CAF50;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .ai-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1.5rem 0;
+    }
+
+    .table-header {
+        background: rgba(212, 175, 55, 0.15);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        border-radius: 10px 10px 0 0;
+        overflow: hidden;
+    }
+
+    .table-header-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1.5fr 1fr;
+        padding: 1rem 1.5rem;
+    }
+
+    @@media (max-width: 768px) {
+        .table-header-row {
+            display: none;
+        }
+    }
+
+    .header-cell {
+        color: #d4af37;
+        font-weight: 700;
+        font-size: 1rem;
+        font-family: 'Inter', sans-serif;
+        text-align: left;
+        padding: 0.5rem;
+    }
+
+    .table-body {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-top: none;
+        border-radius: 0 0 10px 10px;
+    }
+
+    .table-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1.5fr 1fr;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+        align-items: center;
+    }
+
+        .table-row:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(5px);
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .table-row.removed {
+            opacity: 0.5;
+            text-decoration: line-through;
+        }
+
+    @@media (max-width: 768px) {
+        .table-row {
+            grid-template-columns: 1fr;
+            gap: 12px;
+            padding: 1rem;
+        }
+    }
+
+    .table-cell {
+        color: rgba(255, 255, 255, 0.9);
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+        padding: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    @@media (max-width: 768px) {
+        .table-cell {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 10px;
+            align-items: center;
+        }
+
+            .table-cell::before {
+                content: attr(data-label);
+                color: #d4af37;
+                font-weight: 600;
+                font-size: 0.9rem;
+            }
+    }
+
+    .form-input {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        color: rgba(255, 255, 255, 0.9);
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-family: 'Inter', sans-serif;
+        transition: all 0.2s ease;
+        width: 100%;
+    }
+
+        .form-input:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #d4af37;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+            outline: none;
+        }
+
+        .form-input:disabled {
+            background: rgba(255, 255, 255, 0.02);
+            border-color: rgba(212, 175, 55, 0.1);
+            color: rgba(255, 255, 255, 0.4);
+            cursor: not-allowed;
+        }
+
+    .type-select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23d4af37' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 12px center !important;
+        background-size: 16px !important;
+        padding-right: 40px !important;
+    }
+
+        .type-select option {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            font-family: 'Inter', sans-serif !important;
+            padding: 10px !important;
+        }
+
+            .type-select option:hover,
+            .type-select option:focus,
+            .type-select option:checked {
+                background-color: #f0f0f0 !important;
+                color: #000000 !important;
+            }
+
+        .type-select:disabled {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23808080' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") !important;
+        }
+
+    .remove-checkbox {
+        width: 20px;
+        height: 20px;
+        accent-color: #f44336;
+        cursor: pointer;
+    }
+
+    .remove-label {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+        font-family: 'Inter', sans-serif;
+        margin-left: 8px;
+        cursor: pointer;
+    }
+
+    .confirm-btn {
+        background: linear-gradient(135deg, #4CAF50, #66BB6A);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        font-family: 'Inter', sans-serif;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        justify-content: center;
+        margin-top: 1.5rem;
+    }
+
+        .confirm-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(76, 175, 80, 0.3);
+            color: white;
+        }
+
+        .confirm-btn:disabled {
+            background: linear-gradient(135deg, #6c757d, #868e96);
+            cursor: not-allowed;
+            opacity: 0.6;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+    /* Type badges */
+    .type-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .food-badge {
+        background: rgba(76, 175, 80, 0.2);
+        color: #4CAF50;
+    }
+
+    .drink-badge {
+        background: rgba(33, 150, 243, 0.2);
+        color: #2196F3;
+    }
+
+    /* Toast notification */
+    .toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+        z-index: 9999;
+        animation: fadeInOut 2s ease-in-out;
+    }
+
+    @@keyframes fadeInOut {
+        0%, 100% {
+            opacity: 0;
+            transform: translateX(-50%) translateY(10px);
+        }
+
+        10%, 90% {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    }
+
+    .toast-success {
+        background: #4CAF50;
+        color: white;
+    }
+
+    .toast-info {
+        background: #2196F3;
+        color: white;
+    }
+
+    .toast-error {
+        background: #f44336;
+        color: white;
+    }
+
+    /* Instructions */
+    .instructions {
+        background: rgba(212, 175, 55, 0.1);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+        .instructions p {
+            color: rgba(255, 255, 255, 0.8);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+    /* Counter badge */
+    .counter-badge {
+        background: rgba(212, 175, 55, 0.2);
+        color: #d4af37;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-left: 8px;
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Navigation Buttons -->
+    <div class="nav-buttons">
+        <a asp-controller="Home" asp-action="Index" class="nav-btn">
+            <span style="font-size: 1.2rem;">🏠</span>
+            <span>Home</span>
+        </a>
+        <a asp-controller="Settings" asp-action="Index" class="nav-btn">
+            <span style="font-size: 1.2rem;">⬅</span>
+            <span>Back</span>
+        </a>
+    </div>
+
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <span style="font-size: 2.2rem;">🤖</span>
+            AI Menu Builder
+        </h1>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Instructions -->
+        <div class="instructions">
+            <p>
+                <span style="font-size: 1.1rem;">📋</span>
+                <span>Upload a clear image of your menu and AI will automatically detect and extract items. You can then review and confirm the detected items.</span>
+            </p>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="upload-section">
+            <h3 class="section-title">
+                <span>📷</span>
+                Upload Menu Image
+            </h3>
+
+            <form asp-action="UploadMenuImage"
+                  asp-controller="Settings"
+                  method="post"
+                  enctype="multipart/form-data"
+                  class="upload-form">
+
+                <div class="file-input-container">
+                    <input type="file"
+                           name="image"
+                           accept="image/*"
+                           class="file-input"
+                           required />
+                </div>
+
+                <button type="submit" class="upload-btn">
+                    <span style="font-size: 1.2rem;">🤖</span>
+                    <span>Build Menu with AI</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- AI Result Preview -->
+        @if (Model != null && Model.Any())
+        {
+            <div class="ai-result-section">
+                <h3 class="ai-title">
+                    <span>✅</span>
+                    AI Detected Items
+                    <span class="counter-badge" id="totalItems">@Model.Count</span>
+                </h3>
+
+                <form asp-action="ConfirmAiMenu"
+                      asp-controller="Settings"
+                      method="post"
+                      id="confirmAiForm">
+
+                    <div class="ai-table">
+                        <div class="table-header">
+                            <div class="table-header-row">
+                                <div class="header-cell">Name</div>
+                                <div class="header-cell">Price (€)</div>
+                                <div class="header-cell">Type</div>
+                                <div class="header-cell">Remove</div>
+                            </div>
+                        </div>
+
+                        <div class="table-body" id="tableBody">
+                            @for (int i = 0; i < Model.Count; i++)
+                            {
+                                var item = Model[i];
+                                <div class="table-row" id="item-row-@i" data-index="@i">
+                                    <div class="table-cell" data-label="Name">
+                                        <input type="text"
+                                               name="Items[@i].Name"
+                                               value="@item.Name"
+                                               class="form-input item-input"
+                                               data-index="@i"
+                                               required />
+                                    </div>
+
+                                    <div class="table-cell" data-label="Price">
+                                        <input type="number"
+                                               step="0.01"
+                                               name="Items[@i].Price"
+                                               value="@item.Price"
+                                               class="form-input item-input"
+                                               data-index="@i"
+                                               required />
+                                    </div>
+
+                                    <div class="table-cell" data-label="Type">
+                                        <select name="Items[@i].Type"
+                                                class="form-input type-select item-input"
+                                                data-isfood="@item.IsFood"
+                                                data-index="@i"
+                                                required>
+                                            <option value="@item.Type">@item.Type</option>
+                                        </select>
+                                        <span class="type-badge @(item.IsFood ? "food-badge" : "drink-badge") ms-2">
+                                            @(item.IsFood ? "Food" : "Drink")
+                                        </span>
+                                    </div>
+
+                                    <div class="table-cell" data-label="Remove">
+                                        <div style="display: flex; align-items: center; justify-content: center;">
+                                            <input type="checkbox"
+                                                   class="remove-checkbox"
+                                                   data-index="@i"
+                                                   onclick="toggleItem(this)" />
+                                            <label class="remove-label">Remove</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <button type="button" class="confirm-btn" id="confirmBtn" onclick="submitForm()">
+                        <span style="font-size: 1.2rem;">✅</span>
+                        <span>Confirm & Save Menu (<span id="activeItemsCount">@Model.Count</span> items)</span>
+                    </button>
+                </form>
+            </div>
+        }
+        else if (Model != null)
+        {
+            <!-- Empty State -->
+            <div class="ai-result-section" style="text-align: center; padding: 3rem;">
+                <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;">📄</div>
+                <h4 style="color: rgba(255, 255, 255, 0.7); margin-bottom: 0.5rem;">
+                    No Menu Items Detected
+                </h4>
+                <p style="color: rgba(255, 255, 255, 0.5);">
+                    Upload a menu image to start AI detection
+                </p>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    // Global variables
+    let totalItems = @Model?.Count ?? 0;
+    let activeItemsCount = @Model?.Count ?? 0;
+    let removedItems = new Set();
+
+    // Toast notification function
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 2000);
+    }
+
+    // Toggle item removal - SAMO OZNAČAVANJE
+    function toggleItem(checkbox) {
+        const index = parseInt(checkbox.dataset.index);
+        const row = document.getElementById(`item-row-${index}`);
+
+        if (checkbox.checked) {
+            // Mark as removed
+            row.classList.add('removed');
+            removedItems.add(index);
+            activeItemsCount--;
+        } else {
+            // Mark as active
+            row.classList.remove('removed');
+            removedItems.delete(index);
+            activeItemsCount++;
+        }
+
+        // Update counters
+        updateCounters();
+    }
+
+    // Update counters and button state
+    function updateCounters() {
+        // Update active items count
+        const activeCountElement = document.getElementById('activeItemsCount');
+        if (activeCountElement) {
+            activeCountElement.textContent = activeItemsCount;
+        }
+
+        // Update confirm button text
+        const confirmBtn = document.getElementById('confirmBtn');
+        if (confirmBtn) {
+            const textSpan = confirmBtn.querySelector('span:nth-child(2)');
+            if (textSpan) {
+                textSpan.innerHTML = `Confirm & Save Menu (<span id="activeItemsCount">${activeItemsCount}</span> items)`;
+            }
+
+            // Disable button if no active items
+            if (activeItemsCount === 0) {
+                confirmBtn.disabled = true;
+                confirmBtn.title = "No items to save. Uncheck some items to enable.";
+            } else {
+                confirmBtn.disabled = false;
+                confirmBtn.title = "";
+            }
+        }
+
+        // Update total items badge
+        const totalItemsBadge = document.getElementById('totalItems');
+        if (totalItemsBadge) {
+            totalItemsBadge.textContent = totalItems;
+        }
+
+        // Show info if all items are removed
+        if (activeItemsCount === 0 && totalItems > 0) {
+            showToast('All items are marked for removal. Uncheck some items to save.', 'error');
+        }
+    }
+
+    // Remove marked items from form before submission
+    function prepareFormForSubmission() {
+        const form = document.getElementById('confirmAiForm');
+        const tableBody = document.getElementById('tableBody');
+        const rows = tableBody.querySelectorAll('.table-row');
+
+        let newIndex = 0;
+
+        rows.forEach((row, oldIndex) => {
+            if (!removedItems.has(oldIndex)) {
+                // This item is active, update its index
+                const inputs = row.querySelectorAll('[name^="Items["]');
+                inputs.forEach(input => {
+                    const oldName = input.getAttribute('name');
+                    const newName = oldName.replace(/Items\[\d+\]/, `Items[${newIndex}]`);
+                    input.setAttribute('name', newName);
+                });
+                newIndex++;
+            } else {
+                // This item is removed, remove its inputs from DOM
+                const inputs = row.querySelectorAll('[name^="Items["]');
+                inputs.forEach(input => {
+                    input.remove();
+                });
+            }
+        });
+
+        return true;
+    }
+
+    // Custom form submission
+    function submitForm() {
+        if (activeItemsCount === 0) {
+            showToast('Cannot save: All items are marked for removal. Please uncheck some items.', 'error');
+            return;
+        }
+
+        // Validate active items (BEZ CRVENIH ANIMACIJA)
+        let hasErrors = false;
+        const errorMessages = [];
+        const tableBody = document.getElementById('tableBody');
+        const rows = tableBody.querySelectorAll('.table-row');
+
+        rows.forEach((row, index) => {
+            if (!removedItems.has(index)) {
+                const inputs = row.querySelectorAll('.item-input[required]');
+                inputs.forEach(input => {
+                    if (!input.value.trim() && input.type !== 'checkbox') {
+                        hasErrors = true;
+                        const fieldName = input.getAttribute('name').includes('Name') ? 'Name' :
+                            input.getAttribute('name').includes('Price') ? 'Price' : 'Type';
+                        errorMessages.push(`Item ${index + 1} has empty ${fieldName}`);
+                    }
+                });
+            }
+        });
+
+        if (hasErrors) {
+            showToast('Please fill in all required fields for active items', 'error');
+            console.log('Validation errors:', errorMessages);
+            return;
+        }
+
+        // Show loading
+        const btn = document.getElementById('confirmBtn');
+        if (btn && !btn.disabled) {
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span>⏳</span> Preparing Data...';
+            btn.disabled = true;
+            btn.style.opacity = '0.8';
+
+            // Prepare form (remove marked items)
+            prepareFormForSubmission();
+
+            // Submit the form
+            setTimeout(() => {
+                document.getElementById('confirmAiForm').submit();
+            }, 500);
+        }
+    }
+
+    // Populate type dropdowns
+    function populateTypeDropdowns() {
+        document.querySelectorAll('.type-select').forEach(select => {
+            // Skip if already populated
+            if (select.options.length > 1) return;
+
+            const isFood = select.dataset.isfood === "True" || select.dataset.isfood === "true";
+
+            const foodTypes = ["Soup", "Salad", "Meat", "Fish", "Dessert", "Other"];
+            const drinkTypes = ["Red Wine", "White Wine", "Rose Wine", "Beer", "Cocktail", "Spirit", "NonAlcoholic", "Other"];
+
+            const options = isFood ? foodTypes : drinkTypes;
+
+            // Remove all options except the first one
+            while (select.options.length > 1) {
+                select.remove(1);
+            }
+
+            // Add new options
+            options.forEach(opt => {
+                if (opt !== select.options[0].value) {
+                    const optionEl = document.createElement('option');
+                    optionEl.value = opt;
+                    optionEl.textContent = opt;
+                    select.appendChild(optionEl);
+                }
+            });
+
+            // Force black text in dropdown options
+            setTimeout(() => {
+                const options = select.options;
+                for (let i = 0; i < options.length; i++) {
+                    options[i].style.backgroundColor = "#ffffff";
+                    options[i].style.color = "#000000";
+                }
+            }, 10);
+        });
+    }
+
+    // Add event listeners and initialize
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialize dropdowns
+        populateTypeDropdowns();
+
+        // Initialize counters
+        updateCounters();
+
+        // Upload form loading
+        const uploadForm = document.querySelector('.upload-form');
+        if (uploadForm) {
+            uploadForm.addEventListener('submit', function (e) {
+                const btn = this.querySelector('.upload-btn');
+                if (btn) {
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<span>⏳</span> Processing Image...';
+                    btn.disabled = true;
+                    btn.style.opacity = '0.8';
+
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                    }, 3000);
+                }
+            });
+        }
+
+        // File input styling
+        const fileInput = document.querySelector('.file-input');
+        if (fileInput) {
+            fileInput.addEventListener('change', function () {
+                if (this.files && this.files[0]) {
+                    showToast(`Selected: ${this.files[0].name}`, 'info');
+                }
+            });
+        }
+
+        // Add responsive labels for mobile
+        if (window.innerWidth <= 768) {
+            const cells = document.querySelectorAll('.table-cell');
+            cells.forEach(cell => {
+                const label = cell.hasAttribute('data-label') ? cell.getAttribute('data-label') : 'Field';
+                cell.setAttribute('data-label', label);
+            });
+        }
+
+        // Animate rows on load
+        const rows = document.querySelectorAll('.table-row');
+        rows.forEach((row, index) => {
+            setTimeout(() => {
+                row.style.opacity = '1';
+                row.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+
+        // Handle Enter key on form
+        document.querySelectorAll('.item-input').forEach(input => {
+            input.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    // Find next input
+                    const allInputs = Array.from(document.querySelectorAll('.item-input:not(:disabled)'));
+                    const currentIndex = allInputs.indexOf(this);
+                    if (currentIndex < allInputs.length - 1) {
+                        allInputs[currentIndex + 1].focus();
+                    }
+                }
+            });
+        });
+    });
+</script>

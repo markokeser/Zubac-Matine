@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using Zubac.Interfaces;
 using Zubac.Models;
 using Zubac.Services;
@@ -123,7 +126,9 @@ namespace Zubac.Controllers
                     AdminId = settings.AdminId,
                     FoodEnabled = settings.FoodEnabled,
                     FreeDrinksEnabled = settings.FreeDrinksEnabled,
-                    StartTime = settings.StartTime
+                    StartTime = settings.StartTime,
+                    EndTime = settings.EndTime,
+                    RealtimeCounting = settings.RealtimeCounting
                 };
             }
 
@@ -138,7 +143,23 @@ namespace Zubac.Controllers
             var success = await _service.SaveRestaurantSettingsAsync(model);
 
             if (success)
+            {
+                var claims = User.Claims
+        .Where(c => c.Type != "FoodEnabled" && c.Type != "FreeDrinksEnabled")
+        .ToList();
+
+                claims.Add(new Claim("FoodEnabled", model.FoodEnabled.ToString()));
+                claims.Add(new Claim("FreeDrinksEnabled", model.FreeDrinksEnabled.ToString()));
+
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var principal = new ClaimsPrincipal(identity);
+
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
                 return RedirectToAction("RestaurantSettings");
+            }
+            
+                
 
             ModelState.AddModelError("", "Unable to save settings.");
             return View("RestaurantSettings", model);
@@ -179,5 +200,97 @@ namespace Zubac.Controllers
             await _service.DeleteArticleAsync(id);
             return RedirectToAction(isFood ? "FoodSettings" : "DrinksSettings");
         }
+
+        [HttpPost]
+        public IActionResult ToggleSommelier([FromBody] ToggleSommelierRequest req)
+        {
+            var success = _service.ToggleSommelier(req.Id, req.Enabled);
+
+            if (!success)
+                return NotFound();
+
+            return Ok();
+        }
+
+        [HttpPost]
+        public IActionResult ToggleAvailable([FromBody] ToggleSommelierRequest req)
+        {
+            var success = _service.ToggleAvailable(req.Id, req.Enabled);
+
+            if (!success)
+                return NotFound();
+
+            return Ok();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateArticle(ArticleViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest("Invalid data");
+
+            var article = new Article
+            {
+                Id = model.Id,
+                Name = model.Name,
+                Price = model.Price,
+                Type = model.Type,
+                IsAvailable = model.IsAvailable,
+                AiSommelierEnabled = model.AiSommelierEnabled
+            };
+
+            await _service.UpdateArticleAsync(article);
+
+            if (model.IsFood)
+                return RedirectToAction("FoodSettings", "Settings");
+            else
+                return RedirectToAction("DrinksSettings", "Settings");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateStaff(StaffViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _service.UpdateStaffAsync(model);
+            if (!result)
+                return NotFound();
+
+            // Možeš vratiti JSON da frontend zna da je OK
+            return RedirectToAction("Staff", "Settings");
+        }
+
+        public IActionResult AiMenuBuilder()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UploadMenuImage(IFormFile image)
+        {
+            if (image == null || image.Length == 0)
+                return RedirectToAction(nameof(AiMenuBuilder));
+
+            var items = await _service.ParseMenuFromImageAsync(image);
+
+            return View("AiMenuBuilder", items);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ConfirmAiMenu(AiMenuConfirmViewModel model)
+        {
+            if (model.Items == null || !model.Items.Any())
+                return RedirectToAction(nameof(AiMenuBuilder));
+
+            await _service.SaveAiMenuAsync(
+                restaurantId: int.Parse(User.FindFirst("RestaurantId").Value), 
+                model.Items
+            );
+
+            return RedirectToAction("Index");
+        }
+
     }
 }

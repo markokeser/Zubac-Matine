@@ -7,91 +7,502 @@
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-<div class="container my-4">
+<style>
+    body {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%) !important;
+        min-height: 100vh;
+        color: rgba(255, 255, 255, 0.9);
+        font-family: 'Inter', sans-serif;
+    }
 
-    <!-- Home dugme -->
-    <div class="mb-3">
-        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
-            🏠 Home
+    .home-btn {
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-weight: 500;
+        background: rgba(212, 175, 55, 0.1);
+        color: #d4af37;
+        border: 1px solid rgba(212, 175, 55, 0.3);
+    }
+
+        .home-btn:hover {
+            background: rgba(212, 175, 55, 0.2) !important;
+            transform: scale(1.05);
+            color: #d4af37;
+            text-decoration: none;
+        }
+
+    .main-container {
+        background: rgba(45, 45, 68, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 2rem;
+        max-width: 600px;
+        margin: 0 auto;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+        .section-header span:first-child {
+            font-size: 2rem;
+        }
+
+        .section-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+            color: #d4af37;
+            font-family: 'Playfair Display', serif;
+        }
+
+    .form-control, select.select2 {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(212, 175, 55, 0.3) !important;
+        color: rgba(255, 255, 255, 0.9) !important;
+        border-radius: 8px !important;
+        padding: 10px 12px !important;
+        font-family: 'Inter', sans-serif !important;
+        transition: all 0.2s ease !important;
+        width: 100% !important;
+    }
+
+        .form-control:focus, select.select2:focus {
+            background: rgba(255, 255, 255, 0.1) !important;
+            border-color: #d4af37 !important;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1) !important;
+            color: rgba(255, 255, 255, 0.9) !important;
+            outline: none !important;
+        }
+
+    .form-label {
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: 'Inter', sans-serif;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .add-btn {
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        font-family: 'Inter', sans-serif;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+        background: #29B6F6 !important;
+        color: white !important;
+    }
+
+        .add-btn:hover {
+            background: #0288d1 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+    .item-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-radius: 8px;
+        margin-bottom: 8px;
+        animation: slideIn 0.3s ease;
+        font-family: 'Inter', sans-serif;
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .item-info {
+        flex: 1;
+    }
+
+    .item-name {
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .item-details {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.9rem;
+    }
+
+    .item-price {
+        color: #d4af37;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin: 0 20px;
+        font-family: 'Courier New', monospace;
+        min-width: 80px;
+        text-align: right;
+    }
+
+    .remove-btn {
+        background: #F44336;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 1.2rem;
+        padding: 0;
+    }
+
+        .remove-btn:hover {
+            background: #D32F2F;
+            transform: scale(1.1);
+        }
+
+    .submit-btn {
+        background: linear-gradient(135deg, #4CAF50, #66BB6A);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 14px 24px;
+        font-weight: 700;
+        font-size: 1rem;
+        width: 100%;
+        margin-top: 24px;
+        transition: all 0.2s ease;
+        font-family: 'Inter', sans-serif;
+        cursor: pointer;
+    }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(76, 175, 80, 0.3);
+            color: white;
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+    select option {
+        background: #16213e;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Select2 customization */
+    .select2-container--default .select2-selection--single {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(212, 175, 55, 0.3) !important;
+        border-radius: 8px !important;
+        height: 42px !important;
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: rgba(255, 255, 255, 0.9) !important;
+            line-height: 42px !important;
+            font-family: 'Inter', sans-serif !important;
+            padding-left: 12px !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 42px !important;
+        }
+
+    .select2-container--default .select2-results__option {
+        background: #16213e !important;
+        color: rgba(255, 255, 255, 0.9) !important;
+        font-family: 'Inter', sans-serif !important;
+    }
+
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background: rgba(212, 175, 55, 0.3) !important;
+        color: #d4af37 !important;
+    }
+
+    .select2-dropdown {
+        background: #16213e !important;
+        border: 1px solid rgba(212, 175, 55, 0.3) !important;
+        border-radius: 8px !important;
+    }
+
+    /* Toast notification */
+    .toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+        z-index: 9999;
+        animation: fadeInOut 2s ease-in-out;
+    }
+
+    @@keyframes fadeInOut {
+        0%, 100% {
+            opacity: 0;
+            transform: translateX(-50%) translateY(10px);
+        }
+
+        10%, 90% {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    }
+
+    .toast-success {
+        background: #4CAF50;
+        color: white;
+    }
+
+    .toast-error {
+        background: #F44336;
+        color: white;
+    }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        color: rgba(255, 255, 255, 0.5);
+        font-family: 'Inter', sans-serif;
+        padding: 40px 0;
+    }
+
+    /* Header */
+    .page-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .page-title {
+        font-family: 'Playfair Display', serif;
+        color: #d4af37;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    /* Grid layout for form */
+    .grid {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .grid-cols-1 {
+        grid-template-columns: 1fr;
+    }
+
+    @@media (min-width: 768px) {
+        .md\:grid-cols-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .md\:col-span-2 {
+            grid-column: span 2;
+        }
+
+        .md\:col-span-1 {
+            grid-column: span 1;
+        }
+    }
+</style>
+
+<div class="container py-4">
+    <div class="mb-4">
+        <a asp-controller="Home" asp-action="Index" class="home-btn">
+            <span style="font-size: 1.2rem;">🏠</span>
+            <span>Home</span>
         </a>
     </div>
 
-    <div class="card p-4 shadow-sm">
-        <h2 class="mb-4 text-center">🍸 Free Drink Order</h2>
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <span style="font-size: 2.5rem;">🍸</span>
+            Free Drink Order
+        </h1>
+    </div>
 
+    <!-- Main Content Container -->
+    <div class="main-container">
         <form asp-action="FreeDrink" method="post" id="orderForm">
-            <div class="row mb-3">
-                <div class="col-md-8 mb-3">
-                    <label>Drink</label>
-                    <select id="drinkSelect" class="form-control w-100">
-                        <option value="">Select a drink</option>
-                        @foreach (var article in Model.Articles)
-                        {
-                            <option value="@article.Id" data-name="@article.Name" data-price="@article.Price">
-                                @article.Name (@article.Price.ToString())
-                            </option>
-                        }
-                    </select>
+
+            <!-- DRINK SELECTION SECTION -->
+            <div class="mb-8">
+                <div class="section-header">
+                    <span>🍹</span>
+                    <h3>Select Drinks</h3>
                 </div>
 
-                <div class="col-md-4 mb-3">
-                    <label>Quantity</label>
-                    <input type="number" id="quantityInput" class="form-control" placeholder="Enter quantity" min="1" value="1" />
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div class="md:col-span-2">
+                        <label class="form-label">Select Drink</label>
+                        <select id="drinkSelect" class="form-control">
+                            <option value="" selected>Choose a drink...</option>
+                            @foreach (var article in Model.Articles)
+                            {
+                                <option value="@article.Id" data-name="@article.Name" data-price="@article.Price">
+                                    @article.Name (@article.Price.ToString("F2")€)
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="form-label">Quantity</label>
+                        <input type="number" id="quantityInput" class="form-control" placeholder="Enter quantity" min="1" value="1" max="99" />
+                    </div>
+                </div>
+
+                <div class="md:col-span-2">
+                    <button type="button" class="add-btn" onclick="addDrink()">
+                        <span style="margin-right: 8px;">➕</span>
+                        Add to Order
+                    </button>
+                </div>
+
+                <div id="selectedDrinksContainer" class="mt-4">
+                    <div class="empty-state">No drinks added yet...</div>
                 </div>
             </div>
 
-            <div class="mb-3">
-                <button type="button" class="btn btn-info w-100" onclick="addDrink()">➕ Add to List</button>
-            </div>
-
-            <div id="selectedDrinksContainer" class="mb-3"></div>
-
-            <button type="submit" class="btn btn-success w-100">✅ Submit Bar Order</button>
+            <!-- SUBMIT BUTTON -->
+            <button type="submit" class="submit-btn">
+                <span style="margin-right: 8px;">✅</span>
+                Submit Bar Order
+            </button>
         </form>
     </div>
 </div>
 
 <script>
     $(document).ready(function () {
+        // Initialize Select2
         $('#drinkSelect').select2({
-            placeholder: "Select a drink",
-            allowClear: true
+            placeholder: "Choose a drink...",
+            allowClear: true,
+            width: '100%'
         });
     });
 
     let nextIndex = 0;
 
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 2000);
+    }
+
+    function updateEmptyState() {
+        const container = $('#selectedDrinksContainer');
+        if (container.children('.item-row').length === 0) {
+            container.html('<div class="empty-state">No drinks added yet...</div>');
+        }
+    }
+
     function addDrink() {
         const selected = $('#drinkSelect').find(':selected');
         const id = selected.val();
         const name = selected.data("name");
-        const quantity = $('#quantityInput').val();
+        const price = parseFloat(selected.data("price"));
+        const quantity = parseInt($('#quantityInput').val());
 
         if (!id || quantity < 1) {
-            alert("Please select a drink and enter a valid quantity.");
+            showToast("Please select a drink and enter a valid quantity.", 'error');
             return;
         }
 
+        const totalPrice = price * quantity;
+
+        // Remove empty state if present
+        if ($('#selectedDrinksContainer').find('.empty-state').length > 0) {
+            $('#selectedDrinksContainer').empty();
+        }
+
         const drinkHtml = `
-                <div class="drink-item d-flex justify-content-between align-items-center mb-2 p-2 border rounded" id="drink-${nextIndex}">
+                <div class="item-row" id="drink-${nextIndex}">
+                    <div class="item-info">
+                        <div class="item-name">🍹 ${name}</div>
+                        <div class="item-details">Quantity: ${quantity}</div>
+                    </div>
+                    <div class="item-price">${totalPrice.toFixed(2)}€</div>
+                    <button type="button" class="remove-btn" onclick="removeDrink(${nextIndex})">🗑️</button>
+
+                    <!-- Hidden fields for form submission -->
                     <input type="hidden" name="SelectedArticles[${nextIndex}].ArticleId" value="${id}" />
                     <input type="hidden" name="SelectedArticles[${nextIndex}].IsSelected" value="true" />
                     <input type="hidden" name="SelectedArticles[${nextIndex}].Quantity" value="${quantity}" />
-                    <input type="hidden" name="SelectedArticles.index" value="${nextIndex}" />
-                    <span>${name} × ${quantity}</span>
-                    <button type="button" class="btn btn-sm btn-danger" onclick="removeDrink(${nextIndex})">🗑 Remove</button>
                 </div>
             `;
 
         $('#selectedDrinksContainer').append(drinkHtml);
         nextIndex++;
 
+        // Reset inputs
         $('#drinkSelect').val(null).trigger('change');
         $('#quantityInput').val('1');
+
+        // Show success message
+        showToast(`Added ${quantity}x ${name}`, 'success');
     }
 
     function removeDrink(index) {
-        $('#drink-' + index).remove();
+        $(`#drink-${index}`).remove();
+        updateEmptyState();
+        showToast('Drink removed', 'success');
     }
+
+    // Form submission validation
+    $('#orderForm').on('submit', function (e) {
+        const hasItems = $('.item-row').length > 0;
+
+        if (!hasItems) {
+            e.preventDefault();
+            showToast('Please add at least one drink to your order.', 'error');
+            return false;
+        }
+
+        showToast('Submitting bar order...', 'success');
+        return true;
+    });
 </script>

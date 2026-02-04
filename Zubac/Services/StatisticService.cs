@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using Zubac.Data;
 using Zubac.Interfaces;
 using Zubac.Models;
@@ -17,6 +18,12 @@ namespace Zubac.Services
 
         public async Task<StatisticsViewModel> GetStatistic(int restaurantId)
         {
+            var restaurantSettings = await _context.RestaurantSettings.Where(x => x.Id == restaurantId).FirstOrDefaultAsync();
+            var startTime = restaurantSettings.StartTime;
+            var endTime = restaurantSettings.EndTime;
+            if (restaurantSettings.RealtimeCounting)
+                endTime = DateTime.Now;
+
             var paidStats = await _context.Users
             .Where(x => x.RestaurantId == restaurantId)
             .Select(u => new UserEarningsViewModel
@@ -24,7 +31,7 @@ namespace Zubac.Services
                 Username = u.Username,
                 UserRank = u.UserRank,
                 Earnings = _context.Orders
-                    .Where(o => o.CreatedBy == u.Id && !o.IsFree)
+                    .Where(o => o.CreatedBy == u.Id && !o.IsFree && o.Created > startTime && o.Created < endTime)
                     .SelectMany(o => o.OrderArticles)
                     .Sum(oa => (decimal?)oa.Quantity * oa.Article.Price) ?? 0m
             })
@@ -36,7 +43,7 @@ namespace Zubac.Services
                 {
                     Username = u.Username,
                     FreeOrdersCount = _context.Orders
-                        .Where(o => o.CreatedBy == u.Id && o.IsFree)
+                        .Where(o => o.CreatedBy == u.Id && o.IsFree && o.Created > startTime && o.Created < endTime)
                         .Count()
                 })
                 .ToListAsync();
@@ -58,10 +65,10 @@ namespace Zubac.Services
         {
             Name = a.Name,
             Quantity = _context.OrderArticles
-                .Where(oa => oa.ArticleId == a.Id && !oa.Order.IsFree && oa.RestaurantId == restaurantId)
+                .Where(oa => oa.ArticleId == a.Id && !oa.Order.IsFree && oa.RestaurantId == restaurantId && oa.Created > startTime && oa.Created < endTime)
                 .Sum(oa => (int?)oa.Quantity) ?? 0,
             Earnings = _context.OrderArticles
-                .Where(oa => oa.ArticleId == a.Id && !oa.Order.IsFree && oa.RestaurantId == restaurantId)
+                .Where(oa => oa.ArticleId == a.Id && !oa.Order.IsFree && oa.RestaurantId == restaurantId && oa.Created > startTime && oa.Created < endTime)
                 .Sum(oa => (decimal?)oa.Quantity * oa.Article.Price) ?? 0m
         })
         .Where(a => a.Quantity > 0)
@@ -81,7 +88,7 @@ namespace Zubac.Services
                 {
                     Name = a.Name,
                     Quantity = _context.OrderArticles
-                        .Where(oa => oa.ArticleId == a.Id && oa.Order.IsFree)
+                        .Where(oa => oa.ArticleId == a.Id && oa.Order.IsFree && oa.Created > startTime && oa.Created < endTime)
                         .Sum(oa => (int?)oa.Quantity) ?? 0,
                     Earnings = 0 // not used for free drinks
                 })

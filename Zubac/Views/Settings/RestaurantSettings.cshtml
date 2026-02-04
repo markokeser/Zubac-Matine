@@ -1,38 +1,525 @@
 ﻿@model Zubac.Models.RestaurantSettingsViewModel
 
-<div class="container my-4">
-    <!-- Home i Back dugmad -->
-    <div class="d-flex mb-3">
-        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary me-2">🏠 Home</a>
-        <a asp-controller="Settings" asp-action="Index" class="btn btn-secondary">⬅ Back</a>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%) !important;
+        min-height: 100vh;
+        color: rgba(255, 255, 255, 0.9);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .nav-buttons {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .nav-btn {
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-weight: 500;
+        background: rgba(212, 175, 55, 0.1);
+        color: #d4af37;
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        font-family: 'Inter', sans-serif;
+    }
+
+        .nav-btn:hover {
+            background: rgba(212, 175, 55, 0.2) !important;
+            transform: scale(1.05);
+            color: #d4af37;
+            text-decoration: none;
+        }
+
+    .main-container {
+        background: rgba(45, 45, 68, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-family: 'Playfair Display', serif;
+        color: #d4af37;
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .settings-section {
+        margin-bottom: 2rem;
+        animation: fadeIn 0.6s ease;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+    }
+
+    .section-icon {
+        font-size: 1.8rem;
+        color: #d4af37;
+    }
+
+    .section-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.6rem;
+        font-weight: 600;
+        color: #d4af37;
+        margin: 0;
+    }
+
+    .form-control {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(212, 175, 55, 0.3) !important;
+        color: rgba(255, 255, 255, 0.9) !important;
+        border-radius: 8px !important;
+        padding: 10px 12px !important;
+        font-family: 'Inter', sans-serif !important;
+        transition: all 0.2s ease !important;
+        width: 100% !important;
+    }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.1) !important;
+            border-color: #d4af37 !important;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1) !important;
+            color: rgba(255, 255, 255, 0.9) !important;
+            outline: none !important;
+        }
+
+    .form-label {
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 600;
+        font-size: 0.95rem;
+        font-family: 'Inter', sans-serif;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .checkbox-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-radius: 8px;
+        margin-bottom: 12px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+        .checkbox-container:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(212, 175, 55, 0.4);
+            transform: translateX(5px);
+        }
+
+    .checkbox-input {
+        width: 20px;
+        height: 20px;
+        accent-color: #d4af37;
+        cursor: pointer;
+    }
+
+    .checkbox-label {
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+        font-family: 'Inter', sans-serif;
+        cursor: pointer;
+        flex: 1;
+    }
+
+    .checkbox-icon {
+        font-size: 1.2rem;
+        margin-right: 8px;
+        color: #d4af37;
+    }
+
+    /* Time inputs container */
+    .time-inputs {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    @@media (min-width: 768px) {
+        .time-inputs {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    .input-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #d4af37;
+        font-size: 1.1rem;
+        z-index: 2;
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+        .input-wrapper .form-control {
+            padding-left: 40px !important;
+        }
+
+    /* Save button */
+    .save-btn {
+        background: linear-gradient(135deg, #4CAF50, #66BB6A);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 14px 32px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: all 0.2s ease;
+        font-family: 'Inter', sans-serif;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 1rem;
+        width: 100%;
+        justify-content: center;
+    }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(76, 175, 80, 0.3);
+            color: white;
+        }
+
+        .save-btn:active {
+            transform: translateY(0);
+        }
+
+    /* Disabled input styling */
+    .form-control:disabled {
+        background: rgba(255, 255, 255, 0.03) !important;
+        border-color: rgba(212, 175, 55, 0.1) !important;
+        color: rgba(255, 255, 255, 0.4) !important;
+        cursor: not-allowed;
+    }
+
+    /* Help text */
+    .help-text {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.85rem;
+        font-family: 'Inter', sans-serif;
+        margin-top: 6px;
+        font-style: italic;
+    }
+
+    /* Toast notification */
+    .toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+        z-index: 9999;
+        animation: fadeInOut 2s ease-in-out;
+    }
+
+    @@keyframes fadeInOut {
+        0%, 100% {
+            opacity: 0;
+            transform: translateX(-50%) translateY(10px);
+        }
+
+        10%, 90% {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    }
+
+    .toast-success {
+        background: #4CAF50;
+        color: white;
+    }
+
+    .toast-error {
+        background: #F44336;
+        color: white;
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Navigation Buttons -->
+    <div class="nav-buttons">
+        <a asp-controller="Home" asp-action="Index" class="nav-btn">
+            <span style="font-size: 1.2rem;">🏠</span>
+            <span>Home</span>
+        </a>
+        <a asp-controller="Settings" asp-action="Index" class="nav-btn">
+            <span style="font-size: 1.2rem;">⬅</span>
+            <span>Back</span>
+        </a>
     </div>
-<div class="container mt-4">
-    <h2 class="mb-4">Restaurant Settings</h2>
 
-    <form asp-action="SaveSettings" method="post">
-        <input type="hidden" asp-for="Id" />
-        <input type="hidden" asp-for="AdminId" />
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <span style="font-size: 2.2rem;">⚙️</span>
+            Restaurant Settings
+        </h1>
+    </div>
 
-        <div class="card p-4 shadow-sm mb-3">
-            <h4>General</h4>
-            <div class="form-group mt-3">
-                <label asp-for="StartTime">Start of Daily Tracking</label>
-                <input asp-for="StartTime" type="datetime-local" class="form-control" />
+    <!-- Main Container -->
+    <div class="main-container">
+        <form asp-action="SaveSettings" method="post" id="settingsForm">
+            <!-- Hidden fields -->
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="AdminId" />
+
+            <!-- 1. Daily Tracking Section -->
+            <div class="settings-section">
+                <div class="section-header">
+                    <span class="section-icon">📅</span>
+                    <h2 class="section-title">Daily Tracking</h2>
+                </div>
+
+                <div class="time-inputs">
+                    <div class="input-group">
+                        <label class="form-label">
+                            <span style="margin-right: 8px;">⏰</span>
+                            Start of Daily Tracking
+                        </label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">🕒</span>
+                            <input asp-for="StartTime"
+                                   type="datetime-local"
+                                   class="form-control" />
+                        </div>
+                        <div class="help-text">When daily statistics should begin</div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="form-label">
+                            <span style="margin-right: 8px;">⏳</span>
+                            End of Daily Tracking
+                        </label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">🕓</span>
+                            <input asp-for="EndTime"
+                                   type="datetime-local"
+                                   class="form-control"
+                                   id="endTimeInput" />
+                        </div>
+                        <div class="help-text">When daily statistics should end</div>
+                    </div>
+                </div>
+
+                <div class="checkbox-container" onclick="toggleRealtime()">
+                    <input asp-for="RealtimeCounting"
+                           class="checkbox-input"
+                           type="checkbox"
+                           id="realtimeCheckbox" />
+                    <div style="flex: 1; display: flex; align-items: center;">
+                        <span class="checkbox-icon">⚡</span>
+                        <label class="checkbox-label">
+                            Real-time counting (until now)
+                        </label>
+                    </div>
+                </div>
+                <div class="help-text">When enabled, end time will be ignored and counting continues until current time</div>
             </div>
-        </div>
 
-        <div class="card p-4 shadow-sm mb-3">
-            <h4>Permissions</h4>
-            <div class="form-check mt-2">
-                <input asp-for="FoodEnabled" class="form-check-input" type="checkbox" />
-                <label asp-for="FoodEnabled" class="form-check-label">Enable Food Ordering</label>
-            </div>
-            <div class="form-check mt-2">
-                <input asp-for="FreeDrinksEnabled" class="form-check-input" type="checkbox" />
-                <label asp-for="FreeDrinksEnabled" class="form-check-label">Allow Free Drinks</label>
-            </div>
-        </div>
+            <!-- 2. Permissions Section -->
+            <div class="settings-section">
+                <div class="section-header">
+                    <span class="section-icon">🔐</span>
+                    <h2 class="section-title">Permissions</h2>
+                </div>
 
-        <button type="submit" class="btn btn-primary">Save</button>
-    </form>
+                <div class="checkbox-container">
+                    <input asp-for="FoodEnabled"
+                           class="checkbox-input"
+                           type="checkbox" />
+                    <div style="flex: 1; display: flex; align-items: center;">
+                        <span class="checkbox-icon">🍔</span>
+                        <label class="checkbox-label">
+                            Enable Food Ordering
+                        </label>
+                    </div>
+                </div>
+                <div class="help-text">Allow waiters to order food items</div>
+
+                <div class="checkbox-container">
+                    <input asp-for="FreeDrinksEnabled"
+                           class="checkbox-input"
+                           type="checkbox" />
+                    <div style="flex: 1; display: flex; align-items: center;">
+                        <span class="checkbox-icon">🎁</span>
+                        <label class="checkbox-label">
+                            Allow Free Drinks
+                        </label>
+                    </div>
+                </div>
+                <div class="help-text">Enable free drinks functionality for bartenders</div>
+            </div>
+
+            <!-- Save Button -->
+            <button type="submit" class="save-btn">
+                <span>💾</span>
+                Save Settings
+            </button>
+        </form>
+    </div>
 </div>
+
+<script>
+    // Toast notification function
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 2000);
+    }
+
+    // Realtime checkbox functionality
+    function toggleRealtime() {
+        const checkbox = document.getElementById("realtimeCheckbox");
+        const endTimeInput = document.getElementById("endTimeInput");
+
+        checkbox.checked = !checkbox.checked;
+
+        if (checkbox.checked) {
+            endTimeInput.disabled = true;
+            endTimeInput.value = "";
+            endTimeInput.style.opacity = "0.6";
+            showToast('Real-time counting enabled', 'info');
+        } else {
+            endTimeInput.disabled = false;
+            endTimeInput.style.opacity = "1";
+            showToast('Real-time counting disabled', 'info');
+        }
+    }
+
+    // Initialize on page load
+    document.addEventListener("DOMContentLoaded", function () {
+        const checkbox = document.getElementById("realtimeCheckbox");
+        const endTimeInput = document.getElementById("endTimeInput");
+
+        // Set initial state
+        if (checkbox.checked) {
+            endTimeInput.disabled = true;
+            endTimeInput.style.opacity = "0.6";
+        } else {
+            endTimeInput.disabled = false;
+            endTimeInput.style.opacity = "1";
+        }
+
+        // Add click handler to checkbox (not container) to prevent double toggle
+        checkbox.addEventListener("change", function (e) {
+            e.stopPropagation();
+            if (this.checked) {
+                endTimeInput.disabled = true;
+                endTimeInput.style.opacity = "0.6";
+                endTimeInput.value = "";
+            } else {
+                endTimeInput.disabled = false;
+                endTimeInput.style.opacity = "1";
+            }
+        });
+
+        // Form submission
+        document.getElementById('settingsForm').addEventListener('submit', function (e) {
+            const saveBtn = this.querySelector('.save-btn');
+            const originalText = saveBtn.innerHTML;
+
+            // Show loading state
+            saveBtn.innerHTML = '<span>⏳</span> Saving...';
+            saveBtn.disabled = true;
+            saveBtn.style.opacity = '0.8';
+
+            // Re-enable button after 3 seconds (in case of error)
+            setTimeout(() => {
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+                saveBtn.style.opacity = '1';
+            }, 3000);
+
+            showToast('Saving settings...', 'info');
+        });
+
+        // Set default datetime values to current time if empty
+        const startTimeInput = document.querySelector('input[name="StartTime"]');
+        const endTimeInput = document.querySelector('input[name="EndTime"]');
+
+        if (!startTimeInput.value) {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            startTimeInput.value = now.toISOString().slice(0, 16);
+        }
+
+        if (!endTimeInput.value && !checkbox.checked) {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            endTimeInput.value = now.toISOString().slice(0, 16);
+        }
+    });
+
+    // Add animation to sections on load
+    document.addEventListener('DOMContentLoaded', function () {
+        const sections = document.querySelectorAll('.settings-section');
+        sections.forEach((section, index) => {
+            setTimeout(() => {
+                section.style.animation = 'fadeIn 0.6s ease forwards';
+            }, index * 200);
+        });
+    });
+</script>
