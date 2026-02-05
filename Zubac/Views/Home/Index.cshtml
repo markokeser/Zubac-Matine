@@ -80,6 +80,30 @@
                 mask-composite: exclude;
             }
 
+        /* Logout button - now same as other buttons */
+        .logout-card {
+            background: #2d2d44 !important;
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+            .logout-card::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: inherit;
+                padding: 2px;
+                background: linear-gradient(135deg, #d4af37, #f4e4ba, #d4af37);
+                -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+                -webkit-mask-composite: xor;
+                mask-composite: exclude;
+            }
+
+            .logout-card:hover {
+                background: #353550 !important;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            }
+
         /* Responsive adjustments */
         @@media (max-width: 640px) {
             .header-container {
@@ -294,6 +318,17 @@
                         </div>
                     </a>
                 }
+
+                <!-- LOGOUT BUTTON - Always visible for all users -->
+                <form asp-controller="Account" asp-action="Logout" method="post" class="menu-btn logout-card rounded-2xl block h-full">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="w-full h-full p-4 sm:p-5 rounded-2xl text-center flex flex-col items-center justify-center cursor-pointer">
+                        <span class="text-3xl sm:text-4xl mb-2 sm:mb-3 block">🚪</span>
+                        <span class="text-xs sm:text-sm font-semibold block" style="color: #ffffff; font-family: 'Inter', sans-serif;">
+                            Logout
+                        </span>
+                    </button>
+                </form>
             </div>
 
             <!-- Debug panel (remove this in production) -->
@@ -320,6 +355,7 @@
         // Optional: Add hover effects and animations
         document.addEventListener('DOMContentLoaded', function () {
             const menuButtons = document.querySelectorAll('.menu-btn');
+            const logoutForm = document.querySelector('.logout-card');
 
             menuButtons.forEach(button => {
                 button.addEventListener('mouseenter', function () {
@@ -332,6 +368,15 @@
                     this.style.boxShadow = 'none';
                 });
             });
+
+            // Logout form confirmation
+            if (logoutForm) {
+                logoutForm.addEventListener('submit', function (e) {
+                    if (!confirm('Are you sure you want to logout?')) {
+                        e.preventDefault();
+                    }
+                });
+            }
 
             // Adjust layout on window resize
             function adjustLayout() {
