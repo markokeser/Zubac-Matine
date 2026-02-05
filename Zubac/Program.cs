@@ -46,7 +46,7 @@ namespace Zubac
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseMySql(
-            builder.Configuration.GetConnectionString(connectionString),
+            connectionString, // SAMO connectionString, ne GetConnectionString!
             new MySqlServerVersion(new Version(8, 0, 36)) // change to your MySQL version
     )
 );
