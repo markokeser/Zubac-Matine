@@ -36,9 +36,17 @@ namespace Zubac
         options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
             });
 
+            var host = Environment.GetEnvironmentVariable("DB_HOST");
+            var port = Environment.GetEnvironmentVariable("DB_PORT");
+            var database = Environment.GetEnvironmentVariable("DB_NAME");
+            var user = Environment.GetEnvironmentVariable("DB_USER");
+            var password = Environment.GetEnvironmentVariable("DB_PASS");
+
+            var connectionString = $"Server={host};Port={port};Database={database};User={user};Password={password};SslMode=Required;";
+
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseMySql(
-            builder.Configuration.GetConnectionString("DefaultConnection"),
+            builder.Configuration.GetConnectionString(connectionString),
             new MySqlServerVersion(new Version(8, 0, 36)) // change to your MySQL version
     )
 );
