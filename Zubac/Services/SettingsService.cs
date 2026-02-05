@@ -301,7 +301,7 @@ namespace Zubac.Services
 
             var client = _factory.CreateClient();
             client.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", _config["OpenAI:ApiKey"]);
+                new AuthenticationHeaderValue("Bearer", Environment.GetEnvironmentVariable("AI_PASS"));
 
             var requestBody = new
             {
