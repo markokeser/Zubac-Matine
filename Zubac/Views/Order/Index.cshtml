@@ -16,6 +16,8 @@
         min-height: 100vh;
         color: rgba(255, 255, 255, 0.9);
         font-family: 'Inter', sans-serif;
+        margin: 0;
+        padding: 20px;
     }
 
     .home-btn {
@@ -45,7 +47,7 @@
         backdrop-filter: blur(10px);
         border-radius: 16px;
         padding: 2rem;
-        max-width: 1000px;
+        max-width: 800px; /* Smanjeno da bude uža kolona */
         margin: 0 auto;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     }
@@ -66,15 +68,27 @@
         gap: 12px;
     }
 
+    /* Kontejner za sve porudžbine - VERTIKALNI LAYOUT */
+    .orders-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        width: 100%;
+    }
+
     .order-card {
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(212, 175, 55, 0.2);
         border-radius: 12px;
         padding: 1.5rem;
-        margin-bottom: 1rem;
         transition: all 0.3s ease;
-        cursor: pointer;
         animation: fadeIn 0.5s ease;
+        /* Svaka kartica zauzima celu širinu */
+        width: 100%;
+        box-sizing: border-box;
+        /* Sprečava da utiče na druge kartice */
+        position: relative;
+        overflow: visible;
     }
 
     @@keyframes fadeIn {
@@ -99,8 +113,17 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1rem;
+        cursor: pointer;
+        padding: 10px 5px;
+        border-radius: 8px;
+        transition: background-color 0.2s ease;
+        width: 100%;
+        box-sizing: border-box;
     }
+
+        .order-header:hover {
+            background: rgba(212, 175, 55, 0.05);
+        }
 
     .table-number {
         font-family: 'Inter', sans-serif;
@@ -116,23 +139,32 @@
         color: #d4af37;
         font-size: 1.5rem;
         transition: transform 0.3s ease;
+        cursor: pointer;
+        min-width: 24px;
+        text-align: center;
     }
 
     .order-details {
-        padding-top: 1rem;
+        padding-top: 1.5rem;
         border-top: 1px solid rgba(212, 175, 55, 0.2);
         animation: slideDown 0.3s ease;
+        margin-top: 1rem;
+        /* Zauzima samo svoj prostor, ne utiče na druge */
+        position: relative;
+        overflow: visible;
     }
 
     @@keyframes slideDown {
         from {
             opacity: 0;
             transform: translateY(-10px);
+            max-height: 0;
         }
 
         to {
             opacity: 1;
             transform: translateY(0);
+            max-height: 2000px;
         }
     }
 
@@ -178,7 +210,7 @@
         padding: 1rem;
         background: rgba(212, 175, 55, 0.1);
         border-radius: 8px;
-        margin: 1rem 0;
+        margin: 1.5rem 0;
         border: 1px solid rgba(212, 175, 55, 0.2);
     }
 
@@ -212,6 +244,7 @@
         align-items: center;
         justify-content: center;
         gap: 8px;
+        margin-top: 1rem;
     }
 
         .finish-btn:hover {
@@ -224,27 +257,16 @@
             transform: translateY(0);
         }
 
-    .orders-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-
-    @@media (min-width: 768px) {
-        .orders-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.5rem;
-        }
-    }
-
     .all-orders-total {
         background: rgba(212, 175, 55, 0.1);
         border: 1px solid rgba(212, 175, 55, 0.3);
         border-radius: 12px;
         padding: 1.5rem;
-        margin-top: 2rem;
+        margin-top: 2.5rem;
         text-align: center;
         animation: fadeIn 0.8s ease;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .all-total-label {
@@ -316,6 +338,45 @@
     .rotate-180 {
         transform: rotate(180deg);
     }
+
+    /* Animacija za zatvaranje */
+    .order-details.closing {
+        animation: slideUp 0.3s ease;
+        max-height: 0;
+        padding-top: 0;
+        margin-top: 0;
+        overflow: hidden;
+        opacity: 0;
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 1;
+            transform: translateY(0);
+            max-height: 2000px;
+        }
+
+        to {
+            opacity: 0;
+            transform: translateY(-10px);
+            max-height: 0;
+        }
+    }
+
+    /* Responsive design */
+    @@media (min-width: 992px) {
+        .main-container {
+            max-width: 900px;
+        }
+
+        .orders-list {
+            gap: 2rem;
+        }
+
+        .order-card {
+            padding: 2rem;
+        }
+    }
 </style>
 
 <div class="container py-4">
@@ -347,21 +408,22 @@
         }
         else
         {
-            <div class="orders-grid">
+            <div class="orders-list">
                 @foreach (var order in Model)
                 {
                     var orderTotal = calculateTotal(order);
+                    var orderId = order.Id.ToString();
 
-                    <div class="order-card" onclick="toggleDetails('@order.Id', this)">
-                        <div class="order-header">
+                    <div class="order-card" id="card-@orderId">
+                        <div class="order-header" onclick="toggleDetails('@orderId')">
                             <div class="table-number">
                                 <span>🪑</span>
                                 Table #@order.TableNumber
                             </div>
-                            <div class="toggle-arrow" id="arrow-@order.Id">▼</div>
+                            <div class="toggle-arrow" id="arrow-@orderId">▼</div>
                         </div>
 
-                        <div class="order-details" id="details-@order.Id" style="display: none;">
+                        <div class="order-details" id="details-@orderId" style="display: none; max-height: 0; overflow: hidden;">
                             <!-- Order Items -->
                             <div class="items-list">
                                 @foreach (var item in order.OrderArticles)
@@ -389,9 +451,9 @@
                             </div>
 
                             <!-- Finish Order Form -->
-                            <form asp-action="Finish" method="post">
+                            <form asp-action="Finish" method="post" onsubmit="return handleFinishOrder('@orderId')">
                                 <input type="hidden" name="id" value="@order.Id" />
-                                <button type="submit" class="finish-btn" onclick="event.stopPropagation(); showFinishToast('@order.Id')">
+                                <button type="submit" class="finish-btn">
                                     <span>✅</span>
                                     Finish Order
                                 </button>
@@ -399,36 +461,49 @@
                         </div>
                     </div>
                 }
-            </div>
 
-            <!-- All Orders Total -->
-            <div class="all-orders-total">
-                <div class="all-total-label">Total Value of All Active Orders</div>
-                <div class="all-total-amount">@totalOfAllOrders.ToString("F2")€</div>
+                <!-- All Orders Total -->
+                <div class="all-orders-total">
+                    <div class="all-total-label">Total Value of All Active Orders</div>
+                    <div class="all-total-amount">@totalOfAllOrders.ToString("F2")€</div>
+                </div>
             </div>
         }
     </div>
 </div>
 
 <script>
-    // Toggle order details
-    function toggleDetails(orderId, cardElement) {
+    // Toggle order details - IMPROVED VERSION
+    function toggleDetails(orderId) {
         const detailsEl = document.getElementById('details-' + orderId);
         const arrowEl = document.getElementById('arrow-' + orderId);
 
         if (detailsEl.style.display === 'none' || detailsEl.style.display === '') {
             // Show details
             detailsEl.style.display = 'block';
+            detailsEl.style.maxHeight = '2000px'; // Dovoljno velika vrednost
+            detailsEl.style.overflow = 'visible';
             arrowEl.classList.add('rotate-180');
+
+            // Pokreni animaciju
+            detailsEl.style.animation = 'none';
+            setTimeout(() => {
+                detailsEl.style.animation = 'slideDown 0.3s ease';
+            }, 10);
+
             showToast('Order details expanded', 'info');
         } else {
-            // Hide details
-            detailsEl.style.display = 'none';
+            // Hide details - prvo animacija pa sakrivanje
+            detailsEl.style.animation = 'slideUp 0.3s ease';
+            detailsEl.style.maxHeight = '0';
+            detailsEl.style.overflow = 'hidden';
             arrowEl.classList.remove('rotate-180');
-        }
 
-        // Prevent form submission when clicking on card
-        event.stopPropagation();
+            // Sakrij nakon animacije
+            setTimeout(() => {
+                detailsEl.style.display = 'none';
+            }, 300);
+        }
     }
 
     // Toast notification function
@@ -443,43 +518,55 @@
         }, 2000);
     }
 
-    // Show finish order confirmation
-    function showFinishToast(orderId) {
+    // Handle finish order submission
+    function handleFinishOrder(orderId) {
         showToast('Finishing order...', 'success');
 
-        // Optional: Add delay for better UX
-        setTimeout(() => {
-            const card = document.querySelector(`#details-${orderId}`).closest('.order-card');
+        // Optional: Add visual feedback
+        const card = document.getElementById('card-' + orderId);
+        if (card) {
             card.style.opacity = '0.5';
             card.style.transition = 'opacity 0.3s ease';
-        }, 100);
+        }
+
+        return true; // Allow form submission
     }
 
-    // Initialize all cards with hidden details
+    // Prevent click propagation from form elements
     document.addEventListener('DOMContentLoaded', function () {
-    @foreach (var order in Model)
+        // Ensure all details are hidden on page load
+        document.querySelectorAll('[id^="details-"]').forEach(detailsEl => {
+            detailsEl.style.display = 'none';
+            detailsEl.style.maxHeight = '0';
+            detailsEl.style.overflow = 'hidden';
+        });
+
+        document.querySelectorAll('[id^="arrow-"]').forEach(arrowEl => {
+            arrowEl.classList.remove('rotate-180');
+        });
+
+        // Add click event listener to all forms to stop propagation
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('click', function (e) {
+                e.stopPropagation();
+            });
+        });
+
+        // Add click event listener to all finish buttons to stop propagation
+        document.querySelectorAll('.finish-btn').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.stopPropagation();
+            });
+        });
+
+        // Show welcome message
+    @if (Model.Any())
     {
         <text>
-                    // Ensure all details are hidden on page load
-                    const detailsEl = document.getElementById('details-@order.Id');
-            const arrowEl = document.getElementById('arrow-@order.Id');
-            if (detailsEl) detailsEl.style.display = 'none';
-            if (arrowEl) arrowEl.classList.remove('rotate-180');
+                setTimeout(() => {
+                    showToast(`Loaded ${@Model.Count} active orders`, 'info');
+                }, 500);
         </text>
     }
-
-            // Show welcome message
-            if (@Model.Count > 0) {
-            setTimeout(() => {
-                showToast(`Loaded ${@Model.Count} active orders`, 'info');
-            }, 500);
-        }
-    });
-
-    // Prevent form submission from bubbling up to card click
-    document.querySelectorAll('form').forEach(form => {
-        form.addEventListener('click', function (e) {
-            e.stopPropagation();
         });
-    });
 </script>
