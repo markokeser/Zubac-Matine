@@ -104,19 +104,176 @@
                 box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
             }
 
-        /* Responsive adjustments */
-        @@media (max-width: 640px) {
+        /* FIX: Remove overflow restrictions */
+        .content-wrapper {
+            min-height: 100vh;
+            width: 100%;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }
+
+        /* Ensure content can grow */
+        .main-content {
+            min-height: calc(100vh - 40px);
+            padding-bottom: 2rem; /* Space at bottom */
+        }
+
+        /* NEW: Header layout for mobile - COMPLETE SEPARATION WITH NO SIDE PADDING */
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            flex-wrap: nowrap;
+        }
+
+        .restaurant-section {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        /* COMPACT mobile user info - FAR RIGHT WITH CENTERED CONTENT */
+        .user-section-mobile {
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Center content horizontally */
+            gap: 0.4rem;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 0.4rem 0.6rem; /* Equal padding left/right */
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            margin-left: auto; /* Pushes it to the far right */
+            min-width: 120px; /* Minimum width for better centering */
+            text-align: center; /* Center text alignment */
+        }
+
+        .user-avatar-mobile {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #d4af37, #f4e4ba);
+            flex-shrink: 0;
+            font-size: 0.8rem;
+        }
+
+        .user-text-mobile {
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center content horizontally */
+            justify-content: center; /* Center content vertically */
+            min-width: 0; /* Allows text truncation */
+            flex: 1;
+            text-align: center; /* Center text */
+        }
+
+        .username-mobile {
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.1;
+            width: 100%; /* Full width for centering */
+            text-align: center; /* Center text */
+        }
+
+        .rank-mobile {
+            font-size: 0.65rem;
+            color: #d4af37;
+            background: rgba(212, 175, 55, 0.2);
+            padding: 1px 6px; /* More horizontal padding for better centering */
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center; /* Center content */
+            gap: 2px;
+            width: fit-content;
+            margin-top: 2px;
+            white-space: nowrap;
+            line-height: 1.1;
+            text-align: center; /* Center text */
+        }
+
+        /* Desktop responsive adjustments */
+        @@media (min-width: 640px) {
             .header-container {
-                flex-direction: column;
-                gap: 1rem;
-                text-align: center;
+                flex-direction: row;
+                gap: 2rem;
+                padding: 0 1rem; /* Padding on desktop */
+            }
+
+            .user-section-mobile {
+                display: none; /* Hide mobile user info on desktop */
             }
 
             .user-card {
-                width: 100%;
-                max-width: 300px;
+                display: block; /* Show desktop card */
+                width: auto;
+                max-width: none;
+                flex-shrink: 0;
             }
 
+            .restaurant-section {
+                flex: 0 1 auto;
+            }
+
+            #restaurant-title {
+                font-size: 2rem !important;
+            }
+        }
+
+        /* Mobile responsive adjustments - NO SIDE PADDING */
+        @@media (max-width: 639px) {
+            .header-container {
+                padding: 0 0.5rem; /* Minimal padding on mobile */
+                margin-bottom: 1.5rem;
+                flex-wrap: nowrap;
+                justify-content: space-between;
+                width: 100%;
+            }
+
+            .user-card {
+                display: none; /* Hide desktop card on mobile */
+            }
+
+            .restaurant-section {
+                flex-shrink: 0;
+                max-width: 60%;
+                padding-left: 0.25rem; /* Tiny left padding */
+            }
+
+            #restaurant-title {
+                font-size: 1.3rem !important;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 100%;
+                line-height: 1.2;
+            }
+
+            .restaurant-icon {
+                font-size: 1.3rem;
+                flex-shrink: 0;
+            }
+            /* User section pushed to far right with centered content */
+            .user-section-mobile {
+                flex-shrink: 0;
+                max-width: 35%;
+                margin-left: auto;
+                padding: 0.4rem 0.6rem; /* Equal padding on all sides */
+                display: flex;
+                justify-content: center; /* Center horizontally */
+                align-items: center; /* Center vertically */
+            }
+            /* Menu grid adjustments - UNTOUCHED (same as original) */
             .menu-grid {
                 grid-template-columns: repeat(2, 1fr) !important;
                 gap: 0.75rem;
@@ -135,7 +292,7 @@
                 .menu-grid span.text-sm {
                     font-size: 0.75rem;
                 }
-
+            /* Debug panel adjustments */
             .debug-panel {
                 margin-top: 1rem;
                 padding: 0.75rem;
@@ -145,61 +302,155 @@
                     flex-direction: column;
                     gap: 0.5rem;
                 }
+
+            .main-content {
+                padding: 0.5rem;
+            }
         }
 
+        /* Very small screens */
         @@media (max-width: 480px) {
+            .header-container {
+                padding: 0 0.25rem; /* Even less padding */
+            }
+
+            .restaurant-section {
+                max-width: 58%;
+                padding-left: 0;
+            }
+
+            .user-section-mobile {
+                max-width: 38%;
+                min-width: 110px; /* Slightly smaller min-width */
+                padding: 0.35rem 0.5rem; /* Slightly smaller equal padding */
+            }
+
+            .username-mobile {
+                font-size: 0.7rem;
+            }
+
+            #restaurant-title {
+                font-size: 1.2rem !important;
+            }
+
+            .user-avatar-mobile {
+                width: 26px;
+                height: 26px;
+                font-size: 0.75rem;
+            }
+
+            .rank-mobile {
+                font-size: 0.6rem;
+                padding: 1px 5px; /* Adjusted for smaller screens */
+            }
+            /* Menu grid untouched */
             .menu-grid {
                 grid-template-columns: repeat(1, 1fr) !important;
                 max-width: 280px;
             }
 
+                .menu-grid > a {
+                    padding: 1rem !important;
+                }
+        }
+
+        /* Extra small screens */
+        @@media (max-width: 360px) {
+            .header-container {
+                padding: 0 0.15rem; /* Minimal padding */
+            }
+
+            .restaurant-section {
+                max-width: 55%;
+            }
+
+            .user-section-mobile {
+                max-width: 42%;
+                min-width: 100px; /* Even smaller min-width */
+                padding: 0.3rem 0.4rem; /* Smaller equal padding */
+            }
+
             #restaurant-title {
-                font-size: 1.5rem;
+                font-size: 1.1rem !important;
             }
 
-            .user-card {
-                padding: 0.75rem !important;
+            .username-mobile {
+                font-size: 0.65rem;
             }
 
-            .user-info {
-                flex-direction: column;
-                text-align: center;
+            .user-avatar-mobile {
+                width: 24px;
+                height: 24px;
+                font-size: 0.7rem;
             }
 
-            .rank-badge {
-                margin-top: 0.25rem;
+            .rank-mobile {
+                font-size: 0.6rem;
+                padding: 1px 4px; /* Smaller padding */
             }
         }
 
-        /* FIX: Remove overflow restrictions */
-        .content-wrapper {
-            min-height: 100vh;
-            width: 100%;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-        }
+        /* Landscape mode on mobile */
+        @@media (max-height: 600px) and (orientation: landscape) {
+            .header-container {
+                margin-bottom: 1rem;
+            }
 
-        /* Ensure content can grow */
-        .main-content {
-            min-height: calc(100vh - 40px);
-            padding-bottom: 2rem; /* Space at bottom */
+            .main-content {
+                padding-bottom: 1rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="content-wrapper">
         <div class="main-content w-full flex flex-col items-center py-6 px-4 sm:px-6 lg:px-8">
-            <!-- Header Section -->
-            <div class="w-full max-w-7xl mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 px-4 header-container">
-                <!-- Restaurant Name -->
-                <div class="inline-flex items-center gap-2 flex-shrink-0">
-                    <span class="text-2xl sm:text-3xl">🍽️</span>
+            <!-- Header Section - NO SIDE PADDING ON MOBILE -->
+            <div class="w-full max-w-7xl mb-8 flex items-center justify-between header-container">
+                <!-- Restaurant Name (FAR LEFT - NO PADDING) -->
+                <div class="restaurant-section">
+                    <span class="text-2xl sm:text-3xl restaurant-icon">🍽️</span>
                     <h1 id="restaurant-title" class="text-2xl sm:text-3xl md:text-4xl font-bold" style="font-family: 'Playfair Display', serif; color: #d4af37;">
                         @restaurantName
                     </h1>
                 </div>
 
-                <!-- User Info Card -->
+                <!-- Mobile User Info (FAR RIGHT - CENTERED CONTENT) -->
+                <div class="user-section-mobile">
+                    <div class="user-avatar-mobile">
+                        👤
+                    </div>
+                    <div class="user-text-mobile">
+                        <div class="username-mobile">
+                            @userName
+                        </div>
+                        <div class="rank-mobile">
+                            @if (userRank == "0")
+                            {
+                                <span>🍸</span>
+                            }
+                            else if (userRank == "1")
+                            {
+                                <span>🍽️</span>
+                            }
+                            else if (userRank == "2")
+                            {
+                                <span>👔</span>
+                            }
+                            else if (userRank == "3")
+                            {
+                                <span>👑</span>
+                            }
+                            else
+                            {
+                                <span>👤</span>
+                            }
+                            <span>@rankName</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Desktop User Info Card (hidden on mobile) -->
                 <div class="gradient-border rounded-2xl user-card" style="background: rgba(255,255,255,0.05); backdrop-filter: blur(10px);">
                     <div class="px-4 sm:px-6 py-3 sm:py-4 rounded-2xl">
                         <div class="flex items-center gap-3 user-info">
@@ -241,7 +492,7 @@
                 </div>
             </div>
 
-            <!-- Menu Buttons Grid -->
+            <!-- Menu Buttons Grid - UNTOUCHED (same as original) -->
             <div id="menu-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full max-w-7xl px-4 menu-grid">
                 <!-- Dynamic buttons based on Razor logic -->
                 @if (userRank == "1" || userRank == "2" || userRank == "3")
@@ -377,21 +628,6 @@
                     }
                 });
             }
-
-            // Adjust layout on window resize
-            function adjustLayout() {
-                const screenWidth = window.innerWidth;
-
-                if (screenWidth < 640) {
-                    // Mobile optimizations
-                    document.querySelector('.content-wrapper').style.padding = '0';
-                } else {
-                    document.querySelector('.content-wrapper').style.padding = '';
-                }
-            }
-
-            window.addEventListener('resize', adjustLayout);
-            adjustLayout();
         });
     </script>
 </body>
