@@ -29,7 +29,9 @@ namespace Zubac
             {
         options.Cookie.Name = "Zubac.AuthCookie";
         options.LoginPath = "/Account/Login";
-        options.ExpireTimeSpan = TimeSpan.FromDays(30);   // Cookie lasts 30 days
+                options.LogoutPath = "/Account/Logout";
+                options.AccessDeniedPath = "/Account/AccessDenied";
+                options.ExpireTimeSpan = TimeSpan.FromDays(30);   // Cookie lasts 30 days
         options.SlidingExpiration = true;                 // Renew cookie on activity
         options.Cookie.HttpOnly = true;
         options.Cookie.IsEssential = true;
