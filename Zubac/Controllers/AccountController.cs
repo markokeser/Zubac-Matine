@@ -59,5 +59,21 @@ namespace Zubac.Controllers
 
             return RedirectToAction("Index", "Home");
         }
+
+        [HttpGet] // Promenjeno sa POST na GET
+        public async Task<IActionResult> Logout()
+        {
+            Console.WriteLine("DEBUG: Logout called via GET");
+
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            // Brišemo cookie-je
+            foreach (var cookie in Request.Cookies.Keys)
+            {
+                Response.Cookies.Delete(cookie);
+            }
+
+            return RedirectToAction("Login", "Account");
+        }
     }
 }

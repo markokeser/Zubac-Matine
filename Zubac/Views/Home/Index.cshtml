@@ -9,6 +9,9 @@
     string rankName = UserRanks
                      .RankNames
                      .ElementAtOrDefault(Convert.ToInt32(userRank)) ?? "Unknown";
+
+    // Dodajte logout URL
+    var logoutUrl = Url.Action("Logout", "Account");
 }
 
 <!doctype html>
@@ -39,6 +42,7 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: block;
             text-decoration: none;
+            cursor: pointer;
         }
 
             .menu-btn:hover {
@@ -80,45 +84,21 @@
                 mask-composite: exclude;
             }
 
-        /* Logout button - now same as other buttons */
-        .logout-card {
-            background: #2d2d44 !important;
-            border: 2px solid transparent;
-            position: relative;
-        }
-
-            .logout-card::before {
-                content: '';
-                position: absolute;
-                inset: 0;
-                border-radius: inherit;
-                padding: 2px;
-                background: linear-gradient(135deg, #d4af37, #f4e4ba, #d4af37);
-                -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-                -webkit-mask-composite: xor;
-                mask-composite: exclude;
-            }
-
-            .logout-card:hover {
-                background: #353550 !important;
-                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            }
-
         /* FIX: Remove overflow restrictions */
         .content-wrapper {
             min-height: 100vh;
             width: 100%;
             overflow-y: auto;
-            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+            -webkit-overflow-scrolling: touch;
         }
 
         /* Ensure content can grow */
         .main-content {
             min-height: calc(100vh - 40px);
-            padding-bottom: 2rem; /* Space at bottom */
+            padding-bottom: 2rem;
         }
 
-        /* NEW: Header layout for mobile - COMPLETE SEPARATION WITH NO SIDE PADDING */
+        /* NEW: Header layout for mobile */
         .header-container {
             display: flex;
             align-items: center;
@@ -134,21 +114,21 @@
             flex-shrink: 0;
         }
 
-        /* COMPACT mobile user info - FAR RIGHT WITH CENTERED CONTENT */
+        /* COMPACT mobile user info */
         .user-section-mobile {
             display: flex;
             align-items: center;
-            justify-content: center; /* Center content horizontally */
+            justify-content: center;
             gap: 0.4rem;
             flex-shrink: 0;
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
             border-radius: 12px;
-            padding: 0.4rem 0.6rem; /* Equal padding left/right */
+            padding: 0.4rem 0.6rem;
             border: 1px solid rgba(212, 175, 55, 0.2);
-            margin-left: auto; /* Pushes it to the far right */
-            min-width: 120px; /* Minimum width for better centering */
-            text-align: center; /* Center text alignment */
+            margin-left: auto;
+            min-width: 120px;
+            text-align: center;
         }
 
         .user-avatar-mobile {
@@ -166,11 +146,11 @@
         .user-text-mobile {
             display: flex;
             flex-direction: column;
-            align-items: center; /* Center content horizontally */
-            justify-content: center; /* Center content vertically */
-            min-width: 0; /* Allows text truncation */
+            align-items: center;
+            justify-content: center;
+            min-width: 0;
             flex: 1;
-            text-align: center; /* Center text */
+            text-align: center;
         }
 
         .username-mobile {
@@ -181,25 +161,25 @@
             overflow: hidden;
             text-overflow: ellipsis;
             line-height: 1.1;
-            width: 100%; /* Full width for centering */
-            text-align: center; /* Center text */
+            width: 100%;
+            text-align: center;
         }
 
         .rank-mobile {
             font-size: 0.65rem;
             color: #d4af37;
             background: rgba(212, 175, 55, 0.2);
-            padding: 1px 6px; /* More horizontal padding for better centering */
+            padding: 1px 6px;
             border-radius: 8px;
             display: inline-flex;
             align-items: center;
-            justify-content: center; /* Center content */
+            justify-content: center;
             gap: 2px;
             width: fit-content;
             margin-top: 2px;
             white-space: nowrap;
             line-height: 1.1;
-            text-align: center; /* Center text */
+            text-align: center;
         }
 
         /* Desktop responsive adjustments */
@@ -207,15 +187,15 @@
             .header-container {
                 flex-direction: row;
                 gap: 2rem;
-                padding: 0 1rem; /* Padding on desktop */
+                padding: 0 1rem;
             }
 
             .user-section-mobile {
-                display: none; /* Hide mobile user info on desktop */
+                display: none;
             }
 
             .user-card {
-                display: block; /* Show desktop card */
+                display: block;
                 width: auto;
                 max-width: none;
                 flex-shrink: 0;
@@ -230,24 +210,24 @@
             }
         }
 
-        /* Mobile responsive adjustments - NO SIDE PADDING */
+        /* MOBILNA VERZIJA */
         @@media (max-width: 639px) {
             .header-container {
-                padding: 0 0.5rem; /* Minimal padding on mobile */
-                margin-bottom: 1.5rem;
+                padding: 0 0.5rem;
+                margin-bottom: 2rem;
                 flex-wrap: nowrap;
                 justify-content: space-between;
                 width: 100%;
             }
 
             .user-card {
-                display: none; /* Hide desktop card on mobile */
+                display: none;
             }
 
             .restaurant-section {
                 flex-shrink: 0;
                 max-width: 60%;
-                padding-left: 0.25rem; /* Tiny left padding */
+                padding-left: 0.25rem;
             }
 
             #restaurant-title {
@@ -263,55 +243,101 @@
                 font-size: 1.3rem;
                 flex-shrink: 0;
             }
-            /* User section pushed to far right with centered content */
+
             .user-section-mobile {
                 flex-shrink: 0;
                 max-width: 35%;
                 margin-left: auto;
-                padding: 0.4rem 0.6rem; /* Equal padding on all sides */
+                padding: 0.4rem 0.6rem;
                 display: flex;
-                justify-content: center; /* Center horizontally */
-                align-items: center; /* Center vertically */
+                justify-content: center;
+                align-items: center;
             }
-            /* Menu grid adjustments - UNTOUCHED (same as original) */
+
             .menu-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
-                gap: 0.75rem;
-                padding: 0 0.5rem;
+                grid-template-columns: repeat(1, 1fr) !important;
+                gap: 1.5rem !important;
+                padding: 0 1rem !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin-top: 2rem !important;
             }
 
-                .menu-grid > a {
-                    padding: 1rem !important;
+                .menu-grid > a,
+                .menu-grid > form {
+                    min-height: 160px !important;
+                    padding: 1.5rem !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
                 }
 
-                .menu-grid span.text-4xl {
-                    font-size: 2rem;
-                    margin-bottom: 0.5rem;
-                }
+            .btn-content-mobile {
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                width: 100%;
+            }
 
-                .menu-grid span.text-sm {
-                    font-size: 0.75rem;
-                }
-            /* Debug panel adjustments */
+            .btn-icon-mobile {
+                font-size: 3.5rem !important;
+                margin-bottom: 1.25rem !important;
+                display: block;
+            }
+
+            .btn-title-mobile {
+                font-size: 1.5rem !important;
+                font-weight: 700 !important;
+                margin-bottom: 0.5rem !important;
+                line-height: 1.2 !important;
+                color: #ffffff !important;
+                font-family: 'Playfair Display', serif !important;
+            }
+
+            .btn-description-mobile {
+                font-size: 1rem !important;
+                line-height: 1.4 !important;
+                color: rgba(255, 255, 255, 0.7) !important;
+                font-family: 'Inter', sans-serif !important;
+                opacity: 0.8 !important;
+            }
+
+            .logout-btn-mobile {
+                width: 100% !important;
+                height: 100% !important;
+                background: transparent !important;
+                border: none !important;
+                cursor: pointer !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
             .debug-panel {
-                margin-top: 1rem;
-                padding: 0.75rem;
+                margin-top: 2rem !important;
+                padding: 0.75rem !important;
             }
 
                 .debug-panel > div {
-                    flex-direction: column;
-                    gap: 0.5rem;
+                    flex-direction: column !important;
+                    gap: 0.5rem !important;
                 }
 
             .main-content {
-                padding: 0.5rem;
+                padding: 0.5rem 0 !important;
+                padding-bottom: 3rem !important;
             }
         }
 
         /* Very small screens */
         @@media (max-width: 480px) {
             .header-container {
-                padding: 0 0.25rem; /* Even less padding */
+                padding: 0 0.25rem;
             }
 
             .restaurant-section {
@@ -321,8 +347,8 @@
 
             .user-section-mobile {
                 max-width: 38%;
-                min-width: 110px; /* Slightly smaller min-width */
-                padding: 0.35rem 0.5rem; /* Slightly smaller equal padding */
+                min-width: 110px;
+                padding: 0.35rem 0.5rem;
             }
 
             .username-mobile {
@@ -341,23 +367,41 @@
 
             .rank-mobile {
                 font-size: 0.6rem;
-                padding: 1px 5px; /* Adjusted for smaller screens */
-            }
-            /* Menu grid untouched */
-            .menu-grid {
-                grid-template-columns: repeat(1, 1fr) !important;
-                max-width: 280px;
+                padding: 1px 5px;
             }
 
-                .menu-grid > a {
-                    padding: 1rem !important;
+            .menu-grid {
+                grid-template-columns: repeat(1, 1fr) !important;
+                max-width: 100% !important;
+                padding: 0 1rem !important;
+                gap: 1.25rem !important;
+            }
+
+                .menu-grid > a,
+                .menu-grid > form {
+                    min-height: 150px !important;
+                    padding: 1.25rem !important;
                 }
+
+            .btn-icon-mobile {
+                font-size: 3rem !important;
+                margin-bottom: 1rem !important;
+            }
+
+            .btn-title-mobile {
+                font-size: 1.4rem !important;
+                margin-bottom: 0.4rem !important;
+            }
+
+            .btn-description-mobile {
+                font-size: 0.95rem !important;
+            }
         }
 
         /* Extra small screens */
         @@media (max-width: 360px) {
             .header-container {
-                padding: 0 0.15rem; /* Minimal padding */
+                padding: 0 0.15rem;
             }
 
             .restaurant-section {
@@ -366,8 +410,8 @@
 
             .user-section-mobile {
                 max-width: 42%;
-                min-width: 100px; /* Even smaller min-width */
-                padding: 0.3rem 0.4rem; /* Smaller equal padding */
+                min-width: 100px;
+                padding: 0.3rem 0.4rem;
             }
 
             #restaurant-title {
@@ -386,7 +430,33 @@
 
             .rank-mobile {
                 font-size: 0.6rem;
-                padding: 1px 4px; /* Smaller padding */
+                padding: 1px 4px;
+            }
+
+            .menu-grid {
+                grid-template-columns: repeat(1, 1fr) !important;
+                max-width: 100% !important;
+                padding: 0 0.75rem !important;
+                gap: 1rem !important;
+            }
+
+                .menu-grid > a,
+                .menu-grid > form {
+                    min-height: 140px !important;
+                    padding: 1rem !important;
+                }
+
+            .btn-icon-mobile {
+                font-size: 2.8rem !important;
+                margin-bottom: 0.8rem !important;
+            }
+
+            .btn-title-mobile {
+                font-size: 1.3rem !important;
+            }
+
+            .btn-description-mobile {
+                font-size: 0.9rem !important;
             }
         }
 
@@ -399,15 +469,31 @@
             .main-content {
                 padding-bottom: 1rem;
             }
+
+            .menu-grid > a,
+            .menu-grid > form {
+                min-height: 120px !important;
+                padding: 1rem !important;
+            }
+
+            .btn-icon-mobile {
+                font-size: 2.5rem !important;
+                margin-bottom: 0.5rem !important;
+            }
+        }
+
+        /* DEBUG: Highlight logout form for testing */
+        #logoutForm {
+            /* border: 2px solid red !important; */
         }
     </style>
 </head>
 <body>
     <div class="content-wrapper">
         <div class="main-content w-full flex flex-col items-center py-6 px-4 sm:px-6 lg:px-8">
-            <!-- Header Section - NO SIDE PADDING ON MOBILE -->
+            <!-- Header Section -->
             <div class="w-full max-w-7xl mb-8 flex items-center justify-between header-container">
-                <!-- Restaurant Name (FAR LEFT - NO PADDING) -->
+                <!-- Restaurant Name -->
                 <div class="restaurant-section">
                     <span class="text-2xl sm:text-3xl restaurant-icon">🍽️</span>
                     <h1 id="restaurant-title" class="text-2xl sm:text-3xl md:text-4xl font-bold" style="font-family: 'Playfair Display', serif; color: #d4af37;">
@@ -415,7 +501,7 @@
                     </h1>
                 </div>
 
-                <!-- Mobile User Info (FAR RIGHT - CENTERED CONTENT) -->
+                <!-- Mobile User Info -->
                 <div class="user-section-mobile">
                     <div class="user-avatar-mobile">
                         👤
@@ -450,7 +536,7 @@
                     </div>
                 </div>
 
-                <!-- Desktop User Info Card (hidden on mobile) -->
+                <!-- Desktop User Info Card -->
                 <div class="gradient-border rounded-2xl user-card" style="background: rgba(255,255,255,0.05); backdrop-filter: blur(10px);">
                     <div class="px-4 sm:px-6 py-3 sm:py-4 rounded-2xl">
                         <div class="flex items-center gap-3 user-info">
@@ -492,24 +578,40 @@
                 </div>
             </div>
 
-            <!-- Menu Buttons Grid - UNTOUCHED (same as original) -->
+            <!-- Menu Buttons Grid -->
             <div id="menu-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full max-w-7xl px-4 menu-grid">
                 <!-- Dynamic buttons based on Razor logic -->
                 @if (userRank == "1" || userRank == "2" || userRank == "3")
                 {
-                    <a href="@Url.Action("Index", "Order")" class="menu-btn gradient-border rounded-2xl block h-full" style="background: #2d2d44;">
-                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center">
+                    <a href="@Url.Action("Index", "Order")" class="menu-btn gradient-border rounded-3xl block h-full" style="background: #2d2d44;">
+                        <!-- Desktop content -->
+                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center desktop-content">
                             <span class="text-3xl sm:text-4xl mb-2 sm:mb-3 block">🧾</span>
                             <span class="text-xs sm:text-sm font-semibold block" style="color: #ffffff; font-family: 'Inter', sans-serif;">
                                 Active Orders
                             </span>
                         </div>
+                        <!-- Mobile content -->
+                        <div class="btn-content-mobile mobile-content">
+                            <span class="btn-icon-mobile">🧾</span>
+                            <span class="btn-title-mobile">
+                                Active Orders
+                            </span>
+                        </div>
                     </a>
 
-                    <a href="@Url.Action("Create", "Order")" class="menu-btn gradient-border rounded-2xl block h-full" style="background: #2d2d44;">
-                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center">
+                    <a href="@Url.Action("Create", "Order")" class="menu-btn gradient-border rounded-3xl block h-full" style="background: #2d2d44;">
+                        <!-- Desktop content -->
+                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center desktop-content">
                             <span class="text-3xl sm:text-4xl mb-2 sm:mb-3 block">➕</span>
                             <span class="text-xs sm:text-sm font-semibold block" style="color: #ffffff; font-family: 'Inter', sans-serif;">
+                                Make Order
+                            </span>
+                        </div>
+                        <!-- Mobile content -->
+                        <div class="btn-content-mobile mobile-content">
+                            <span class="btn-icon-mobile">➕</span>
+                            <span class="btn-title-mobile">
                                 Make Order
                             </span>
                         </div>
@@ -518,10 +620,18 @@
 
                 @if (userRank == "0" || userRank == "2" || userRank == "3")
                 {
-                    <a href="@Url.Action("OrderOnBar", "Order")" class="menu-btn gradient-border rounded-2xl block h-full" style="background: #2d2d44;">
-                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center">
+                    <a href="@Url.Action("OrderOnBar", "Order")" class="menu-btn gradient-border rounded-3xl block h-full" style="background: #2d2d44;">
+                        <!-- Desktop content -->
+                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center desktop-content">
                             <span class="text-3xl sm:text-4xl mb-2 sm:mb-3 block">🍸</span>
                             <span class="text-xs sm:text-sm font-semibold block" style="color: #ffffff; font-family: 'Inter', sans-serif;">
+                                Make Bar Order
+                            </span>
+                        </div>
+                        <!-- Mobile content -->
+                        <div class="btn-content-mobile mobile-content">
+                            <span class="btn-icon-mobile">🍸</span>
+                            <span class="btn-title-mobile">
                                 Make Bar Order
                             </span>
                         </div>
@@ -530,10 +640,18 @@
 
                 @if (freeDrinksEnabled)
                 {
-                    <a href="@Url.Action("FreeDrink", "Order")" class="menu-btn gradient-border rounded-2xl block h-full" style="background: #2d2d44;">
-                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center">
+                    <a href="@Url.Action("FreeDrink", "Order")" class="menu-btn gradient-border rounded-3xl block h-full" style="background: #2d2d44;">
+                        <!-- Desktop content -->
+                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center desktop-content">
                             <span class="text-3xl sm:text-4xl mb-2 sm:mb-3 block">🎁</span>
                             <span class="text-xs sm:text-sm font-semibold block" style="color: #ffffff; font-family: 'Inter', sans-serif;">
+                                Free Drink
+                            </span>
+                        </div>
+                        <!-- Mobile content -->
+                        <div class="btn-content-mobile mobile-content">
+                            <span class="btn-icon-mobile">🎁</span>
+                            <span class="btn-title-mobile">
                                 Free Drink
                             </span>
                         </div>
@@ -542,47 +660,83 @@
 
                 @if (userRank == "3")
                 {
-                    <a href="@Url.Action("FindOrder", "Order")" class="menu-btn gradient-border rounded-2xl block h-full" style="background: #2d2d44;">
-                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center">
+                    <a href="@Url.Action("FindOrder", "Order")" class="menu-btn gradient-border rounded-3xl block h-full" style="background: #2d2d44;">
+                        <!-- Desktop content -->
+                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center desktop-content">
                             <span class="text-3xl sm:text-4xl mb-2 sm:mb-3 block">🔎</span>
                             <span class="text-xs sm:text-sm font-semibold block" style="color: #ffffff; font-family: 'Inter', sans-serif;">
                                 Find Order
                             </span>
                         </div>
+                        <!-- Mobile content -->
+                        <div class="btn-content-mobile mobile-content">
+                            <span class="btn-icon-mobile">🔎</span>
+                            <span class="btn-title-mobile">
+                                Find Order
+                            </span>
+                        </div>
                     </a>
 
-                    <a href="@Url.Action("Index", "Statistics")" class="menu-btn gradient-border rounded-2xl block h-full" style="background: #2d2d44;">
-                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center">
+                    <a href="@Url.Action("Index", "Statistics")" class="menu-btn gradient-border rounded-3xl block h-full" style="background: #2d2d44;">
+                        <!-- Desktop content -->
+                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center desktop-content">
                             <span class="text-3xl sm:text-4xl mb-2 sm:mb-3 block">📊</span>
                             <span class="text-xs sm:text-sm font-semibold block" style="color: #ffffff; font-family: 'Inter', sans-serif;">
                                 Statistics
                             </span>
                         </div>
+                        <!-- Mobile content -->
+                        <div class="btn-content-mobile mobile-content">
+                            <span class="btn-icon-mobile">📊</span>
+                            <span class="btn-title-mobile">
+                                Statistics
+                            </span>
+                        </div>
                     </a>
 
-                    <a href="@Url.Action("Index", "Settings")" class="menu-btn gradient-border rounded-2xl block h-full" style="background: #2d2d44;">
-                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center">
+                    <a href="@Url.Action("Index", "Settings")" class="menu-btn gradient-border rounded-3xl block h-full" style="background: #2d2d44;">
+                        <!-- Desktop content -->
+                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center desktop-content">
                             <span class="text-3xl sm:text-4xl mb-2 sm:mb-3 block">⚙️</span>
                             <span class="text-xs sm:text-sm font-semibold block" style="color: #ffffff; font-family: 'Inter', sans-serif;">
+                                Settings
+                            </span>
+                        </div>
+                        <!-- Mobile content -->
+                        <div class="btn-content-mobile mobile-content">
+                            <span class="btn-icon-mobile">⚙️</span>
+                            <span class="btn-title-mobile">
                                 Settings
                             </span>
                         </div>
                     </a>
                 }
 
-                <!-- LOGOUT BUTTON - Always visible for all users -->
-                <form asp-controller="Account" asp-action="Logout" method="post" class="menu-btn logout-card rounded-2xl block h-full">
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="w-full h-full p-4 sm:p-5 rounded-2xl text-center flex flex-col items-center justify-center cursor-pointer">
+                <!-- LOGOUT BUTTON - POPRAVLJENA VERZIJA -->
+                <a href="@Url.Action("Logout", "Account")"
+                   class="menu-btn gradient-border rounded-3xl block h-full"
+                   style="background: #2d2d44;"
+                   onclick="return confirm('Are you sure you want to logout?');">
+
+                    <!-- Desktop content -->
+                    <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center desktop-content">
                         <span class="text-3xl sm:text-4xl mb-2 sm:mb-3 block">🚪</span>
                         <span class="text-xs sm:text-sm font-semibold block" style="color: #ffffff; font-family: 'Inter', sans-serif;">
                             Logout
                         </span>
-                    </button>
-                </form>
+                    </div>
+
+                    <!-- Mobile content -->
+                    <div class="btn-content-mobile mobile-content">
+                        <span class="btn-icon-mobile">🚪</span>
+                        <span class="btn-title-mobile">
+                            Logout
+                        </span>
+                    </div>
+                </a>
             </div>
 
-            <!-- Debug panel (remove this in production) -->
+            <!-- Debug panel -->
             <div class="mt-6 sm:mt-10 p-3 sm:p-4 rounded-xl w-full max-w-7xl debug-panel" style="background: rgba(255,255,255,0.05);">
                 <p class="text-xs sm:text-sm mb-2 sm:mb-3" style="color: rgba(255,255,255,0.6); font-family: 'Inter', sans-serif;">
                     Current Permissions Debug:
@@ -603,11 +757,12 @@
     </div>
 
     <script>
-        // Optional: Add hover effects and animations
+        // Simple and reliable logout functionality
         document.addEventListener('DOMContentLoaded', function () {
-            const menuButtons = document.querySelectorAll('.menu-btn');
-            const logoutForm = document.querySelector('.logout-card');
+            console.log('DEBUG: Page loaded - Logout form initialized');
 
+            // 1. Handle hover effects for all menu buttons
+            const menuButtons = document.querySelectorAll('.menu-btn');
             menuButtons.forEach(button => {
                 button.addEventListener('mouseenter', function () {
                     this.style.transform = 'translateY(-4px)';
@@ -620,14 +775,78 @@
                 });
             });
 
-            // Logout form confirmation
-            if (logoutForm) {
-                logoutForm.addEventListener('submit', function (e) {
-                    if (!confirm('Are you sure you want to logout?')) {
-                        e.preventDefault();
-                    }
-                });
+            // 2. Show/hide desktop vs mobile content based on screen size
+            function updateContentVisibility() {
+                const isMobile = window.innerWidth < 640;
+                const desktopContents = document.querySelectorAll('.desktop-content');
+                const mobileContents = document.querySelectorAll('.mobile-content');
+
+                if (isMobile) {
+                    desktopContents.forEach(el => el.style.display = 'none');
+                    mobileContents.forEach(el => el.style.display = 'flex');
+                } else {
+                    desktopContents.forEach(el => el.style.display = 'flex');
+                    mobileContents.forEach(el => el.style.display = 'none');
+                }
             }
+
+            updateContentVisibility();
+            window.addEventListener('resize', updateContentVisibility);
+
+            // 3. SIMPLE AND RELIABLE LOGOUT HANDLING
+            const logoutForm = document.getElementById('logoutForm');
+            const logoutButtons = document.querySelectorAll('.logout-btn');
+
+            if (logoutForm) {
+                console.log('DEBUG: Logout form found, action:', logoutForm.action);
+
+                // Remove any existing event listeners by cloning and replacing
+                const newForm = logoutForm.cloneNode(true);
+                logoutForm.parentNode.replaceChild(newForm, logoutForm);
+
+                // Get the new form reference
+                const freshForm = document.getElementById('logoutForm');
+
+                // Add submit handler to the form itself
+                freshForm.addEventListener('submit', function (e) {
+                    console.log('DEBUG: Form submit event triggered');
+
+                    // Ask for confirmation
+                    if (!confirm('Are you sure you want to logout?')) {
+                        console.log('DEBUG: Logout cancelled by user');
+                        e.preventDefault();
+                        return false;
+                    }
+
+                    console.log('DEBUG: Logout confirmed, submitting...');
+                    // Form will submit normally
+                    return true;
+                });
+
+                // Also add click handlers to buttons (as backup)
+                document.querySelectorAll('.logout-btn').forEach(button => {
+                    button.addEventListener('click', function (e) {
+                        console.log('DEBUG: Logout button clicked');
+                        // Let the form's submit handler handle it
+                    });
+                });
+            } else {
+                console.error('DEBUG: Logout form not found!');
+            }
+
+            // 4. Alternative: Direct form submission if above doesn't work
+            // This is a backup method
+            document.addEventListener('click', function (e) {
+                if (e.target.closest('.logout-btn')) {
+                    console.log('DEBUG: Backup logout handler triggered');
+
+                    const form = document.getElementById('logoutForm');
+                    if (form && confirm('Are you sure you want to logout?')) {
+                        console.log('DEBUG: Backup - submitting form');
+                        form.submit();
+                    }
+                }
+            });
         });
     </script>
 </body>

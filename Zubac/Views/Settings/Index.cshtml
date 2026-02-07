@@ -12,52 +12,40 @@
 }
 
 <!doctype html>
-<html lang="en" style="margin: 0; padding: 0; width: 100vw; overflow-x: clip;">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Restaurant Settings</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
     <style>
-        /* AGGRESSIVE RESET - ELIMINATE ALL MARGINS/PADDING */
+        /* RESET */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
         }
 
-        html {
-            width: 100vw;
-            height: 100vh;
-            overflow-x: clip;
+        html, body {
+            width: 100%;
+            height: 100%;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            overflow-x: hidden;
         }
 
         body {
-            width: 100vw;
-            min-height: 100vh;
-            overflow-x: clip;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            color: rgba(255, 255, 255, 0.9);
+            font-family: 'Inter', sans-serif;
             position: relative;
-        }
-
-        #app-container {
-            width: 100vw;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
-            position: relative;
-            overflow-x: clip;
         }
 
         .settings-btn {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: block;
             text-decoration: none;
-            min-height: 180px;
         }
 
             .settings-btn:hover {
@@ -94,173 +82,170 @@
                 mask-composite: exclude;
             }
 
-        /* Responsive adjustments */
-        @@media (max-width: 640px) {
-            .settings-grid {
-                grid-template-columns: repeat(1, 1fr) !important;
-                gap: 1.5rem !important;
-                padding: 0 1rem !important;
-                width: 100vw !important;
-                max-width: 100vw !important;
-                margin-top: 2rem !important;
-            }
-
-            .settings-btn {
-                min-height: 160px;
-                padding: 1.5rem !important;
-            }
-
-            .settings-grid > a {
-                padding: 1.5rem !important;
-            }
-
-            .settings-grid span.text-5xl {
-                font-size: 3.5rem;
-                margin-bottom: 1rem;
-            }
-
-            .settings-grid span.text-xl {
-                font-size: 1.5rem;
-                margin-bottom: 0.5rem;
-            }
-
-            .settings-grid span.text-sm {
-                font-size: 1rem;
-                line-height: 1.4;
-            }
-
-            .header-title {
-                font-size: 2.5rem !important;
-            }
-
-            .header-icon {
-                font-size: 2.5rem !important;
+        /* MOBILNA VERZIJA - POPRAVLJENA */
+        @@media (max-width: 639px) {
+            /* Home button pozicija - ISPRAVLJENO */
+            .home-btn-container {
+                position: absolute;
+                top: 1.5rem;
+                left: 1rem;
+                z-index: 50;
             }
 
             .home-btn {
-                padding: 0.75rem 1.5rem !important;
-                font-size: 1rem;
+                padding: 0.75rem 1.25rem !important;
+                font-size: 0.95rem;
+                background: rgba(212, 175, 55, 0.1) !important;
+                color: #d4af37 !important;
+                border: 1px solid rgba(212, 175, 55, 0.3) !important;
+            }
+            /* Main container - DODAO PADDING GORE ZA HOME DUGME */
+            .main-container {
+                padding-top: 7rem !important; /* POVEĆANO da stane home dugme */
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                width: 100% !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                position: relative;
+            }
+            /* Header content - DODAO MARGIN GORE */
+            .header-content {
+                text-align: center;
+                padding: 0 1rem;
+                width: 100%;
+                margin-top: 1rem !important; /* Dodat margin da ne bude uz vrh */
+            }
+
+            .header-title {
+                font-size: 2.25rem !important; /* SMANJENO malo */
+                line-height: 1.2;
+                margin-top: 0.5rem !important;
+            }
+
+            .header-icon {
+                font-size: 2.25rem !important;
             }
 
             .header-description {
                 font-size: 1rem !important;
                 margin-top: 0.5rem;
             }
+            /* Grid */
+            #settings-grid {
+                display: grid !important;
+                grid-template-columns: 1fr !important;
+                gap: 1.5rem !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 0 1rem !important;
+                margin: 2rem auto 0 auto !important; /* Dodat margin gore */
+            }
+            /* Dugmići */
+            .settings-btn {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-height: 150px;
+                padding: 1.25rem !important;
+                margin: 0 !important;
+            }
+            /* Button content */
+            .btn-content {
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                width: 100%;
+                padding: 1.25rem;
+            }
 
-            .main-container {
-                padding-top: 4rem !important;
+            .btn-icon {
+                font-size: 3rem !important;
+                margin-bottom: 1rem !important;
+            }
+
+            .btn-title {
+                font-size: 1.4rem !important;
+                font-weight: 700 !important;
+                margin-bottom: 0.4rem !important;
+                line-height: 1.2 !important;
+            }
+
+            .btn-description {
+                font-size: 0.95rem !important;
+                line-height: 1.4 !important;
             }
         }
 
-        @@media (max-width: 480px) {
-            .settings-grid {
-                grid-template-columns: repeat(1, 1fr) !important;
-                max-width: 100vw !important;
-                padding: 0 1rem !important;
-                gap: 1.25rem !important;
+        /* TABLET VERZIJA */
+        @@media (min-width: 640px) and (max-width: 1023px) {
+            .home-btn-container {
+                position: absolute;
+                top: 2rem;
+                left: 2rem;
+                z-index: 50;
+            }
+
+            .main-container {
+                padding-top: 8rem !important;
+            }
+
+            #settings-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 2rem !important;
+                max-width: 800px !important;
+                padding: 0 2rem !important;
             }
 
             .settings-btn {
-                min-height: 150px;
-                padding: 1.25rem !important;
+                min-height: 200px;
             }
 
             .header-title {
-                font-size: 2.25rem !important;
-            }
-
-            .header-icon {
-                font-size: 2.25rem !important;
-            }
-
-            .home-btn {
-                padding: 0.75rem 1.25rem !important;
-                font-size: 0.95rem;
-            }
-
-            .main-container {
-                padding-top: 3.5rem !important;
+                font-size: 3rem !important;
             }
         }
 
-        /* UTILITY CLASSES FOR FULL WIDTH */
-        .full-width {
-            width: 100vw !important;
-            max-width: 100vw !important;
-            margin-left: 0 !important;
-            margin-right: 0 !important;
-            padding-left: 0 !important;
-            padding-right: 0 !important;
-        }
-
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-            .no-scrollbar::-webkit-scrollbar {
-                display: none;
-            }
-
-        /* Spacing adjustments */
-        .header-spacing {
-            margin-bottom: 4rem !important;
-        }
-
-        .grid-spacing {
-            margin-top: 3rem !important;
-        }
-
-        .main-container {
-            padding-top: 5rem !important;
-        }
-
-        @@media (min-width: 768px) {
-            .header-spacing {
-                margin-bottom: 5rem !important;
-            }
-
-            .grid-spacing {
-                margin-top: 4rem !important;
-            }
-
-            .settings-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
-                gap: 2rem !important;
-            }
-
-            .settings-btn {
-                min-height: 220px;
-            }
-
-            .main-container {
-                padding-top: 6rem !important;
-            }
-        }
-
+        /* DESKTOP VERZIJA */
         @@media (min-width: 1024px) {
-            .settings-grid {
+            .home-btn-container {
+                position: absolute;
+                top: 2.5rem;
+                left: 2.5rem;
+                z-index: 50;
+            }
+
+            .main-container {
+                padding-top: 9rem !important;
+            }
+
+            #settings-grid {
                 grid-template-columns: repeat(3, 1fr) !important;
                 gap: 2.5rem !important;
                 max-width: 1400px !important;
+                padding: 0 3rem !important;
             }
 
             .settings-btn {
                 min-height: 250px;
             }
 
-            .main-container {
-                padding-top: 7rem !important;
+            .header-title {
+                font-size: 3.5rem !important;
             }
         }
 
-        /* Button content styling */
+        /* Button content styling - zajedničko */
         .btn-content {
             height: 100%;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            text-align: center;
             padding: 2rem;
         }
 
@@ -274,208 +259,135 @@
             font-weight: 700;
             margin-bottom: 0.75rem;
             line-height: 1.2;
-            text-align: center;
+            color: #ffffff;
+            font-family: 'Playfair Display', serif;
         }
 
         .btn-description {
             font-size: 1.1rem;
             line-height: 1.4;
-            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-family: 'Inter', sans-serif;
             opacity: 0.8;
         }
 
-        @@media (max-width: 640px) {
-            .btn-content {
-                padding: 1.5rem;
-            }
+        /* Header styling */
+        .header-content {
+            text-align: center;
+            width: 100%;
+            margin-bottom: 3rem;
+        }
 
-            .btn-icon {
-                font-size: 3.5rem;
-                margin-bottom: 1.25rem;
-            }
+        .header-title {
+            font-family: 'Playfair Display', serif;
+            color: #d4af37;
+        }
 
-            .btn-title {
-                font-size: 1.5rem;
-                margin-bottom: 0.5rem;
-            }
-
-            .btn-description {
-                font-size: 1rem;
-            }
+        .header-description {
+            color: rgba(255,255,255,0.7);
+            font-family: 'Inter', sans-serif;
+            margin-top: 0.5rem;
         }
     </style>
 </head>
-<body style="margin: 0; padding: 0; width: 100vw;">
-    <div id="app-container" class="full-width no-scrollbar" style="padding: 0; margin: 0;">
-        <!-- Home Button - Top Left -->
-        <div class="absolute top-6 left-6 z-50">
-            <a asp-controller="Home" asp-action="Index" class="home-btn flex items-center gap-2 px-5 py-4 rounded-xl font-medium" style="background: rgba(212, 175, 55, 0.1); color: #d4af37; font-family: 'Inter', sans-serif; border: 1px solid rgba(212, 175, 55, 0.3); text-decoration: none;">
-                <span class="text-2xl">🏠</span>
-                <span class="text-lg">Home</span>
-            </a>
+<body>
+    <!-- Home Button - Top Left - ISPRAVLJENO -->
+    <div class="home-btn-container">
+        <a asp-controller="Home" asp-action="Index" class="home-btn flex items-center gap-2 px-5 py-4 rounded-xl font-medium" style="text-decoration: none;">
+            <span class="text-2xl">🏠</span>
+            <span class="text-lg">Home</span>
+        </a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-container w-full min-h-screen flex flex-col items-center py-8">
+        <!-- Header - ISPRAVLJENO -->
+        <div class="header-content">
+            <div class="inline-flex items-center gap-3 mb-4 justify-center">
+                <span class="text-5xl md:text-6xl header-icon">⚙️</span>
+                <h1 class="text-5xl md:text-6xl font-bold header-title">
+                    Settings
+                </h1>
+            </div>
+            <p class="text-lg md:text-xl header-description">
+                Manage your restaurant configuration
+            </p>
         </div>
 
-        <div class="w-full min-h-screen flex flex-col items-center py-8 px-0 main-container">
-            <!-- Header Section -->
-            <div class="text-center mb-16 header-spacing">
-                <div class="inline-flex items-center gap-3 mb-4">
-                    <span class="text-5xl header-icon">⚙️</span>
-                    <h1 class="text-5xl md:text-6xl font-bold header-title" style="font-family: 'Playfair Display', serif; color: #d4af37;">
-                        Settings
-                    </h1>
+        <!-- Settings Grid -->
+        <div id="settings-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-7xl mx-auto px-4">
+            <!-- Staff Settings -->
+            <a asp-controller="Settings" asp-action="Staff" class="settings-btn gradient-border rounded-3xl" style="background: #2d2d44;">
+                <div class="btn-content">
+                    <span class="btn-icon">👥</span>
+                    <span class="btn-title">
+                        Staff Settings
+                    </span>
+                    <span class="btn-description">
+                        Manage staff members and permissions
+                    </span>
                 </div>
-                <p class="text-lg header-description" style="color: rgba(255,255,255,0.7); font-family: 'Inter', sans-serif;">
-                    Manage your restaurant configuration
-                </p>
-            </div>
+            </a>
 
-            <!-- Settings Grid -->
-            <div id="settings-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full px-6 sm:px-8 settings-grid grid-spacing" style="width: 100vw; max-width: 100vw; box-sizing: border-box;">
-                <!-- Staff Settings -->
-                <a asp-controller="Settings" asp-action="Staff" class="settings-btn gradient-border rounded-3xl block h-full" style="background: #2d2d44; text-decoration: none;">
-                    <div class="btn-content">
-                        <span class="btn-icon">👥</span>
-                        <span class="btn-title" style="color: #ffffff; font-family: 'Playfair Display', serif;">
-                            Staff Settings
-                        </span>
-                        <span class="btn-description" style="color: rgba(255,255,255,0.7); font-family: 'Inter', sans-serif;">
-                            Manage staff members and permissions
-                        </span>
-                    </div>
-                </a>
+            <!-- Restaurant Settings -->
+            <a asp-controller="Settings" asp-action="RestaurantSettings" class="settings-btn gradient-border rounded-3xl" style="background: #2d2d44;">
+                <div class="btn-content">
+                    <span class="btn-icon">🏪</span>
+                    <span class="btn-title">
+                        Restaurant Settings
+                    </span>
+                    <span class="btn-description">
+                        Configure restaurant details and preferences
+                    </span>
+                </div>
+            </a>
 
-                <!-- Restaurant Settings -->
-                <a asp-controller="Settings" asp-action="RestaurantSettings" class="settings-btn gradient-border rounded-3xl block h-full" style="background: #2d2d44; text-decoration: none;">
-                    <div class="btn-content">
-                        <span class="btn-icon">🏪</span>
-                        <span class="btn-title" style="color: #ffffff; font-family: 'Playfair Display', serif;">
-                            Restaurant Settings
-                        </span>
-                        <span class="btn-description" style="color: rgba(255,255,255,0.7); font-family: 'Inter', sans-serif;">
-                            Configure restaurant details and preferences
-                        </span>
-                    </div>
-                </a>
+            <!-- Drink Settings -->
+            <a asp-controller="Settings" asp-action="DrinksSettings" class="settings-btn gradient-border rounded-3xl" style="background: #2d2d44;">
+                <div class="btn-content">
+                    <span class="btn-icon">🍷</span>
+                    <span class="btn-title">
+                        Drink Settings
+                    </span>
+                    <span class="btn-description">
+                        Manage drink menu and pricing
+                    </span>
+                </div>
+            </a>
 
-                <!-- Drink Settings -->
-                <a asp-controller="Settings" asp-action="DrinksSettings" class="settings-btn gradient-border rounded-3xl block h-full" style="background: #2d2d44; text-decoration: none;">
-                    <div class="btn-content">
-                        <span class="btn-icon">🍷</span>
-                        <span class="btn-title" style="color: #ffffff; font-family: 'Playfair Display', serif;">
-                            Drink Settings
-                        </span>
-                        <span class="btn-description" style="color: rgba(255,255,255,0.7); font-family: 'Inter', sans-serif;">
-                            Manage drink menu and pricing
-                        </span>
-                    </div>
-                </a>
+            <!-- Food Settings -->
+            <a asp-controller="Settings" asp-action="FoodSettings" class="settings-btn gradient-border rounded-3xl" style="background: #2d2d44;">
+                <div class="btn-content">
+                    <span class="btn-icon">🍽️</span>
+                    <span class="btn-title">
+                        Food Settings
+                    </span>
+                    <span class="btn-description">
+                        Manage food menu and categories
+                    </span>
+                </div>
+            </a>
 
-                <!-- Food Settings -->
-                <a asp-controller="Settings" asp-action="FoodSettings" class="settings-btn gradient-border rounded-3xl block h-full" style="background: #2d2d44; text-decoration: none;">
-                    <div class="btn-content">
-                        <span class="btn-icon">🍽️</span>
-                        <span class="btn-title" style="color: #ffffff; font-family: 'Playfair Display', serif;">
-                            Food Settings
-                        </span>
-                        <span class="btn-description" style="color: rgba(255,255,255,0.7); font-family: 'Inter', sans-serif;">
-                            Manage food menu and categories
-                        </span>
-                    </div>
-                </a>
-
-                <!-- AI Menu Builder -->
-                <a asp-controller="Settings" asp-action="AiMenuBuilder" class="settings-btn gradient-border rounded-3xl block h-full" style="background: #2d2d44; text-decoration: none;">
-                    <div class="btn-content">
-                        <span class="btn-icon">🤖</span>
-                        <span class="btn-title" style="color: #ffffff; font-family: 'Playfair Display', serif;">
-                            AI Menu Builder
-                        </span>
-                        <span class="btn-description" style="color: rgba(255,255,255,0.7); font-family: 'Inter', sans-serif;">
-                            Generate menu with artificial intelligence
-                        </span>
-                    </div>
-                </a>
-            </div>
+            <!-- AI Menu Builder -->
+            <a asp-controller="Settings" asp-action="AiMenuBuilder" class="settings-btn gradient-border rounded-3xl" style="background: #2d2d44;">
+                <div class="btn-content">
+                    <span class="btn-icon">🤖</span>
+                    <span class="btn-title">
+                        AI Menu Builder
+                    </span>
+                    <span class="btn-description">
+                        Generate menu with artificial intelligence
+                    </span>
+                </div>
+            </a>
         </div>
     </div>
 
     <script>
-        // AGGRESSIVE FIX FOR MARGIN/PADDING ISSUES
         document.addEventListener('DOMContentLoaded', function () {
-            // Force all elements to have no margin/padding
-            const allElements = document.querySelectorAll('*');
-            allElements.forEach(el => {
-                el.style.margin = '0';
-                el.style.padding = '0';
-                el.style.boxSizing = 'border-box';
-            });
+            console.log('DEBUG: Page loaded');
 
-            // Specifically target problematic elements
-            const html = document.documentElement;
-            const body = document.body;
-            const appContainer = document.getElementById('app-container');
-
-            // Apply inline styles to override everything
-            html.style.margin = '0';
-            html.style.padding = '0';
-            html.style.width = '100vw';
-            html.style.overflowX = 'clip';
-            html.style.backgroundColor = '#1a1a2e';
-
-            body.style.margin = '0';
-            body.style.padding = '0';
-            body.style.width = '100vw';
-            body.style.overflowX = 'clip';
-            body.style.backgroundColor = '#1a1a2e';
-            body.style.position = 'relative';
-
-            appContainer.style.margin = '0';
-            appContainer.style.padding = '0';
-            appContainer.style.width = '100vw';
-            appContainer.style.maxWidth = '100vw';
-            appContainer.style.overflowX = 'clip';
-            appContainer.style.position = 'relative';
-            appContainer.style.left = '0';
-            appContainer.style.right = '0';
-
-            // Add spacing between header and grid
-            const header = document.querySelector('.header-spacing');
-            const grid = document.getElementById('settings-grid');
-
-            if (header && grid) {
-                header.style.marginBottom = window.innerWidth < 640 ? '3rem' : '4rem';
-                grid.style.marginTop = window.innerWidth < 640 ? '2rem' : '3rem';
-            }
-
-            // Adjust main container padding based on screen size
-            const mainContainer = document.querySelector('.main-container');
-            if (mainContainer) {
-                if (window.innerWidth < 480) {
-                    mainContainer.style.paddingTop = '3.5rem';
-                } else if (window.innerWidth < 640) {
-                    mainContainer.style.paddingTop = '4rem';
-                } else if (window.innerWidth < 768) {
-                    mainContainer.style.paddingTop = '5rem';
-                } else if (window.innerWidth < 1024) {
-                    mainContainer.style.paddingTop = '6rem';
-                } else {
-                    mainContainer.style.paddingTop = '7rem';
-                }
-            }
-
-            // Fix any remaining containers
-            const containers = document.querySelectorAll('.header-spacing, .settings-grid');
-            containers.forEach(container => {
-                container.style.marginLeft = '0';
-                container.style.marginRight = '0';
-                container.style.paddingLeft = '0';
-                container.style.paddingRight = '0';
-                container.style.width = '100vw';
-                container.style.maxWidth = '100vw';
-                container.style.boxSizing = 'border-box';
-            });
-
-            // Add hover effects to settings buttons
+            // Hover efekti
             const settingsButtons = document.querySelectorAll('.settings-btn');
             settingsButtons.forEach(button => {
                 button.addEventListener('mouseenter', function () {
@@ -489,71 +401,41 @@
                 });
             });
 
-            // Add hover effect to home button
             const homeButton = document.querySelector('.home-btn');
             if (homeButton) {
                 homeButton.addEventListener('mouseenter', function () {
                     this.style.transform = 'scale(1.05)';
-                    this.style.background = 'rgba(212, 175, 55, 0.2)';
+                    this.style.background = 'rgba(212, 175, 55, 0.2) !important';
                 });
 
                 homeButton.addEventListener('mouseleave', function () {
                     this.style.transform = 'scale(1)';
-                    this.style.background = 'rgba(212, 175, 55, 0.1)';
+                    this.style.background = 'rgba(212, 175, 55, 0.1) !important';
                 });
             }
 
-            // Adjust button sizes based on content
-            const adjustButtonSizes = () => {
-                const buttons = document.querySelectorAll('.settings-btn');
-                buttons.forEach(button => {
-                    const content = button.querySelector('.btn-content');
-                    if (content) {
-                        const contentHeight = content.scrollHeight;
-                        const minHeight = window.innerWidth < 768 ? 160 : 220;
-                        button.style.minHeight = Math.max(minHeight, contentHeight + 40) + 'px';
+            // Proveri da li naslov prelazi preko Home dugmeta
+            const checkOverlap = () => {
+                const homeBtn = document.querySelector('.home-btn-container');
+                const header = document.querySelector('.header-content');
+
+                if (homeBtn && header && window.innerWidth < 640) {
+                    const homeRect = homeBtn.getBoundingClientRect();
+                    const headerRect = header.getBoundingClientRect();
+
+                    console.log('Home button position:', homeRect.top, homeRect.right);
+                    console.log('Header position:', headerRect.top, headerRect.left);
+
+                    // Ako se preklapaju, dodaj više margine
+                    if (headerRect.top < homeRect.bottom + 10) {
+                        header.style.marginTop = (homeRect.bottom + 20) + 'px';
                     }
-                });
+                }
             };
 
-            adjustButtonSizes();
-            window.addEventListener('resize', adjustButtonSizes);
-        });
-
-        // Adjust spacing on resize
-        window.addEventListener('resize', function () {
-            const header = document.querySelector('.header-spacing');
-            const grid = document.getElementById('settings-grid');
-            const mainContainer = document.querySelector('.main-container');
-
-            if (header && grid) {
-                if (window.innerWidth < 640) {
-                    header.style.marginBottom = '3rem';
-                    grid.style.marginTop = '2rem';
-                } else {
-                    header.style.marginBottom = '4rem';
-                    grid.style.marginTop = '3rem';
-                }
-            }
-
-            if (mainContainer) {
-                if (window.innerWidth < 480) {
-                    mainContainer.style.paddingTop = '3.5rem';
-                } else if (window.innerWidth < 640) {
-                    mainContainer.style.paddingTop = '4rem';
-                } else if (window.innerWidth < 768) {
-                    mainContainer.style.paddingTop = '5rem';
-                } else if (window.innerWidth < 1024) {
-                    mainContainer.style.paddingTop = '6rem';
-                } else {
-                    mainContainer.style.paddingTop = '7rem';
-                }
-            }
-
-            document.documentElement.style.margin = '0';
-            document.documentElement.style.padding = '0';
-            document.body.style.margin = '0';
-            document.body.style.padding = '0';
+            // Proveri odmah i na resize
+            checkOverlap();
+            window.addEventListener('resize', checkOverlap);
         });
     </script>
 </body>

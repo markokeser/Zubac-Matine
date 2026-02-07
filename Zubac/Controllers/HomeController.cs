@@ -22,7 +22,11 @@ namespace Zubac.Controllers
 
         public async Task<IActionResult> Index()
         {
-            int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
+            try
+            {
+               int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
+            
+            
             RestaurantData restaurantData = await _accountService.GetRestaurantData(restaurantId);
             var claims = User.Claims
         .Where(c => c.Type != "FoodEnabled" && c.Type != "FreeDrinksEnabled")
@@ -38,6 +42,11 @@ namespace Zubac.Controllers
 
 
             return View();
+            }
+            catch
+            {
+                return RedirectToAction("Login", "Account");
+            }
         }
 
         public IActionResult Privacy()
