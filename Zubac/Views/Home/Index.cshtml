@@ -9,9 +9,6 @@
     string rankName = UserRanks
                      .RankNames
                      .ElementAtOrDefault(Convert.ToInt32(userRank)) ?? "Unknown";
-
-    // Dodajte logout URL
-    var logoutUrl = Url.Action("Logout", "Account");
 }
 
 <!doctype html>
@@ -19,57 +16,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurant Menu</title>
+    <title>Restaurant Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
+        /* RESET */
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
 
-        body {
-            margin: 0;
-            padding: 0;
+        html, body {
+            width: 100%;
+            height: 100%;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
-            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body {
             color: rgba(255, 255, 255, 0.9);
             font-family: 'Inter', sans-serif;
+            position: relative;
         }
 
         .menu-btn {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: block;
             text-decoration: none;
-            cursor: pointer;
+            width: 100%;
         }
 
             .menu-btn:hover {
                 transform: translateY(-4px);
-                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
             }
 
             .menu-btn:active {
                 transform: translateY(-2px);
             }
 
-        .rank-badge {
-            animation: pulse-soft 2s ease-in-out infinite;
-        }
-
-        @@keyframes pulse-soft {
-            0%, 100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.8;
-            }
-        }
-
         .gradient-border {
             position: relative;
+            border-radius: 20px;
         }
 
             .gradient-border::before {
@@ -84,195 +75,122 @@
                 mask-composite: exclude;
             }
 
-        /* FIX: Remove overflow restrictions */
-        .content-wrapper {
-            min-height: 100vh;
-            width: 100%;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        /* Ensure content can grow */
-        .main-content {
-            min-height: calc(100vh - 40px);
-            padding-bottom: 2rem;
-        }
-
-        /* NEW: Header layout for mobile */
-        .header-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            flex-wrap: nowrap;
-        }
-
-        .restaurant-section {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            flex-shrink: 0;
-        }
-
-        /* COMPACT mobile user info */
-        .user-section-mobile {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.4rem;
-            flex-shrink: 0;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 0.4rem 0.6rem;
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            margin-left: auto;
-            min-width: 120px;
-            text-align: center;
-        }
-
-        .user-avatar-mobile {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #d4af37, #f4e4ba);
-            flex-shrink: 0;
-            font-size: 0.8rem;
-        }
-
-        .user-text-mobile {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-width: 0;
-            flex: 1;
-            text-align: center;
-        }
-
-        .username-mobile {
-            font-weight: 600;
-            font-size: 0.75rem;
-            color: white;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            line-height: 1.1;
-            width: 100%;
-            text-align: center;
-        }
-
-        .rank-mobile {
-            font-size: 0.65rem;
-            color: #d4af37;
-            background: rgba(212, 175, 55, 0.2);
-            padding: 1px 6px;
-            border-radius: 8px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 2px;
-            width: fit-content;
-            margin-top: 2px;
-            white-space: nowrap;
-            line-height: 1.1;
-            text-align: center;
-        }
-
-        /* Desktop responsive adjustments */
-        @@media (min-width: 640px) {
-            .header-container {
-                flex-direction: row;
-                gap: 2rem;
-                padding: 0 1rem;
-            }
-
-            .user-section-mobile {
-                display: none;
-            }
-
-            .user-card {
-                display: block;
-                width: auto;
-                max-width: none;
-                flex-shrink: 0;
-            }
-
-            .restaurant-section {
-                flex: 0 1 auto;
-            }
-
-            #restaurant-title {
-                font-size: 2rem !important;
-            }
-        }
-
-        /* MOBILNA VERZIJA */
+        /* MOBILNA VERZIJA - JOS SMANJENO */
         @@media (max-width: 639px) {
-            .header-container {
-                padding: 0 0.5rem;
-                margin-bottom: 2rem;
-                flex-wrap: nowrap;
-                justify-content: space-between;
+            /* Main container - JOS MANJE */
+            .main-container {
+                padding-top: 3.5rem !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                width: 100% !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                position: relative;
+            }
+            /* Header - JOS MANJE */
+            .header-content {
+                text-align: center;
+                padding: 0 0.75rem;
                 width: 100%;
+                margin-top: 0 !important;
+                margin-bottom: 1.5rem !important;
             }
 
-            .user-card {
-                display: none;
+            .header-title {
+                font-size: 1.8rem !important;
+                line-height: 1.1;
             }
 
-            .restaurant-section {
+            .header-icon {
+                font-size: 1.8rem !important;
+            }
+
+            .header-description {
+                font-size: 0.9rem !important;
+                margin-top: 0.25rem;
+                display: none; /* Sakrij opis na mobile */
+            }
+            /* User Info Card - Mobile - JOS MANJE */
+            .user-card-mobile {
+                position: absolute;
+                top: 0.75rem;
+                right: 0.5rem;
+                z-index: 50;
+                background: rgba(255, 255, 255, 0.05);
+                backdrop-filter: blur(10px);
+                border-radius: 12px;
+                padding: 0.5rem 0.6rem;
+                border: 1px solid rgba(212, 175, 55, 0.2);
+                max-width: 140px;
+            }
+
+            .user-info-mobile {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .user-avatar-mobile {
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: linear-gradient(135deg, #d4af37, #f4e4ba);
+                font-size: 0.9rem;
                 flex-shrink: 0;
-                max-width: 60%;
-                padding-left: 0.25rem;
             }
 
-            #restaurant-title {
-                font-size: 1.3rem !important;
+            .user-text-mobile {
+                display: flex;
+                flex-direction: column;
+                min-width: 0;
+            }
+
+            .username-mobile {
+                font-weight: 600;
+                font-size: 0.75rem;
+                color: white;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                max-width: 100%;
-                line-height: 1.2;
+                line-height: 1;
             }
 
-            .restaurant-icon {
-                font-size: 1.3rem;
-                flex-shrink: 0;
-            }
-
-            .user-section-mobile {
-                flex-shrink: 0;
-                max-width: 35%;
-                margin-left: auto;
-                padding: 0.4rem 0.6rem;
-                display: flex;
-                justify-content: center;
+            .rank-mobile {
+                font-size: 0.65rem;
+                color: #d4af37;
+                background: rgba(212, 175, 55, 0.2);
+                padding: 0.1rem 0.4rem;
+                border-radius: 8px;
+                display: inline-flex;
                 align-items: center;
+                gap: 0.15rem;
+                width: fit-content;
+                margin-top: 0.15rem;
             }
-
-            .menu-grid {
-                grid-template-columns: repeat(1, 1fr) !important;
-                gap: 1.5rem !important;
-                padding: 0 1rem !important;
+            /* Grid - JOS MANJE */
+            #menu-grid {
+                display: grid !important;
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
                 width: 100% !important;
                 max-width: 100% !important;
-                margin-top: 2rem !important;
+                padding: 0 0.75rem !important;
+                margin: 0.5rem auto 0 auto !important;
             }
-
-                .menu-grid > a,
-                .menu-grid > form {
-                    min-height: 160px !important;
-                    padding: 1.5rem !important;
-                    display: flex !important;
-                    align-items: center !important;
-                    justify-content: center !important;
-                }
-
-            .btn-content-mobile {
+            /* Dugmići - JOS MANJE */
+            .menu-btn {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-height: 130px !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            /* Button content - JOS MANJE */
+            .btn-content {
                 height: 100%;
                 display: flex;
                 flex-direction: column;
@@ -280,493 +198,534 @@
                 align-items: center;
                 text-align: center;
                 width: 100%;
+                padding: 1.25rem 0.75rem;
             }
 
-            .btn-icon-mobile {
-                font-size: 3.5rem !important;
-                margin-bottom: 1.25rem !important;
-                display: block;
-            }
-
-            .btn-title-mobile {
-                font-size: 1.5rem !important;
-                font-weight: 700 !important;
-                margin-bottom: 0.5rem !important;
-                line-height: 1.2 !important;
-                color: #ffffff !important;
-                font-family: 'Playfair Display', serif !important;
-            }
-
-            .btn-description-mobile {
-                font-size: 1rem !important;
-                line-height: 1.4 !important;
-                color: rgba(255, 255, 255, 0.7) !important;
-                font-family: 'Inter', sans-serif !important;
-                opacity: 0.8 !important;
-            }
-
-            .logout-btn-mobile {
-                width: 100% !important;
-                height: 100% !important;
-                background: transparent !important;
-                border: none !important;
-                cursor: pointer !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-
-            .debug-panel {
-                margin-top: 2rem !important;
-                padding: 0.75rem !important;
-            }
-
-                .debug-panel > div {
-                    flex-direction: column !important;
-                    gap: 0.5rem !important;
-                }
-
-            .main-content {
-                padding: 0.5rem 0 !important;
-                padding-bottom: 3rem !important;
-            }
-        }
-
-        /* Very small screens */
-        @@media (max-width: 480px) {
-            .header-container {
-                padding: 0 0.25rem;
-            }
-
-            .restaurant-section {
-                max-width: 58%;
-                padding-left: 0;
-            }
-
-            .user-section-mobile {
-                max-width: 38%;
-                min-width: 110px;
-                padding: 0.35rem 0.5rem;
-            }
-
-            .username-mobile {
-                font-size: 0.7rem;
-            }
-
-            #restaurant-title {
-                font-size: 1.2rem !important;
-            }
-
-            .user-avatar-mobile {
-                width: 26px;
-                height: 26px;
-                font-size: 0.75rem;
-            }
-
-            .rank-mobile {
-                font-size: 0.6rem;
-                padding: 1px 5px;
-            }
-
-            .menu-grid {
-                grid-template-columns: repeat(1, 1fr) !important;
-                max-width: 100% !important;
-                padding: 0 1rem !important;
-                gap: 1.25rem !important;
-            }
-
-                .menu-grid > a,
-                .menu-grid > form {
-                    min-height: 150px !important;
-                    padding: 1.25rem !important;
-                }
-
-            .btn-icon-mobile {
-                font-size: 3rem !important;
-                margin-bottom: 1rem !important;
-            }
-
-            .btn-title-mobile {
-                font-size: 1.4rem !important;
-                margin-bottom: 0.4rem !important;
-            }
-
-            .btn-description-mobile {
-                font-size: 0.95rem !important;
-            }
-        }
-
-        /* Extra small screens */
-        @@media (max-width: 360px) {
-            .header-container {
-                padding: 0 0.15rem;
-            }
-
-            .restaurant-section {
-                max-width: 55%;
-            }
-
-            .user-section-mobile {
-                max-width: 42%;
-                min-width: 100px;
-                padding: 0.3rem 0.4rem;
-            }
-
-            #restaurant-title {
-                font-size: 1.1rem !important;
-            }
-
-            .username-mobile {
-                font-size: 0.65rem;
-            }
-
-            .user-avatar-mobile {
-                width: 24px;
-                height: 24px;
-                font-size: 0.7rem;
-            }
-
-            .rank-mobile {
-                font-size: 0.6rem;
-                padding: 1px 4px;
-            }
-
-            .menu-grid {
-                grid-template-columns: repeat(1, 1fr) !important;
-                max-width: 100% !important;
-                padding: 0 0.75rem !important;
-                gap: 1rem !important;
-            }
-
-                .menu-grid > a,
-                .menu-grid > form {
-                    min-height: 140px !important;
-                    padding: 1rem !important;
-                }
-
-            .btn-icon-mobile {
-                font-size: 2.8rem !important;
-                margin-bottom: 0.8rem !important;
-            }
-
-            .btn-title-mobile {
-                font-size: 1.3rem !important;
-            }
-
-            .btn-description-mobile {
-                font-size: 0.9rem !important;
-            }
-        }
-
-        /* Landscape mode on mobile */
-        @@media (max-height: 600px) and (orientation: landscape) {
-            .header-container {
-                margin-bottom: 1rem;
-            }
-
-            .main-content {
-                padding-bottom: 1rem;
-            }
-
-            .menu-grid > a,
-            .menu-grid > form {
-                min-height: 120px !important;
-                padding: 1rem !important;
-            }
-
-            .btn-icon-mobile {
+            .btn-icon {
                 font-size: 2.5rem !important;
-                margin-bottom: 0.5rem !important;
+                margin-bottom: 0.75rem !important;
             }
+
+            .btn-title {
+                font-size: 1.2rem !important;
+                font-weight: 700 !important;
+                margin-bottom: 0.25rem !important;
+                line-height: 1.1 !important;
+            }
+
+            .btn-description {
+                font-size: 0.8rem !important;
+                line-height: 1.2 !important;
+                display: none; /* Sakrij opis na mobile */
+            }
+            /* Debug panel - JOS MANJE */
+            .debug-panel {
+                margin-top: 1.5rem !important;
+                padding: 0.5rem !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+
+                .debug-panel p {
+                    margin-bottom: 0.5rem !important;
+                    font-size: 0.75rem !important;
+                }
         }
 
-        /* DEBUG: Highlight logout form for testing */
-        #logoutForm {
-            /* border: 2px solid red !important; */
+        /* TABLET VERZIJA - JOS SMANJENO */
+        @@media (min-width: 640px) and (max-width: 1023px) {
+            /* JOS MANJE */
+            .main-container {
+                padding-top: 4.5rem !important;
+            }
+
+            #menu-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 1.5rem !important;
+                max-width: 700px !important;
+                padding: 0 1.25rem !important;
+            }
+            /* JOS MANJA visina dugmića */
+            .menu-btn {
+                min-height: 170px;
+            }
+            /* JOS MANJEN font header */
+            .header-title {
+                font-size: 2.5rem !important;
+            }
+
+            .header-icon {
+                font-size: 2.5rem !important;
+            }
+            /* JOS MANJEN margin header */
+            .header-content {
+                margin-bottom: 1.75rem !important;
+            }
+
+            .header-description {
+                font-size: 1rem !important;
+                margin-top: 0.25rem;
+            }
+
+            .user-card-desktop {
+                position: absolute;
+                top: 1.25rem;
+                right: 1rem;
+                z-index: 50;
+                background: rgba(255, 255, 255, 0.05);
+                backdrop-filter: blur(10px);
+                border-radius: 16px;
+                padding: 0.7rem 1rem;
+                border: 1px solid rgba(212, 175, 55, 0.2);
+                max-width: 200px;
+            }
+
+                .user-card-desktop .user-avatar {
+                    width: 45px;
+                    height: 45px;
+                    font-size: 1.3rem;
+                }
+
+                .user-card-desktop .username {
+                    font-size: 0.9rem;
+                }
+
+                .user-card-desktop .rank {
+                    font-size: 0.8rem;
+                    padding: 0.2rem 0.6rem;
+                }
+        }
+
+        /* DESKTOP VERZIJA - JOS SMANJENO */
+        @@media (min-width: 1024px) {
+            /* JOS MANJE */
+            .main-container {
+                padding-top: 5.5rem !important;
+            }
+
+            #menu-grid {
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 1.75rem !important;
+                max-width: 1100px !important;
+                padding: 0 1.5rem !important;
+            }
+            /* JOS MANJA visina dugmića */
+            .menu-btn {
+                min-height: 200px;
+            }
+            /* JOS MANJEN font header */
+            .header-title {
+                font-size: 3rem !important;
+            }
+
+            .header-icon {
+                font-size: 3rem !important;
+            }
+            /* JOS MANJEN margin header */
+            .header-content {
+                margin-bottom: 2rem !important;
+            }
+
+            .header-description {
+                font-size: 1.1rem !important;
+                margin-top: 0.25rem;
+            }
+
+            .user-card-desktop {
+                position: absolute;
+                top: 1.5rem;
+                right: 1.5rem;
+                z-index: 50;
+                background: rgba(255, 255, 255, 0.05);
+                backdrop-filter: blur(10px);
+                border-radius: 18px;
+                padding: 0.8rem 1.25rem;
+                border: 1px solid rgba(212, 175, 55, 0.2);
+                max-width: 240px;
+            }
+
+                .user-card-desktop .user-avatar {
+                    width: 48px;
+                    height: 48px;
+                    font-size: 1.4rem;
+                }
+
+                .user-card-desktop .username {
+                    font-size: 0.95rem;
+                }
+
+                .user-card-desktop .rank {
+                    font-size: 0.85rem;
+                    padding: 0.25rem 0.7rem;
+                }
+        }
+
+        /* Button content styling - zajedničko - JOS SMANJENO */
+        .btn-content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 1.75rem 1.25rem;
+        }
+
+        .btn-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .btn-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+            color: #ffffff;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .btn-description {
+            font-size: 1rem;
+            line-height: 1.3;
+            color: rgba(255, 255, 255, 0.7);
+            font-family: 'Inter', sans-serif;
+            opacity: 0.9;
+        }
+
+        /* Header styling - JOS SMANJENO */
+        .header-content {
+            text-align: center;
+            width: 100%;
+        }
+
+        .header-title {
+            font-family: 'Playfair Display', serif;
+            color: #d4af37;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-description {
+            color: rgba(255,255,255,0.8);
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+        }
+
+        /* User Card Styling - Desktop - JOS SMANJENO */
+        .user-card-desktop .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .user-card-desktop .user-avatar {
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #d4af37, #f4e4ba);
+            flex-shrink: 0;
+        }
+
+        .user-card-desktop .user-text {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .user-card-desktop .username {
+            font-weight: 600;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.2;
+        }
+
+        .user-card-desktop .rank {
+            color: #d4af37;
+            background: rgba(212, 175, 55, 0.2);
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            width: fit-content;
+            margin-top: 0.25rem;
+        }
+
+        /* Logout button special */
+        .logout-btn .btn-icon {
+            color: #ff6b6b;
+        }
+
+        /* Debug panel - JOS SMANJENO */
+        .debug-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            margin-top: 2rem;
+            padding: 1rem;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+            .debug-panel p {
+                text-align: center;
+                color: rgba(255,255,255,0.6);
+                font-size: 0.85rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .debug-panel > div {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.5rem;
+            }
+
+        /* Dodatne optimizacije za kompaktnost */
+        .main-container > *:not(:last-child) {
+            margin-bottom: 1rem !important;
+        }
+
+        .main-container {
+            padding-bottom: 2rem !important;
         }
     </style>
 </head>
 <body>
-    <div class="content-wrapper">
-        <div class="main-content w-full flex flex-col items-center py-6 px-4 sm:px-6 lg:px-8">
-            <!-- Header Section -->
-            <div class="w-full max-w-7xl mb-8 flex items-center justify-between header-container">
-                <!-- Restaurant Name -->
-                <div class="restaurant-section">
-                    <span class="text-2xl sm:text-3xl restaurant-icon">🍽️</span>
-                    <h1 id="restaurant-title" class="text-2xl sm:text-3xl md:text-4xl font-bold" style="font-family: 'Playfair Display', serif; color: #d4af37;">
-                        @restaurantName
-                    </h1>
+    <!-- User Info Card - Mobile -->
+    <div class="user-card-mobile d-block d-sm-none">
+        <div class="user-info-mobile">
+            <div class="user-avatar-mobile">
+                👤
+            </div>
+            <div class="user-text-mobile">
+                <div class="username-mobile">
+                    @userName
                 </div>
-
-                <!-- Mobile User Info -->
-                <div class="user-section-mobile">
-                    <div class="user-avatar-mobile">
-                        👤
-                    </div>
-                    <div class="user-text-mobile">
-                        <div class="username-mobile">
-                            @userName
-                        </div>
-                        <div class="rank-mobile">
-                            @if (userRank == "0")
-                            {
-                                <span>🍸</span>
-                            }
-                            else if (userRank == "1")
-                            {
-                                <span>🍽️</span>
-                            }
-                            else if (userRank == "2")
-                            {
-                                <span>👔</span>
-                            }
-                            else if (userRank == "3")
-                            {
-                                <span>👑</span>
-                            }
-                            else
-                            {
-                                <span>👤</span>
-                            }
-                            <span>@rankName</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Desktop User Info Card -->
-                <div class="gradient-border rounded-2xl user-card" style="background: rgba(255,255,255,0.05); backdrop-filter: blur(10px);">
-                    <div class="px-4 sm:px-6 py-3 sm:py-4 rounded-2xl">
-                        <div class="flex items-center gap-3 user-info">
-                            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-lg sm:text-xl flex-shrink-0" style="background: linear-gradient(135deg, #d4af37, #f4e4ba);">
-                                👤
-                            </div>
-                            <div class="text-left">
-                                <p id="user-name-display" class="text-base sm:text-lg font-semibold truncate max-w-[150px] sm:max-w-none" style="font-family: 'Inter', sans-serif; color: #ffffff;">
-                                    @userName
-                                </p>
-                                <span id="rank-badge" class="rank-badge inline-flex items-center gap-1 px-2 sm:px-3 py-1 rounded-full text-xs font-medium mt-1" style="background: rgba(212, 175, 55, 0.2); color: #d4af37; font-family: 'Inter', sans-serif;">
-                                    <span id="rank-icon">
-                                        @if (userRank == "0")
-                                        {
-                                            <text>🍸</text>
-                                        }
-                                        else if (userRank == "1")
-                                        {
-                                            <text>🍽️</text>
-                                        }
-                                        else if (userRank == "2")
-                                        {
-                                            <text>👔</text>
-                                        }
-                                        else if (userRank == "3")
-                                        {
-                                            <text>👑</text>
-                                        }
-                                        else
-                                        {
-                                            <text>👤</text>
-                                        }
-                                    </span>
-                                    <span id="rank-text" class="truncate">@rankName</span>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+                <div class="rank-mobile">
+                    @if (userRank == "0")
+                    {
+                        <span>🍸</span>
+                    }
+                    else if (userRank == "1")
+                    {
+                        <span>🍽️</span>
+                    }
+                    else if (userRank == "2")
+                    {
+                        <span>👔</span>
+                    }
+                    else if (userRank == "3")
+                    {
+                        <span>👑</span>
+                    }
+                    else
+                    {
+                        <span>👤</span>
+                    }
+                    <span>@rankName</span>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- Menu Buttons Grid -->
-            <div id="menu-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full max-w-7xl px-4 menu-grid">
-                <!-- Dynamic buttons based on Razor logic -->
-                @if (userRank == "1" || userRank == "2" || userRank == "3")
-                {
-                    <a href="@Url.Action("Index", "Order")" class="menu-btn gradient-border rounded-3xl block h-full" style="background: #2d2d44;">
-                        <!-- Desktop content -->
-                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center desktop-content">
-                            <span class="text-3xl sm:text-4xl mb-2 sm:mb-3 block">🧾</span>
-                            <span class="text-xs sm:text-sm font-semibold block" style="color: #ffffff; font-family: 'Inter', sans-serif;">
-                                Active Orders
-                            </span>
-                        </div>
-                        <!-- Mobile content -->
-                        <div class="btn-content-mobile mobile-content">
-                            <span class="btn-icon-mobile">🧾</span>
-                            <span class="btn-title-mobile">
-                                Active Orders
-                            </span>
-                        </div>
-                    </a>
+    <!-- User Info Card - Desktop -->
+    <div class="user-card-desktop d-none d-sm-block">
+        <div class="user-info">
+            <div class="user-avatar">
+                👤
+            </div>
+            <div class="user-text">
+                <div class="username">
+                    @userName
+                </div>
+                <div class="rank">
+                    @if (userRank == "0")
+                    {
+                        <span>🍸</span>
+                    }
+                    else if (userRank == "1")
+                    {
+                        <span>🍽️</span>
+                    }
+                    else if (userRank == "2")
+                    {
+                        <span>👔</span>
+                    }
+                    else if (userRank == "3")
+                    {
+                        <span>👑</span>
+                    }
+                    else
+                    {
+                        <span>👤</span>
+                    }
+                    <span>@rankName</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                    <a href="@Url.Action("Create", "Order")" class="menu-btn gradient-border rounded-3xl block h-full" style="background: #2d2d44;">
-                        <!-- Desktop content -->
-                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center desktop-content">
-                            <span class="text-3xl sm:text-4xl mb-2 sm:mb-3 block">➕</span>
-                            <span class="text-xs sm:text-sm font-semibold block" style="color: #ffffff; font-family: 'Inter', sans-serif;">
-                                Make Order
-                            </span>
-                        </div>
-                        <!-- Mobile content -->
-                        <div class="btn-content-mobile mobile-content">
-                            <span class="btn-icon-mobile">➕</span>
-                            <span class="btn-title-mobile">
-                                Make Order
-                            </span>
-                        </div>
-                    </a>
-                }
+    <!-- Main Content -->
+    <div class="main-container w-full min-h-screen flex flex-col items-center py-4">
+        <!-- Header -->
+        <div class="header-content">
+            <div class="inline-flex items-center gap-3 mb-3 justify-center">
+                <span class="text-4xl md:text-5xl header-icon">🍽️</span>
+                <h1 class="text-4xl md:text-5xl font-bold header-title">
+                    @restaurantName
+                </h1>
+            </div>
+            <p class="text-base md:text-lg header-description">
+                Restaurant Management Dashboard
+            </p>
+        </div>
 
-                @if (userRank == "0" || userRank == "2" || userRank == "3")
-                {
-                    <a href="@Url.Action("OrderOnBar", "Order")" class="menu-btn gradient-border rounded-3xl block h-full" style="background: #2d2d44;">
-                        <!-- Desktop content -->
-                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center desktop-content">
-                            <span class="text-3xl sm:text-4xl mb-2 sm:mb-3 block">🍸</span>
-                            <span class="text-xs sm:text-sm font-semibold block" style="color: #ffffff; font-family: 'Inter', sans-serif;">
-                                Make Bar Order
-                            </span>
-                        </div>
-                        <!-- Mobile content -->
-                        <div class="btn-content-mobile mobile-content">
-                            <span class="btn-icon-mobile">🍸</span>
-                            <span class="btn-title-mobile">
-                                Make Bar Order
-                            </span>
-                        </div>
-                    </a>
-                }
-
-                @if (freeDrinksEnabled)
-                {
-                    <a href="@Url.Action("FreeDrink", "Order")" class="menu-btn gradient-border rounded-3xl block h-full" style="background: #2d2d44;">
-                        <!-- Desktop content -->
-                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center desktop-content">
-                            <span class="text-3xl sm:text-4xl mb-2 sm:mb-3 block">🎁</span>
-                            <span class="text-xs sm:text-sm font-semibold block" style="color: #ffffff; font-family: 'Inter', sans-serif;">
-                                Free Drink
-                            </span>
-                        </div>
-                        <!-- Mobile content -->
-                        <div class="btn-content-mobile mobile-content">
-                            <span class="btn-icon-mobile">🎁</span>
-                            <span class="btn-title-mobile">
-                                Free Drink
-                            </span>
-                        </div>
-                    </a>
-                }
-
-                @if (userRank == "3")
-                {
-                    <a href="@Url.Action("FindOrder", "Order")" class="menu-btn gradient-border rounded-3xl block h-full" style="background: #2d2d44;">
-                        <!-- Desktop content -->
-                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center desktop-content">
-                            <span class="text-3xl sm:text-4xl mb-2 sm:mb-3 block">🔎</span>
-                            <span class="text-xs sm:text-sm font-semibold block" style="color: #ffffff; font-family: 'Inter', sans-serif;">
-                                Find Order
-                            </span>
-                        </div>
-                        <!-- Mobile content -->
-                        <div class="btn-content-mobile mobile-content">
-                            <span class="btn-icon-mobile">🔎</span>
-                            <span class="btn-title-mobile">
-                                Find Order
-                            </span>
-                        </div>
-                    </a>
-
-                    <a href="@Url.Action("Index", "Statistics")" class="menu-btn gradient-border rounded-3xl block h-full" style="background: #2d2d44;">
-                        <!-- Desktop content -->
-                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center desktop-content">
-                            <span class="text-3xl sm:text-4xl mb-2 sm:mb-3 block">📊</span>
-                            <span class="text-xs sm:text-sm font-semibold block" style="color: #ffffff; font-family: 'Inter', sans-serif;">
-                                Statistics
-                            </span>
-                        </div>
-                        <!-- Mobile content -->
-                        <div class="btn-content-mobile mobile-content">
-                            <span class="btn-icon-mobile">📊</span>
-                            <span class="btn-title-mobile">
-                                Statistics
-                            </span>
-                        </div>
-                    </a>
-
-                    <a href="@Url.Action("Index", "Settings")" class="menu-btn gradient-border rounded-3xl block h-full" style="background: #2d2d44;">
-                        <!-- Desktop content -->
-                        <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center desktop-content">
-                            <span class="text-3xl sm:text-4xl mb-2 sm:mb-3 block">⚙️</span>
-                            <span class="text-xs sm:text-sm font-semibold block" style="color: #ffffff; font-family: 'Inter', sans-serif;">
-                                Settings
-                            </span>
-                        </div>
-                        <!-- Mobile content -->
-                        <div class="btn-content-mobile mobile-content">
-                            <span class="btn-icon-mobile">⚙️</span>
-                            <span class="btn-title-mobile">
-                                Settings
-                            </span>
-                        </div>
-                    </a>
-                }
-
-                <!-- LOGOUT BUTTON - POPRAVLJENA VERZIJA -->
-                <a href="@Url.Action("Logout", "Account")"
-                   class="menu-btn gradient-border rounded-3xl block h-full"
-                   style="background: #2d2d44;"
-                   onclick="return confirm('Are you sure you want to logout?');">
-
-                    <!-- Desktop content -->
-                    <div class="p-4 sm:p-5 rounded-2xl text-center h-full flex flex-col items-center justify-center desktop-content">
-                        <span class="text-3xl sm:text-4xl mb-2 sm:mb-3 block">🚪</span>
-                        <span class="text-xs sm:text-sm font-semibold block" style="color: #ffffff; font-family: 'Inter', sans-serif;">
-                            Logout
+        <!-- Menu Grid -->
+        <div id="menu-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-7xl mx-auto px-3">
+            <!-- Dynamic buttons based on Razor logic -->
+            @if (userRank == "1" || userRank == "2" || userRank == "3")
+            {
+                <a href="@Url.Action("Index", "Order")" class="menu-btn gradient-border" style="background: linear-gradient(135deg, #2d2d44, #1f1f30);">
+                    <div class="btn-content">
+                        <span class="btn-icon">🧾</span>
+                        <span class="btn-title">
+                            Active Orders
                         </span>
-                    </div>
-
-                    <!-- Mobile content -->
-                    <div class="btn-content-mobile mobile-content">
-                        <span class="btn-icon-mobile">🚪</span>
-                        <span class="btn-title-mobile">
-                            Logout
+                        <span class="btn-description">
+                            View and manage current orders
                         </span>
                     </div>
                 </a>
-            </div>
 
-            <!-- Debug panel -->
-            <div class="mt-6 sm:mt-10 p-3 sm:p-4 rounded-xl w-full max-w-7xl debug-panel" style="background: rgba(255,255,255,0.05);">
-                <p class="text-xs sm:text-sm mb-2 sm:mb-3" style="color: rgba(255,255,255,0.6); font-family: 'Inter', sans-serif;">
-                    Current Permissions Debug:
-                </p>
-                <div class="flex flex-wrap gap-2 justify-center">
-                    <div class="px-3 sm:px-4 py-1 sm:py-2 rounded-lg text-xs sm:text-sm font-medium" style="background: rgba(212, 175, 55, 0.2); color: #d4af37; font-family: 'Inter', sans-serif;">
-                        Rank: @rankName
+                <a href="@Url.Action("Create", "Order")" class="menu-btn gradient-border" style="background: linear-gradient(135deg, #2d2d44, #1f1f30);">
+                    <div class="btn-content">
+                        <span class="btn-icon">➕</span>
+                        <span class="btn-title">
+                            New Order
+                        </span>
+                        <span class="btn-description">
+                            Create a new food order
+                        </span>
                     </div>
-                    <div class="px-3 sm:px-4 py-1 sm:py-2 rounded-lg text-xs sm:text-sm font-medium" style="background: rgba(212, 175, 55, 0.2); color: #d4af37; font-family: 'Inter', sans-serif;">
-                        User: @userName
+                </a>
+            }
+
+            @if (userRank == "0" || userRank == "2" || userRank == "3")
+            {
+                <a href="@Url.Action("OrderOnBar", "Order")" class="menu-btn gradient-border" style="background: linear-gradient(135deg, #2d2d44, #1f1f30);">
+                    <div class="btn-content">
+                        <span class="btn-icon">🍸</span>
+                        <span class="btn-title">
+                            Bar Order
+                        </span>
+                        <span class="btn-description">
+                            Create bar and drink orders
+                        </span>
                     </div>
-                    <div class="px-3 sm:px-4 py-1 sm:py-2 rounded-lg text-xs sm:text-sm font-medium" style="background: rgba(212, 175, 55, 0.2); color: #d4af37; font-family: 'Inter', sans-serif;">
-                        Free Drinks: @(freeDrinksEnabled ? "Enabled" : "Disabled")
+                </a>
+            }
+
+            @if (freeDrinksEnabled)
+            {
+                <a href="@Url.Action("FreeDrink", "Order")" class="menu-btn gradient-border" style="background: linear-gradient(135deg, #2d2d44, #1f1f30);">
+                    <div class="btn-content">
+                        <span class="btn-icon">🎁</span>
+                        <span class="btn-title">
+                            Free Drink
+                        </span>
+                        <span class="btn-description">
+                            Claim your free drink
+                        </span>
                     </div>
+                </a>
+            }
+
+            @if (userRank == "3")
+            {
+                <a href="@Url.Action("FindOrder", "Order")" class="menu-btn gradient-border" style="background: linear-gradient(135deg, #2d2d44, #1f1f30);">
+                    <div class="btn-content">
+                        <span class="btn-icon">🔎</span>
+                        <span class="btn-title">
+                            Find Order
+                        </span>
+                        <span class="btn-description">
+                            Search for specific orders
+                        </span>
+                    </div>
+                </a>
+
+                <a href="@Url.Action("Index", "Statistics")" class="menu-btn gradient-border" style="background: linear-gradient(135deg, #2d2d44, #1f1f30);">
+                    <div class="btn-content">
+                        <span class="btn-icon">📊</span>
+                        <span class="btn-title">
+                            Statistics
+                        </span>
+                        <span class="btn-description">
+                            View sales and performance data
+                        </span>
+                    </div>
+                </a>
+
+                <a href="@Url.Action("Index", "Settings")" class="menu-btn gradient-border" style="background: linear-gradient(135deg, #2d2d44, #1f1f30);">
+                    <div class="btn-content">
+                        <span class="btn-icon">⚙️</span>
+                        <span class="btn-title">
+                            Settings
+                        </span>
+                        <span class="btn-description">
+                            Configure restaurant settings
+                        </span>
+                    </div>
+                </a>
+            }
+
+            <!-- Logout Button -->
+            <a href="@Url.Action("Logout", "Account")"
+               class="menu-btn gradient-border logout-btn"
+               style="background: linear-gradient(135deg, #2d2d44, #1f1f30);"
+               onclick="return confirm('Are you sure you want to logout?');">
+                <div class="btn-content">
+                    <span class="btn-icon">🚪</span>
+                    <span class="btn-title">
+                        Logout
+                    </span>
+                    <span class="btn-description">
+                        Sign out of your account
+                    </span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Debug Panel -->
+        <div class="debug-panel">
+            <p>Session Information</p>
+            <div>
+                <div class="px-2.5 py-1 rounded-md text-xs font-medium" style="background: rgba(212, 175, 55, 0.15); color: #d4af37;">
+                    Rank: @rankName
+                </div>
+                <div class="px-2.5 py-1 rounded-md text-xs font-medium" style="background: rgba(212, 175, 55, 0.15); color: #d4af37;">
+                    User: @userName
+                </div>
+                <div class="px-2.5 py-1 rounded-md text-xs font-medium" style="background: rgba(212, 175, 55, 0.15); color: #d4af37;">
+                    Free Drinks: @(freeDrinksEnabled ? "Enabled" : "Disabled")
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Simple and reliable logout functionality
         document.addEventListener('DOMContentLoaded', function () {
-            console.log('DEBUG: Page loaded - Logout form initialized');
+            console.log('Dashboard loaded');
 
-            // 1. Handle hover effects for all menu buttons
+            // Hover efekti za dugmiće
             const menuButtons = document.querySelectorAll('.menu-btn');
             menuButtons.forEach(button => {
                 button.addEventListener('mouseenter', function () {
                     this.style.transform = 'translateY(-4px)';
-                    this.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.2)';
+                    this.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.25)';
                 });
 
                 button.addEventListener('mouseleave', function () {
@@ -775,78 +734,28 @@
                 });
             });
 
-            // 2. Show/hide desktop vs mobile content based on screen size
-            function updateContentVisibility() {
-                const isMobile = window.innerWidth < 640;
-                const desktopContents = document.querySelectorAll('.desktop-content');
-                const mobileContents = document.querySelectorAll('.mobile-content');
-
-                if (isMobile) {
-                    desktopContents.forEach(el => el.style.display = 'none');
-                    mobileContents.forEach(el => el.style.display = 'flex');
-                } else {
-                    desktopContents.forEach(el => el.style.display = 'flex');
-                    mobileContents.forEach(el => el.style.display = 'none');
-                }
-            }
-
-            updateContentVisibility();
-            window.addEventListener('resize', updateContentVisibility);
-
-            // 3. SIMPLE AND RELIABLE LOGOUT HANDLING
-            const logoutForm = document.getElementById('logoutForm');
-            const logoutButtons = document.querySelectorAll('.logout-btn');
-
-            if (logoutForm) {
-                console.log('DEBUG: Logout form found, action:', logoutForm.action);
-
-                // Remove any existing event listeners by cloning and replacing
-                const newForm = logoutForm.cloneNode(true);
-                logoutForm.parentNode.replaceChild(newForm, logoutForm);
-
-                // Get the new form reference
-                const freshForm = document.getElementById('logoutForm');
-
-                // Add submit handler to the form itself
-                freshForm.addEventListener('submit', function (e) {
-                    console.log('DEBUG: Form submit event triggered');
-
-                    // Ask for confirmation
+            // Logout confirmation
+            const logoutBtn = document.querySelector('.logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function (e) {
                     if (!confirm('Are you sure you want to logout?')) {
-                        console.log('DEBUG: Logout cancelled by user');
                         e.preventDefault();
-                        return false;
                     }
-
-                    console.log('DEBUG: Logout confirmed, submitting...');
-                    // Form will submit normally
-                    return true;
                 });
-
-                // Also add click handlers to buttons (as backup)
-                document.querySelectorAll('.logout-btn').forEach(button => {
-                    button.addEventListener('click', function (e) {
-                        console.log('DEBUG: Logout button clicked');
-                        // Let the form's submit handler handle it
-                    });
-                });
-            } else {
-                console.error('DEBUG: Logout form not found!');
             }
 
-            // 4. Alternative: Direct form submission if above doesn't work
-            // This is a backup method
-            document.addEventListener('click', function (e) {
-                if (e.target.closest('.logout-btn')) {
-                    console.log('DEBUG: Backup logout handler triggered');
-
-                    const form = document.getElementById('logoutForm');
-                    if (form && confirm('Are you sure you want to logout?')) {
-                        console.log('DEBUG: Backup - submitting form');
-                        form.submit();
-                    }
+            // Sakrij opis na mobile - dodatna provera
+            const adjustMobileLayout = () => {
+                if (window.innerWidth < 640) {
+                    const descriptions = document.querySelectorAll('.btn-description');
+                    descriptions.forEach(desc => {
+                        desc.style.display = 'none';
+                    });
                 }
-            });
+            };
+
+            adjustMobileLayout();
+            window.addEventListener('resize', adjustMobileLayout);
         });
     </script>
 </body>

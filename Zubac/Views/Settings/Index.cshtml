@@ -20,7 +20,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         /* RESET */
         * {
@@ -46,6 +46,7 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: block;
             text-decoration: none;
+            width: 100%;
         }
 
             .settings-btn:hover {
@@ -68,6 +69,7 @@
 
         .gradient-border {
             position: relative;
+            border-radius: 20px;
         }
 
             .gradient-border::before {
@@ -82,26 +84,26 @@
                 mask-composite: exclude;
             }
 
-        /* MOBILNA VERZIJA - POPRAVLJENA */
+        /* MOBILNA VERZIJA - Usklađena sa početnom */
         @@media (max-width: 639px) {
-            /* Home button pozicija - ISPRAVLJENO */
+            /* Home button pozicija - manje */
             .home-btn-container {
                 position: absolute;
-                top: 1.5rem;
-                left: 1rem;
+                top: 0.75rem;
+                left: 0.5rem;
                 z-index: 50;
             }
 
             .home-btn {
-                padding: 0.75rem 1.25rem !important;
-                font-size: 0.95rem;
+                padding: 0.6rem 1rem !important;
+                font-size: 0.85rem;
                 background: rgba(212, 175, 55, 0.1) !important;
                 color: #d4af37 !important;
                 border: 1px solid rgba(212, 175, 55, 0.3) !important;
             }
-            /* Main container - DODAO PADDING GORE ZA HOME DUGME */
+            /* Main container - manje */
             .main-container {
-                padding-top: 7rem !important; /* POVEĆANO da stane home dugme */
+                padding-top: 3.5rem !important;
                 padding-left: 0 !important;
                 padding-right: 0 !important;
                 width: 100% !important;
@@ -110,44 +112,45 @@
                 align-items: center !important;
                 position: relative;
             }
-            /* Header content - DODAO MARGIN GORE */
+            /* Header content */
             .header-content {
                 text-align: center;
-                padding: 0 1rem;
+                padding: 0 0.75rem;
                 width: 100%;
-                margin-top: 1rem !important; /* Dodat margin da ne bude uz vrh */
+                margin-top: 0 !important;
+                margin-bottom: 1.5rem !important;
             }
 
             .header-title {
-                font-size: 2.25rem !important; /* SMANJENO malo */
-                line-height: 1.2;
-                margin-top: 0.5rem !important;
+                font-size: 1.8rem !important;
+                line-height: 1.1;
             }
 
             .header-icon {
-                font-size: 2.25rem !important;
+                font-size: 1.8rem !important;
             }
 
             .header-description {
-                font-size: 1rem !important;
-                margin-top: 0.5rem;
+                font-size: 0.9rem !important;
+                margin-top: 0.25rem;
+                display: none; /* Sakrij opis na mobile */
             }
             /* Grid */
             #settings-grid {
                 display: grid !important;
                 grid-template-columns: 1fr !important;
-                gap: 1.5rem !important;
+                gap: 1rem !important;
                 width: 100% !important;
                 max-width: 100% !important;
-                padding: 0 1rem !important;
-                margin: 2rem auto 0 auto !important; /* Dodat margin gore */
+                padding: 0 0.75rem !important;
+                margin: 0.5rem auto 0 auto !important;
             }
-            /* Dugmići */
+            /* Dugmići - iste veličine kao na početnoj */
             .settings-btn {
                 width: 100% !important;
                 max-width: 100% !important;
-                min-height: 150px;
-                padding: 1.25rem !important;
+                min-height: 130px !important;
+                padding: 0 !important;
                 margin: 0 !important;
             }
             /* Button content */
@@ -159,47 +162,100 @@
                 align-items: center;
                 text-align: center;
                 width: 100%;
-                padding: 1.25rem;
+                padding: 1.25rem 0.75rem;
             }
 
             .btn-icon {
-                font-size: 3rem !important;
-                margin-bottom: 1rem !important;
+                font-size: 2.5rem !important;
+                margin-bottom: 0.75rem !important;
             }
 
             .btn-title {
-                font-size: 1.4rem !important;
+                font-size: 1.2rem !important;
                 font-weight: 700 !important;
-                margin-bottom: 0.4rem !important;
-                line-height: 1.2 !important;
+                margin-bottom: 0.25rem !important;
+                line-height: 1.1 !important;
             }
 
             .btn-description {
-                font-size: 0.95rem !important;
-                line-height: 1.4 !important;
+                font-size: 0.8rem !important;
+                line-height: 1.2 !important;
+                display: none; /* Sakrij opis na mobile */
             }
         }
 
-        /* TABLET VERZIJA */
+        /* TABLET VERZIJA - Usklađena */
         @@media (min-width: 640px) and (max-width: 1023px) {
             .home-btn-container {
                 position: absolute;
-                top: 2rem;
-                left: 2rem;
+                top: 1.25rem;
+                left: 1rem;
                 z-index: 50;
             }
 
+            .home-btn {
+                padding: 0.7rem 1.25rem !important;
+                font-size: 0.9rem;
+            }
+
             .main-container {
-                padding-top: 8rem !important;
+                padding-top: 4.5rem !important;
             }
 
             #settings-grid {
                 grid-template-columns: repeat(2, 1fr) !important;
-                gap: 2rem !important;
-                max-width: 800px !important;
-                padding: 0 2rem !important;
+                gap: 1.5rem !important;
+                max-width: 700px !important;
+                padding: 0 1.25rem !important;
+            }
+            /* Ista veličina dugmića kao na početnoj */
+            .settings-btn {
+                min-height: 170px;
             }
 
+            .header-title {
+                font-size: 2.5rem !important;
+            }
+
+            .header-icon {
+                font-size: 2.5rem !important;
+            }
+
+            .header-content {
+                margin-bottom: 1.75rem !important;
+            }
+
+            .header-description {
+                font-size: 1rem !important;
+                margin-top: 0.25rem;
+            }
+        }
+
+        /* DESKTOP VERZIJA - Usklađena sa početnom */
+        @@media (min-width: 1024px) {
+            .home-btn-container {
+                position: absolute;
+                top: 1.5rem;
+                left: 1.5rem;
+                z-index: 50;
+            }
+
+            .home-btn {
+                padding: 0.8rem 1.5rem !important;
+                font-size: 1rem;
+            }
+
+            .main-container {
+                padding-top: 5.5rem !important;
+            }
+
+            #settings-grid {
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 1.75rem !important;
+                max-width: 1100px !important;
+                padding: 0 1.5rem !important;
+            }
+            /* ISTA VELIČINA DUGMIĆA KAO NA POČETNOJ - min-height: 200px */
             .settings-btn {
                 min-height: 200px;
             }
@@ -207,38 +263,22 @@
             .header-title {
                 font-size: 3rem !important;
             }
-        }
 
-        /* DESKTOP VERZIJA */
-        @@media (min-width: 1024px) {
-            .home-btn-container {
-                position: absolute;
-                top: 2.5rem;
-                left: 2.5rem;
-                z-index: 50;
+            .header-icon {
+                font-size: 3rem !important;
             }
 
-            .main-container {
-                padding-top: 9rem !important;
+            .header-content {
+                margin-bottom: 2rem !important;
             }
 
-            #settings-grid {
-                grid-template-columns: repeat(3, 1fr) !important;
-                gap: 2.5rem !important;
-                max-width: 1400px !important;
-                padding: 0 3rem !important;
-            }
-
-            .settings-btn {
-                min-height: 250px;
-            }
-
-            .header-title {
-                font-size: 3.5rem !important;
+            .header-description {
+                font-size: 1.1rem !important;
+                margin-top: 0.25rem;
             }
         }
 
-        /* Button content styling - zajedničko */
+        /* Button content styling - zajedničko - Usklađeno */
         .btn-content {
             height: 100%;
             display: flex;
@@ -246,78 +286,96 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 2rem;
+            padding: 1.75rem 1.25rem;
         }
 
         .btn-icon {
-            font-size: 4rem;
-            margin-bottom: 1.5rem;
+            font-size: 3.5rem;
+            margin-bottom: 1.25rem;
         }
 
         .btn-title {
-            font-size: 1.75rem;
+            font-size: 1.6rem;
             font-weight: 700;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.5rem;
             line-height: 1.2;
             color: #ffffff;
             font-family: 'Playfair Display', serif;
         }
 
         .btn-description {
-            font-size: 1.1rem;
-            line-height: 1.4;
+            font-size: 1rem;
+            line-height: 1.3;
             color: rgba(255, 255, 255, 0.7);
             font-family: 'Inter', sans-serif;
-            opacity: 0.8;
+            opacity: 0.9;
         }
 
-        /* Header styling */
+        /* Header styling - Usklađeno */
         .header-content {
             text-align: center;
             width: 100%;
-            margin-bottom: 3rem;
         }
 
         .header-title {
             font-family: 'Playfair Display', serif;
             color: #d4af37;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
         .header-description {
-            color: rgba(255,255,255,0.7);
+            color: rgba(255,255,255,0.8);
             font-family: 'Inter', sans-serif;
-            margin-top: 0.5rem;
+            font-weight: 500;
+        }
+
+        /* Home button styling */
+        .home-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-radius: 16px;
+            font-weight: 500;
+            text-decoration: none;
+            background: rgba(212, 175, 55, 0.1);
+            color: #d4af37;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        /* Konzistentne pozadine za dugmiće */
+        .settings-btn {
+            background: linear-gradient(135deg, #2d2d44, #1f1f30) !important;
         }
     </style>
 </head>
 <body>
-    <!-- Home Button - Top Left - ISPRAVLJENO -->
+    <!-- Home Button - Top Left -->
     <div class="home-btn-container">
-        <a asp-controller="Home" asp-action="Index" class="home-btn flex items-center gap-2 px-5 py-4 rounded-xl font-medium" style="text-decoration: none;">
-            <span class="text-2xl">🏠</span>
-            <span class="text-lg">Home</span>
+        <a asp-controller="Home" asp-action="Index" class="home-btn flex items-center gap-2">
+            <span class="text-xl">🏠</span>
+            <span>Home</span>
         </a>
     </div>
 
     <!-- Main Content -->
-    <div class="main-container w-full min-h-screen flex flex-col items-center py-8">
-        <!-- Header - ISPRAVLJENO -->
+    <div class="main-container w-full min-h-screen flex flex-col items-center py-4">
+        <!-- Header -->
         <div class="header-content">
-            <div class="inline-flex items-center gap-3 mb-4 justify-center">
-                <span class="text-5xl md:text-6xl header-icon">⚙️</span>
-                <h1 class="text-5xl md:text-6xl font-bold header-title">
+            <div class="inline-flex items-center gap-3 mb-3 justify-center">
+                <span class="text-4xl md:text-5xl header-icon">⚙️</span>
+                <h1 class="text-4xl md:text-5xl font-bold header-title">
                     Settings
                 </h1>
             </div>
-            <p class="text-lg md:text-xl header-description">
+            <p class="text-base md:text-lg header-description">
                 Manage your restaurant configuration
             </p>
         </div>
 
         <!-- Settings Grid -->
-        <div id="settings-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-7xl mx-auto px-4">
+        <div id="settings-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-7xl mx-auto px-3">
             <!-- Staff Settings -->
-            <a asp-controller="Settings" asp-action="Staff" class="settings-btn gradient-border rounded-3xl" style="background: #2d2d44;">
+            <a asp-controller="Settings" asp-action="Staff" class="settings-btn gradient-border">
                 <div class="btn-content">
                     <span class="btn-icon">👥</span>
                     <span class="btn-title">
@@ -330,7 +388,7 @@
             </a>
 
             <!-- Restaurant Settings -->
-            <a asp-controller="Settings" asp-action="RestaurantSettings" class="settings-btn gradient-border rounded-3xl" style="background: #2d2d44;">
+            <a asp-controller="Settings" asp-action="RestaurantSettings" class="settings-btn gradient-border">
                 <div class="btn-content">
                     <span class="btn-icon">🏪</span>
                     <span class="btn-title">
@@ -343,7 +401,7 @@
             </a>
 
             <!-- Drink Settings -->
-            <a asp-controller="Settings" asp-action="DrinksSettings" class="settings-btn gradient-border rounded-3xl" style="background: #2d2d44;">
+            <a asp-controller="Settings" asp-action="DrinksSettings" class="settings-btn gradient-border">
                 <div class="btn-content">
                     <span class="btn-icon">🍷</span>
                     <span class="btn-title">
@@ -356,7 +414,7 @@
             </a>
 
             <!-- Food Settings -->
-            <a asp-controller="Settings" asp-action="FoodSettings" class="settings-btn gradient-border rounded-3xl" style="background: #2d2d44;">
+            <a asp-controller="Settings" asp-action="FoodSettings" class="settings-btn gradient-border">
                 <div class="btn-content">
                     <span class="btn-icon">🍽️</span>
                     <span class="btn-title">
@@ -369,7 +427,7 @@
             </a>
 
             <!-- AI Menu Builder -->
-            <a asp-controller="Settings" asp-action="AiMenuBuilder" class="settings-btn gradient-border rounded-3xl" style="background: #2d2d44;">
+            <a asp-controller="Settings" asp-action="AiMenuBuilder" class="settings-btn gradient-border">
                 <div class="btn-content">
                     <span class="btn-icon">🤖</span>
                     <span class="btn-title">
@@ -385,9 +443,9 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            console.log('DEBUG: Page loaded');
+            console.log('Settings page loaded');
 
-            // Hover efekti
+            // Hover efekti za settings dugmiće
             const settingsButtons = document.querySelectorAll('.settings-btn');
             settingsButtons.forEach(button => {
                 button.addEventListener('mouseenter', function () {
@@ -401,18 +459,46 @@
                 });
             });
 
+            // Hover efekti za home dugme
             const homeButton = document.querySelector('.home-btn');
             if (homeButton) {
                 homeButton.addEventListener('mouseenter', function () {
                     this.style.transform = 'scale(1.05)';
-                    this.style.background = 'rgba(212, 175, 55, 0.2) !important';
+                    this.style.background = 'rgba(212, 175, 55, 0.2)';
                 });
 
                 homeButton.addEventListener('mouseleave', function () {
                     this.style.transform = 'scale(1)';
-                    this.style.background = 'rgba(212, 175, 55, 0.1) !important';
+                    this.style.background = 'rgba(212, 175, 55, 0.1)';
                 });
             }
+
+            // Sakrij opis na mobile
+            const adjustMobileLayout = () => {
+                if (window.innerWidth < 640) {
+                    const descriptions = document.querySelectorAll('.btn-description');
+                    const headerDescription = document.querySelector('.header-description');
+
+                    descriptions.forEach(desc => {
+                        desc.style.display = 'none';
+                    });
+
+                    if (headerDescription) {
+                        headerDescription.style.display = 'none';
+                    }
+                } else {
+                    const descriptions = document.querySelectorAll('.btn-description');
+                    const headerDescription = document.querySelector('.header-description');
+
+                    descriptions.forEach(desc => {
+                        desc.style.display = 'block';
+                    });
+
+                    if (headerDescription) {
+                        headerDescription.style.display = 'block';
+                    }
+                }
+            };
 
             // Proveri da li naslov prelazi preko Home dugmeta
             const checkOverlap = () => {
@@ -423,19 +509,20 @@
                     const homeRect = homeBtn.getBoundingClientRect();
                     const headerRect = header.getBoundingClientRect();
 
-                    console.log('Home button position:', homeRect.top, homeRect.right);
-                    console.log('Header position:', headerRect.top, headerRect.left);
-
-                    // Ako se preklapaju, dodaj više margine
-                    if (headerRect.top < homeRect.bottom + 10) {
-                        header.style.marginTop = (homeRect.bottom + 20) + 'px';
+                    // Ako se preklapaju, dodaj margin
+                    if (headerRect.top < homeRect.bottom + 5) {
+                        header.style.marginTop = (homeRect.bottom + 10) + 'px';
                     }
                 }
             };
 
-            // Proveri odmah i na resize
+            // Run on load and resize
+            adjustMobileLayout();
             checkOverlap();
-            window.addEventListener('resize', checkOverlap);
+            window.addEventListener('resize', function () {
+                adjustMobileLayout();
+                checkOverlap();
+            });
         });
     </script>
 </body>
