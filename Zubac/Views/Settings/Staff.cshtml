@@ -412,6 +412,16 @@
         color: white;
     }
 
+    .toast-error {
+        background: #dc3545;
+        color: white;
+    }
+
+    .toast-warning {
+        background: #ffc107;
+        color: #1a1a2e;
+    }
+
     /* Responsive Actions */
     @@media (max-width: 576px) {
         .actions-cell {
@@ -644,14 +654,18 @@
 
         setTimeout(() => {
             toast.remove();
-        }, 2000);
+        }, 3000);
     }
 
     function generateLink(staffId) {
         showToast('Generating password link...', 'info');
 
         fetch(`/Settings/GeneratePasswordLink/${staffId}`, {
-            method: 'POST'
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
         })
             .then(response => response.json())
             .then(data => {
@@ -661,21 +675,37 @@
                     myModal.show();
                     showToast('Link generated successfully!', 'success');
                 } else {
-                    showToast('Error generating link.', 'error');
+                    // Proveri da li je poruka o demo korisniku
+                    if (data.message === "Demo user can't change passwords.") {
+                        alert('DEMO USER RESTRICTION\n\nPassword changes are not allowed for demo users.\n\nThis is a demo account limitation.');
+                        showToast('Demo user cannot change passwords!', 'warning');
+                    } else {
+                        alert('Error: ' + (data.message || 'Failed to generate link'));
+                        showToast(data.message || 'Error generating link.', 'error');
+                    }
                 }
             })
             .catch(err => {
-                showToast('Error: ' + err, 'error');
+                console.error('Error:', err);
+                alert('Network error: Could not connect to server. Please try again.');
+                showToast('Network error. Please try again.', 'error');
             });
     }
 
     document.getElementById('copyLinkBtn').addEventListener('click', function () {
         const input = document.getElementById('generatedLink');
-        input.select();
-        input.setSelectionRange(0, 99999);
-        navigator.clipboard.writeText(input.value)
-            .then(() => showToast('Link copied to clipboard!', 'success'))
-            .catch(() => showToast('Failed to copy link', 'error'));
+        if (input.value) {
+            input.select();
+            input.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(input.value)
+                .then(() => showToast('Link copied to clipboard!', 'success'))
+                .catch(() => {
+                    alert('Failed to copy link. Please copy manually.');
+                    showToast('Failed to copy link', 'error');
+                });
+        } else {
+            alert('No link to copy');
+        }
     });
 
     const rankMap = {
@@ -722,6 +752,8 @@
         // Animate rows on load
         const rows = document.querySelectorAll('.table-row');
         rows.forEach((row, index) => {
+            row.style.opacity = '0';
+            row.style.transform = 'translateY(10px)';
             setTimeout(() => {
                 row.style.opacity = '1';
                 row.style.transform = 'translateY(0)';

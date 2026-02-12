@@ -36,6 +36,10 @@ namespace Zubac.Controllers
         [HttpPost]
         public async Task<IActionResult> GeneratePasswordLink(int id)
         {
+            int userId = int.Parse(User.FindFirst("UserId").Value);
+            if (userId == 1)
+                return Json(new { success = false, message = "Demo user can't change passwords." });
+
             var token = await _service.CreateStaffLinkAsync(id); // vraća token string ili pun link
             var link = Url.Action("SetPassword", "Settings", new { token = token }, Request.Scheme);
 
