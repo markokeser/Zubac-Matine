@@ -1,572 +1,108 @@
-﻿@model List<Zubac.Models.Order>
+@model List<Zubac.Models.Order>
 
 @{
-    ViewData["Title"] = "See Orders";
+    ViewData["Title"] = "Active orders";
     Func<Zubac.Models.Order, decimal> calculateTotal = o => o.OrderArticles.Sum(x => x.Article.Price * x.Quantity);
     var totalOfAllOrders = Model.Sum(order => calculateTotal(order));
+    var totalItems = Model.Sum(o => o.OrderArticles.Sum(a => a.Quantity));
+    var index = 0;
 }
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<div class="page">
+    <header class="page-head">
+        <div class="page-head__text">
+            <a asp-controller="Home" asp-action="Index" class="back-link">@Html.Icon("chevron-left") Dashboard</a>
+            <div class="eyebrow reveal">Table service</div>
+            <h1 class="page-title reveal" style="--i:1">Active orders</h1>
+            <p class="page-sub reveal" style="--i:2">Your open tables, newest first. Finish an order once the table has paid.</p>
+        </div>
+        <div class="page-head__actions reveal" style="--i:2">
+            <a asp-action="Create" class="button button--primary">@Html.Icon("plus") New order</a>
+        </div>
+    </header>
 
-<style>
-    body {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%) !important;
-        min-height: 100vh;
-        color: rgba(255, 255, 255, 0.9);
-        font-family: 'Inter', sans-serif;
-        margin: 0;
-        padding: 20px;
-    }
-
-    .home-btn {
-        transition: all 0.2s ease;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px 16px;
-        border-radius: 8px;
-        font-weight: 500;
-        background: rgba(212, 175, 55, 0.1);
-        color: #d4af37;
-        border: 1px solid rgba(212, 175, 55, 0.3);
-        margin-bottom: 2rem;
-    }
-
-        .home-btn:hover {
-            background: rgba(212, 175, 55, 0.2) !important;
-            transform: scale(1.05);
-            color: #d4af37;
-            text-decoration: none;
-        }
-
-    .main-container {
-        background: rgba(45, 45, 68, 0.8);
-        backdrop-filter: blur(10px);
-        border-radius: 16px;
-        padding: 2rem;
-        max-width: 800px; /* Smanjeno da bude uža kolona */
-        margin: 0 auto;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    }
-
-    .page-header {
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-
-    .page-title {
-        font-family: 'Playfair Display', serif;
-        color: #d4af37;
-        font-size: 2.2rem;
-        font-weight: 700;
-        margin: 0;
-        display: inline-flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    /* Kontejner za sve porudžbine - VERTIKALNI LAYOUT */
-    .orders-list {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-        width: 100%;
-    }
-
-    .order-card {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(212, 175, 55, 0.2);
-        border-radius: 12px;
-        padding: 1.5rem;
-        transition: all 0.3s ease;
-        animation: fadeIn 0.5s ease;
-        /* Svaka kartica zauzima celu širinu */
-        width: 100%;
-        box-sizing: border-box;
-        /* Sprečava da utiče na druge kartice */
-        position: relative;
-        overflow: visible;
-    }
-
-    @@keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .order-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        border-color: rgba(212, 175, 55, 0.4);
-    }
-
-    .order-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        cursor: pointer;
-        padding: 10px 5px;
-        border-radius: 8px;
-        transition: background-color 0.2s ease;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-        .order-header:hover {
-            background: rgba(212, 175, 55, 0.05);
-        }
-
-    .table-number {
-        font-family: 'Inter', sans-serif;
-        font-weight: 700;
-        font-size: 1.4rem;
-        color: #d4af37;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .toggle-arrow {
-        color: #d4af37;
-        font-size: 1.5rem;
-        transition: transform 0.3s ease;
-        cursor: pointer;
-        min-width: 24px;
-        text-align: center;
-    }
-
-    .order-details {
-        padding-top: 1.5rem;
-        border-top: 1px solid rgba(212, 175, 55, 0.2);
-        animation: slideDown 0.3s ease;
-        margin-top: 1rem;
-        /* Zauzima samo svoj prostor, ne utiče na druge */
-        position: relative;
-        overflow: visible;
-    }
-
-    @@keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-            max-height: 0;
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-            max-height: 2000px;
-        }
-    }
-
-    .item-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.8rem 0.5rem;
-        margin-bottom: 0.5rem;
-        background: rgba(255, 255, 255, 0.03);
-        border-radius: 8px;
-        border-left: 3px solid #29B6F6;
-    }
-
-    .item-info {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .item-icon {
-        font-size: 1.1rem;
-    }
-
-    .item-name {
-        color: rgba(255, 255, 255, 0.9);
-        font-weight: 500;
-    }
-
-    .item-quantity {
-        color: rgba(255, 255, 255, 0.6);
-        font-size: 0.9rem;
-    }
-
-    .item-price {
-        color: #d4af37;
-        font-weight: 600;
-        font-family: 'Courier New', monospace;
-    }
-
-    .order-total {
-        text-align: right;
-        padding: 1rem;
-        background: rgba(212, 175, 55, 0.1);
-        border-radius: 8px;
-        margin: 1.5rem 0;
-        border: 1px solid rgba(212, 175, 55, 0.2);
-    }
-
-    .total-label {
-        color: rgba(255, 255, 255, 0.7);
-        font-weight: 600;
-        font-size: 1rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .total-amount {
-        color: #d4af37;
-        font-weight: 700;
-        font-size: 1.4rem;
-        font-family: 'Courier New', monospace;
-    }
-
-    .finish-btn {
-        background: linear-gradient(135deg, #4CAF50, #66BB6A);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 12px 20px;
-        font-weight: 600;
-        font-size: 1rem;
-        width: 100%;
-        transition: all 0.2s ease;
-        font-family: 'Inter', sans-serif;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        margin-top: 1rem;
-    }
-
-        .finish-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(76, 175, 80, 0.3);
-            color: white;
-        }
-
-        .finish-btn:active {
-            transform: translateY(0);
-        }
-
-    .all-orders-total {
-        background: rgba(212, 175, 55, 0.1);
-        border: 1px solid rgba(212, 175, 55, 0.3);
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-top: 2.5rem;
-        text-align: center;
-        animation: fadeIn 0.8s ease;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .all-total-label {
-        color: rgba(255, 255, 255, 0.8);
-        font-weight: 600;
-        font-size: 1.1rem;
-        margin-bottom: 0.5rem;
-        font-family: 'Inter', sans-serif;
-    }
-
-    .all-total-amount {
-        color: #d4af37;
-        font-weight: 800;
-        font-size: 1.8rem;
-        font-family: 'Courier New', monospace;
-    }
-
-    .empty-state {
-        text-align: center;
-        color: rgba(255, 255, 255, 0.5);
-        font-family: 'Inter', sans-serif;
-        padding: 4rem 0;
-        font-size: 1.1rem;
-    }
-
-    .empty-icon {
-        font-size: 4rem;
-        margin-bottom: 1rem;
-        opacity: 0.7;
-    }
-
-    /* Toast notification */
-    .toast {
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        padding: 12px 24px;
-        border-radius: 8px;
-        font-family: 'Inter', sans-serif;
-        font-weight: 500;
-        z-index: 9999;
-        animation: fadeInOut 2s ease-in-out;
-    }
-
-    @@keyframes fadeInOut {
-        0%, 100% {
-            opacity: 0;
-            transform: translateX(-50%) translateY(10px);
-        }
-
-        10%, 90% {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-    }
-
-    .toast-success {
-        background: #4CAF50;
-        color: white;
-    }
-
-    .toast-info {
-        background: #29B6F6;
-        color: white;
-    }
-
-    /* Arrow rotation animation */
-    .rotate-180 {
-        transform: rotate(180deg);
-    }
-
-    /* Animacija za zatvaranje */
-    .order-details.closing {
-        animation: slideUp 0.3s ease;
-        max-height: 0;
-        padding-top: 0;
-        margin-top: 0;
-        overflow: hidden;
-        opacity: 0;
-    }
-
-    @@keyframes slideUp {
-        from {
-            opacity: 1;
-            transform: translateY(0);
-            max-height: 2000px;
-        }
-
-        to {
-            opacity: 0;
-            transform: translateY(-10px);
-            max-height: 0;
-        }
-    }
-
-    /* Responsive design */
-    @@media (min-width: 992px) {
-        .main-container {
-            max-width: 900px;
-        }
-
-        .orders-list {
-            gap: 2rem;
-        }
-
-        .order-card {
-            padding: 2rem;
-        }
-    }
-</style>
-
-<div class="container py-4">
-    <!-- Home Button -->
-    <a asp-controller="Home" asp-action="Index" class="home-btn">
-        <span style="font-size: 1.2rem;">🏠</span>
-        <span>Home</span>
-    </a>
-
-    <!-- Header -->
-    <div class="page-header">
-        <h1 class="page-title">
-            <span style="font-size: 2.2rem;">🧾</span>
-            Active Orders
-        </h1>
-    </div>
-
-    <!-- Main Container -->
-    <div class="main-container">
-        @if (!Model.Any())
-        {
-            <div class="empty-state">
-                <div class="empty-icon">📭</div>
-                <h3 style="color: rgba(255, 255, 255, 0.7); margin-bottom: 0.5rem;">
-                    No Active Orders
-                </h3>
-                <p>There are currently no orders to display.</p>
+    @if (!Model.Any())
+    {
+        <div class="card reveal" style="--i:3">
+            <div class="empty">
+                <div class="empty__icon">@Html.Icon("inbox")</div>
+                <div class="empty__title">No open tables</div>
+                <p class="empty__text">You don't have any active orders right now. New orders will show up here until you finish them.</p>
+                <a asp-action="Create" class="button button--primary">@Html.Icon("plus") Start an order</a>
             </div>
-        }
-        else
-        {
-            <div class="orders-list">
-                @foreach (var order in Model)
-                {
-                    var orderTotal = calculateTotal(order);
-                    var orderId = order.Id.ToString();
+        </div>
+    }
+    else
+    {
+        <div class="stats">
+            <div class="stat stat--hero reveal" style="--i:3">
+                <div class="stat__label">@Html.Icon("euro") Open value</div>
+                <div class="stat__value">@UiHelpers.Money(totalOfAllOrders)</div>
+                <div class="stat__sub">Across all your active tables</div>
+            </div>
+            <div class="stat reveal" style="--i:4">
+                <div class="stat__label">@Html.Icon("hash") Open tables</div>
+                <div class="stat__value">@Model.Count</div>
+                <div class="stat__sub">@totalItems items served</div>
+            </div>
+        </div>
 
-                    <div class="order-card" id="card-@orderId">
-                        <div class="order-header" onclick="toggleDetails('@orderId')">
-                            <div class="table-number">
-                                <span>🪑</span>
-                                Table #@order.TableNumber
-                            </div>
-                            <div class="toggle-arrow" id="arrow-@orderId">▼</div>
+        <div class="orders-grid">
+            @foreach (var order in Model)
+            {
+                var orderTotal = calculateTotal(order);
+                var itemCount = order.OrderArticles.Sum(a => a.Quantity);
+                var preview = string.Join(", ", order.OrderArticles.Select(a => $"{a.Quantity}× {a.Article.Name}"));
+
+                <article class="card order-card reveal" style="--i:@(Math.Min(++index + 4, 14))">
+                    <div class="order-card__head">
+                        <div class="table-badge">
+                            <small>Table</small>
+                            <strong>@order.TableNumber</strong>
                         </div>
-
-                        <div class="order-details" id="details-@orderId" style="display: none; max-height: 0; overflow: hidden;">
-                            <!-- Order Items -->
-                            <div class="items-list">
-                                @foreach (var item in order.OrderArticles)
-                                {
-                                    var itemIcon = item.Article.IsFood ? "🍔" : "🥤";
-                                    var itemTotal = item.Article.Price * item.Quantity;
-
-                                    <div class="item-row">
-                                        <div class="item-info">
-                                            <span class="item-icon">@itemIcon</span>
-                                            <span class="item-name">@item.Article.Name</span>
-                                            <span class="item-quantity">× @item.Quantity</span>
-                                        </div>
-                                        <div class="item-price">
-                                            @itemTotal.ToString("F2")€
-                                        </div>
-                                    </div>
-                                }
+                        <div style="min-width: 0;">
+                            <div class="order-card__title">Table @order.TableNumber</div>
+                            <div class="order-card__meta">
+                                <span title="@order.Created.ToString("dd.MM.yyyy HH:mm")">@Html.Icon("clock") @order.Created.ToString("HH:mm")</span>
+                                <span>· @UiHelpers.TimeAgo(order.Created)</span>
                             </div>
-
-                            <!-- Order Total -->
-                            <div class="order-total">
-                                <div class="total-label">Order Total</div>
-                                <div class="total-amount">@orderTotal.ToString("F2")€</div>
-                            </div>
-
-                            <!-- Finish Order Form -->
-                            <form asp-action="Finish" method="post" onsubmit="return handleFinishOrder('@orderId')">
-                                <input type="hidden" name="id" value="@order.Id" />
-                                <button type="submit" class="finish-btn">
-                                    <span>✅</span>
-                                    Finish Order
-                                </button>
-                            </form>
+                        </div>
+                        <div class="order-card__total">
+                            <div class="order-card__amount">@UiHelpers.Money(orderTotal)</div>
+                            <div class="order-card__count">@itemCount @(itemCount == 1 ? "item" : "items")</div>
                         </div>
                     </div>
-                }
 
-                <!-- All Orders Total -->
-                <div class="all-orders-total">
-                    <div class="all-total-label">Total Value of All Active Orders</div>
-                    <div class="all-total-amount">@totalOfAllOrders.ToString("F2")€</div>
-                </div>
-            </div>
-        }
-    </div>
+                    <details class="disclosure">
+                        <summary>
+                            @Html.Icon("clipboard")
+                            <span class="disclosure__preview">@preview</span>
+                            @Html.Icon("chevron-down")
+                        </summary>
+                        <ul class="lines">
+                            @foreach (var item in order.OrderArticles)
+                            {
+                                <li>
+                                    <span class="lines__qty">@item.Quantity×</span>
+                                    <span class="lines__name">@item.Article.Name</span>
+                                    <span class="lines__price">@UiHelpers.Money(item.Article.Price * item.Quantity)</span>
+                                </li>
+                            }
+                        </ul>
+                    </details>
+
+                    <form asp-action="Finish" method="post"
+                          data-confirm="Mark the order for table @order.TableNumber (@UiHelpers.Money(orderTotal)) as paid and close it?"
+                          data-confirm-title="Finish this order?"
+                          data-confirm-ok="Finish order"
+                          data-confirm-icon="check-circle">
+                        <input type="hidden" name="id" value="@order.Id" />
+                        <button type="submit" class="button button--success button--block">
+                            @Html.Icon("check") <span>Finish order</span>
+                        </button>
+                    </form>
+                </article>
+            }
+        </div>
+    }
 </div>
-
-<script>
-    // Toggle order details - IMPROVED VERSION
-    function toggleDetails(orderId) {
-        const detailsEl = document.getElementById('details-' + orderId);
-        const arrowEl = document.getElementById('arrow-' + orderId);
-
-        if (detailsEl.style.display === 'none' || detailsEl.style.display === '') {
-            // Show details
-            detailsEl.style.display = 'block';
-            detailsEl.style.maxHeight = '2000px'; // Dovoljno velika vrednost
-            detailsEl.style.overflow = 'visible';
-            arrowEl.classList.add('rotate-180');
-
-            // Pokreni animaciju
-            detailsEl.style.animation = 'none';
-            setTimeout(() => {
-                detailsEl.style.animation = 'slideDown 0.3s ease';
-            }, 10);
-
-            showToast('Order details expanded', 'info');
-        } else {
-            // Hide details - prvo animacija pa sakrivanje
-            detailsEl.style.animation = 'slideUp 0.3s ease';
-            detailsEl.style.maxHeight = '0';
-            detailsEl.style.overflow = 'hidden';
-            arrowEl.classList.remove('rotate-180');
-
-            // Sakrij nakon animacije
-            setTimeout(() => {
-                detailsEl.style.display = 'none';
-            }, 300);
-        }
-    }
-
-    // Toast notification function
-    function showToast(message, type = 'info') {
-        const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
-        toast.textContent = message;
-        document.body.appendChild(toast);
-
-        setTimeout(() => {
-            toast.remove();
-        }, 2000);
-    }
-
-    // Handle finish order submission
-    function handleFinishOrder(orderId) {
-        showToast('Finishing order...', 'success');
-
-        // Optional: Add visual feedback
-        const card = document.getElementById('card-' + orderId);
-        if (card) {
-            card.style.opacity = '0.5';
-            card.style.transition = 'opacity 0.3s ease';
-        }
-
-        return true; // Allow form submission
-    }
-
-    // Prevent click propagation from form elements
-    document.addEventListener('DOMContentLoaded', function () {
-        // Ensure all details are hidden on page load
-        document.querySelectorAll('[id^="details-"]').forEach(detailsEl => {
-            detailsEl.style.display = 'none';
-            detailsEl.style.maxHeight = '0';
-            detailsEl.style.overflow = 'hidden';
-        });
-
-        document.querySelectorAll('[id^="arrow-"]').forEach(arrowEl => {
-            arrowEl.classList.remove('rotate-180');
-        });
-
-        // Add click event listener to all forms to stop propagation
-        document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('click', function (e) {
-                e.stopPropagation();
-            });
-        });
-
-        // Add click event listener to all finish buttons to stop propagation
-        document.querySelectorAll('.finish-btn').forEach(button => {
-            button.addEventListener('click', function (e) {
-                e.stopPropagation();
-            });
-        });
-
-        // Show welcome message
-    @if (Model.Any())
-    {
-        <text>
-                setTimeout(() => {
-                    showToast(`Loaded ${@Model.Count} active orders`, 'info');
-                }, 500);
-        </text>
-    }
-        });
-</script>

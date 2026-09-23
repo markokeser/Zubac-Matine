@@ -1,14 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using Zubac.Data;
 using Zubac.Interfaces;
 using Zubac.Models;
 
 namespace Zubac.Controllers
 {
+    [Authorize]
     public class OrderController : Controller
     {
         private readonly IOrderService _service;
@@ -17,12 +14,19 @@ namespace Zubac.Controllers
             _service = service;
         }
 
+        private int RestaurantId => int.Parse(User.FindFirst("RestaurantId")!.Value);
+        private int UserId => int.Parse(User.FindFirst("UserId")!.Value);
+
+        private void Toast(string message, string type = "success")
+        {
+            TempData["Toast"] = message;
+            TempData["ToastType"] = type;
+        }
+
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
-            int id = int.Parse(User.FindFirst("UserId").Value);
-            var orders = await _service.GetOrders(id, restaurantId);
+            var orders = await _service.GetOrders(UserId, RestaurantId);
 
             return View(orders);
         }
@@ -30,19 +34,9 @@ namespace Zubac.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
-            var articles = await _service.GetArticles(restaurantId);
-
             var model = new MakeOrderViewModel
             {
-                Articles = articles.Where(x => x.RestaurantId == restaurantId && x.IsAvailable).Select(a => new ArticleViewModel
-                {
-                    Id = a.Id,
-                    Name = a.Name,
-                    Price = a.Price,
-                    IsFood = a.IsFood,
-                    RestaurantId = restaurantId
-                }).ToList()
+                Articles = await _service.GetModelArticles(RestaurantId)
             };
 
             return View(model);
@@ -51,11 +45,9 @@ namespace Zubac.Controllers
         [HttpGet]
         public async Task<IActionResult> FreeDrink()
         {
-            int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
-            var articles = await _service.GetModelArticles(restaurantId);
             var model = new MakeOrderViewModel
             {
-                Articles = articles
+                Articles = await _service.GetModelArticles(RestaurantId)
             };
 
             return View(model);
@@ -64,117 +56,115 @@ namespace Zubac.Controllers
         [HttpGet]
         public async Task<IActionResult> OrderOnBar()
         {
-            int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
-            var articles = await _service.GetModelArticles(restaurantId);
             var model = new MakeOrderViewModel
             {
-                Articles = articles
+                Articles = await _service.GetModelArticles(RestaurantId)
             };
 
             return View(model);
         }
 
         [HttpGet]
+        [Authorize(Policy = "Admin")]
         public async Task<IActionResult> FindOrder()
         {
-            int RestaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
-            var waiters = await _service.GetWaiters(RestaurantId);
-
             var model = new FindOrderViewModel
             {
-                Waiters = waiters
+                Waiters = await _service.GetWaiters(RestaurantId)
             };
 
             return View(model);
         }
 
         [HttpPost]
+        [Authorize(Policy = "Admin")]
         public async Task<IActionResult> FindOrder(FindOrderViewModel model)
         {
-            int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
-            model.Waiters = await _service.GetWaiters(restaurantId);
+            model.Waiters = await _service.GetWaiters(RestaurantId);
 
             model.Orders = await _service.SearchOrders(
                 model.TableNumber,
                 model.CreatedBy,
-                restaurantId
+                RestaurantId
             );
 
             return View(model);
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [HttpPost]
         public async Task<IActionResult> Create(MakeOrderViewModel model)
         {
-            int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
+            if (model.TableNumber <= 0)
+                ModelState.AddModelError("", "Please choose a table.");
+
             if (!ModelState.IsValid || model.SelectedArticles == null || model.SelectedArticles.Count == 0)
             {
-                model.Articles = await _service.GetModelArticles(restaurantId);
+                if (model.SelectedArticles == null || model.SelectedArticles.Count == 0)
+                    ModelState.AddModelError("", "Please add at least one item.");
 
-                ModelState.AddModelError("", "Please select at least one drink.");
+                model.Articles = await _service.GetModelArticles(RestaurantId);
                 return View(model);
             }
 
-            int id = int.Parse(User.FindFirst("UserId").Value);
-            var response = await _service.CreateOrder(model, id, restaurantId);
+            var response = await _service.CreateOrder(model, UserId, RestaurantId);
 
-            if(response.Success == false)
+            if (response.Success == false)
             {
                 ModelState.AddModelError("", response.ErrorMessage);
+                model.Articles = await _service.GetModelArticles(RestaurantId);
                 return View(model);
             }
 
-            return RedirectToAction("Index", "Home"); // or wherever your order list is
+            Toast($"Order for table {model.TableNumber} sent");
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpPost]
         public async Task<IActionResult> OrderOnBar(MakeOrderViewModel model)
         {
-            int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
             if (!ModelState.IsValid || model.SelectedArticles == null || model.SelectedArticles.Count == 0)
             {
-                model.Articles = await _service.GetModelArticles(restaurantId);
+                model.Articles = await _service.GetModelArticles(RestaurantId);
 
-                ModelState.AddModelError("", "Please select at least one drink.");
-                return View("OrderOnBar", model); // render the OrderOnBar.cshtml view
+                ModelState.AddModelError("", "Please add at least one item.");
+                return View("OrderOnBar", model);
             }
 
-            int id = int.Parse(User.FindFirst("UserId").Value);
-            var response = await _service.OrderOnBar(model, id, restaurantId);
+            var response = await _service.OrderOnBar(model, UserId, RestaurantId);
 
             if (response.Success == false)
             {
-                ModelState.AddModelError(response.ErrorTitle, response.ErrorMessage);
+                ModelState.AddModelError("", response.ErrorMessage);
+                model.Articles = await _service.GetModelArticles(RestaurantId);
                 return View(model);
             }
 
+            Toast("Bar order completed");
             return RedirectToAction("OrderOnBar");
         }
 
         [HttpPost]
         public async Task<IActionResult> FreeDrink(MakeOrderViewModel model)
         {
-            int restaurantId = int.Parse(User.FindFirst("RestaurantId").Value);
             if (!ModelState.IsValid || model.SelectedArticles == null || model.SelectedArticles.Count == 0)
             {
-                model.Articles = await _service.GetModelArticles(restaurantId);
+                model.Articles = await _service.GetModelArticles(RestaurantId);
 
-                ModelState.AddModelError("", "Please select at least one drink.");
-                return View("FreeDrink", model); // render the OrderOnBar.cshtml view
+                ModelState.AddModelError("", "Please add at least one item.");
+                return View("FreeDrink", model);
             }
 
-            int id = int.Parse(User.FindFirst("UserId").Value);
-            var response = await _service.CreateFreeDrink(model, id, restaurantId);
+            var response = await _service.CreateFreeDrink(model, UserId, RestaurantId);
 
             if (response.Success == false)
             {
-                ModelState.AddModelError(response.ErrorTitle, response.ErrorMessage);
+                ModelState.AddModelError("", response.ErrorMessage);
+                model.Articles = await _service.GetModelArticles(RestaurantId);
                 return View(model);
             }
 
+            Toast("Free order logged");
             return RedirectToAction("Index", "Home");
         }
 
@@ -185,38 +175,8 @@ namespace Zubac.Controllers
 
             if (response.Success == false) return NotFound();
 
+            Toast("Order finished");
             return RedirectToAction(nameof(Index));
-        }
-
-
-
-
-
-        // GET: OrderController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: OrderController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: OrderController/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
         }
     }
 }

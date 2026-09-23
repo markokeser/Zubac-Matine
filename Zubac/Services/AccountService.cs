@@ -24,7 +24,8 @@ namespace Zubac.Services
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Username == model.Username);
 
-            if (user == null)
+            // Staff created without a password (still waiting for their set-password link) can't sign in.
+            if (user == null || string.IsNullOrEmpty(user.Password))
                 return null;
 
             var hasher = new PasswordHasher<Users>();

@@ -79,15 +79,27 @@ namespace Zubac.Services
             var json = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await client.PostAsync("https://api.openai.com/v1/chat/completions", content);
-            var responseJson = await response.Content.ReadAsStringAsync();
+            string? aiText;
+            try
+            {
+                var response = await client.PostAsync("https://api.openai.com/v1/chat/completions", content);
+                if (!response.IsSuccessStatusCode)
+                    return null;
 
-            using var doc = JsonDocument.Parse(responseJson);
-            var aiText = doc.RootElement
-                .GetProperty("choices")[0]
-                .GetProperty("message")
-                .GetProperty("content")
-                .GetString();
+                var responseJson = await response.Content.ReadAsStringAsync();
+
+                using var doc = JsonDocument.Parse(responseJson);
+                aiText = doc.RootElement
+                    .GetProperty("choices")[0]
+                    .GetProperty("message")
+                    .GetProperty("content")
+                    .GetString();
+            }
+            catch (Exception ex) when (ex is HttpRequestException or JsonException or KeyNotFoundException or InvalidOperationException or TaskCanceledException)
+            {
+                // AI service unreachable or returned an unexpected payload — the UI shows a friendly message.
+                return null;
+            }
 
             if (string.IsNullOrWhiteSpace(aiText))
                 return null;

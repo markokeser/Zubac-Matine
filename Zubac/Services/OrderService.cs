@@ -122,7 +122,7 @@ namespace Zubac.Services
             {
                 if (selected.IsSelected && selected.Quantity > 0)
                 {
-                    var articleExists = await _context.Articles.AnyAsync(a => a.Id == selected.ArticleId);
+                    var articleExists = await _context.Articles.AnyAsync(a => a.Id == selected.ArticleId && a.RestaurantId == restaurantId);
                     if (!articleExists) continue;
 
                     order.OrderArticles.Add(new OrderArticle
@@ -267,12 +267,14 @@ namespace Zubac.Services
                   x.Type == "Beer" ? 5 :
                   x.Type == "Spirit" ? 6 :
                   x.Type == "NonAlcoholic" ? 7 :
-                  999).Select(a => new ArticleViewModel
+                  999).ThenBy(x => x.Name).Select(a => new ArticleViewModel
                     {
                         Id = a.Id,
                         Name = a.Name,
                         Price = a.Price,
                         IsFood = a.IsFood,
+                        IsAvailable = a.IsAvailable,
+                        Type = a.Type,
                         RestaurantId = restaurantId
                     }).ToListAsync();
 

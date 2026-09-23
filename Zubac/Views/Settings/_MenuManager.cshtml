@@ -1,0 +1,306 @@
+@model List<Zubac.Models.ArticleViewModel>
+@*
+    Shared list + add/edit dialogs for FoodSettings and DrinksSettings.
+    ViewData: "IsFood" (bool).
+*@
+@{
+    var isFood = ViewData["IsFood"] is bool f && f;
+    var noun = isFood ? "Dish" : "Drink";
+    var nounLower = isFood ? "dish" : "drink";
+    var aiLabel = isFood ? "AI pairing" : "AI sommelier";
+    var aiHelp = isFood
+        ? "Guests can pick this dish in the AI Sommelier."
+        : "The AI Sommelier may recommend this drink.";
+
+    var typeOptions = isFood
+        ? new[] { ("Soup", "Soup"), ("Salad", "Salad"), ("Meat", "Meat"), ("Fish", "Fish"), ("Dessert", "Dessert"), ("Other", "Other") }
+        : new[] { ("Cocktail", "Cocktail"), ("Red Wine", "Red Wine"), ("White Wine", "White Wine"), ("Rose Wine", "Rosé Wine"), ("Beer", "Beer"), ("Spirit", "Spirit (whiskey, vodka…)"), ("NonAlcoholic", "Non-alcoholic"), ("Other", "Other") };
+
+    var presentTypes = Model
+        .Select(a => a.Type)
+        .Where(t => !string.IsNullOrWhiteSpace(t))
+        .Distinct()
+        .OrderBy(t => t)
+        .ToList();
+
+    var availableCount = Model.Count(a => a.IsAvailable);
+    var aiCount = Model.Count(a => a.AiSommelierEnabled);
+    var index = 0;
+}
+
+@Html.AntiForgeryToken()
+
+<div data-menu-manager data-noun="@noun">
+    <div class="stats">
+        <div class="stat reveal" style="--i:3">
+            <div class="stat__label">@Html.Icon(isFood ? "utensils" : "wine") On the menu</div>
+            <div class="stat__value">@Model.Count</div>
+            <div class="stat__sub">@(isFood ? "dishes" : "drinks") in total</div>
+        </div>
+        <div class="stat reveal" style="--i:4">
+            <div class="stat__label">@Html.Icon("check-circle") Available</div>
+            <div class="stat__value" data-count-available>@availableCount</div>
+            <div class="stat__sub">shown to staff when ordering</div>
+        </div>
+        <div class="stat reveal" style="--i:5">
+            <div class="stat__label">@Html.Icon("sparkles") @aiLabel</div>
+            <div class="stat__value" data-count-ai>@aiCount</div>
+            <div class="stat__sub">used by the AI Sommelier</div>
+        </div>
+    </div>
+
+    <div class="card card--flush menu-list reveal" style="--i:6">
+        @if (!Model.Any())
+        {
+            <div class="empty">
+                <div class="empty__icon">@Html.Icon(isFood ? "utensils" : "wine")</div>
+                <div class="empty__title">No @(isFood ? "dishes" : "drinks") yet</div>
+                <p class="empty__text">Add your first @nounLower, or import a whole menu from a photo with the AI menu builder.</p>
+                <div class="row-gap" style="justify-content: center; margin-top: 20px;">
+                    <button type="button" class="button button--primary" data-bs-toggle="modal" data-bs-target="#addItemModal" style="margin-top: 0;">@Html.Icon("plus") Add @nounLower</button>
+                    <a asp-action="AiMenuBuilder" class="button button--outline-gold" style="margin-top: 0;">@Html.Icon("sparkles") AI menu builder</a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="list-toolbar">
+                <div class="input-wrap">
+                    @Html.Icon("search")
+                    <input type="search" class="input input--sm" placeholder="Search @(isFood ? "dishes" : "drinks")…" data-list-search aria-label="Search" />
+                </div>
+                @if (presentTypes.Count > 1)
+                {
+                    <select class="select input--sm" style="width: auto; min-width: 170px;" data-list-type aria-label="Filter by type">
+                        <option value="">All types</option>
+                        @foreach (var t in presentTypes)
+                        {
+                            <option value="@t">@UiHelpers.TypeLabel(t)</option>
+                        }
+                    </select>
+                }
+            </div>
+
+            <div class="list-head">
+                <span>Name</span>
+                <span>Type</span>
+                <span>Price</span>
+                <span>Available</span>
+                <span>@aiLabel</span>
+                <span style="text-align: right;">Actions</span>
+            </div>
+
+            @foreach (var item in Model)
+            {
+                <div class="list-row" data-item data-name="@item.Name.ToLowerInvariant()" data-type="@item.Type" style="--i:@(Math.Min(++index, 12))">
+                    <div class="c-name item-name">@item.Name</div>
+                    <div class="c-type"><span class="tag" data-tone="@UiHelpers.TypeTone(item.Type)">@UiHelpers.TypeLabel(item.Type)</span></div>
+                    <div class="c-price item-price">@UiHelpers.Money(item.Price)</div>
+                    <div class="c-avail">
+                        <label class="switch switch--success">
+                            <input type="checkbox" class="js-available" data-id="@item.Id" @(item.IsAvailable ? "checked" : "") aria-label="Available: @item.Name" />
+                            <span class="switch__track"></span>
+                            <span class="switch__label m-label">Available</span>
+                        </label>
+                    </div>
+                    <div class="c-ai">
+                        <label class="switch switch--violet">
+                            <input type="checkbox" class="js-ai" data-id="@item.Id" @(item.AiSommelierEnabled ? "checked" : "") aria-label="@aiLabel: @item.Name" />
+                            <span class="switch__track"></span>
+                            <span class="switch__label m-label">@aiLabel</span>
+                        </label>
+                    </div>
+                    <div class="cell-actions c-actions">
+                        <button type="button" class="button button--sm button--icon button--ghost"
+                                data-edit
+                                data-id="@item.Id"
+                                data-name="@item.Name"
+                                data-price="@UiHelpers.Invariant(item.Price)"
+                                data-type="@item.Type"
+                                data-available="@item.IsAvailable"
+                                data-ai="@item.AiSommelierEnabled"
+                                aria-label="Edit @item.Name" title="Edit">
+                            @Html.Icon("pencil")
+                        </button>
+                        <form asp-action="DeleteArticle" method="post" class="d-inline"
+                              data-confirm="“@item.Name” will be removed from the menu."
+                              data-confirm-title="Delete this @nounLower?"
+                              data-confirm-ok="Delete"
+                              data-confirm-tone="danger">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <input type="hidden" name="isFood" value="@(isFood ? "true" : "false")" />
+                            <button type="submit" class="button button--sm button--icon button--danger-ghost" aria-label="Delete @item.Name" title="Delete">
+                                @Html.Icon("trash")
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+
+            <div class="empty empty--sm" data-no-results hidden>
+                <div class="empty__icon">@Html.Icon("search")</div>
+                <div class="empty__title">No matches</div>
+                <p class="empty__text">Try a different name or type.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Add item -->
+<div class="modal fade" id="addItemModal" tabindex="-1" aria-labelledby="addItemLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form asp-action="AddArticle" method="post" data-loading>
+                <input type="hidden" name="IsFood" value="@(isFood ? "true" : "false")" />
+
+                <div class="modal-header">
+                    <div class="modal-title">
+                        <span class="chip-icon">@Html.Icon("plus")</span>
+                        <div>
+                            <div id="addItemLabel">Add @nounLower</div>
+                            <div class="modal-sub">It appears on the ordering screen right away.</div>
+                        </div>
+                    </div>
+                    <button type="button" class="modal-close" data-bs-dismiss="modal" aria-label="Close">@Html.Icon("x")</button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="field">
+                        <label class="label" for="addName">Name</label>
+                        <input id="addName" name="Name" class="input" required maxlength="120" placeholder="@(isFood ? "e.g. Beef tartare" : "e.g. Aperol Spritz")" autocomplete="off" />
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-5">
+                            <div class="field">
+                                <label class="label" for="addPrice">Price (€)</label>
+                                <input id="addPrice" name="Price" type="number" inputmode="decimal" step="0.01" min="0" class="input" required placeholder="0.00" />
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-7">
+                            <div class="field">
+                                <label class="label" for="addType">Type</label>
+                                <select id="addType" name="Type" class="select" required>
+                                    <option value="">Choose a type</option>
+                                    @foreach (var (value, label) in typeOptions)
+                                    {
+                                        <option value="@value">@label</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <label class="toggle-row" style="margin-top: 18px;">
+                        <span class="toggle-row__text">
+                            <span class="toggle-row__title d-block">Available now</span>
+                            <span class="toggle-row__desc d-block">Staff can add it to orders.</span>
+                        </span>
+                        <span class="switch switch--success">
+                            <input type="checkbox" name="IsAvailable" value="true" checked />
+                            <span class="switch__track"></span>
+                        </span>
+                    </label>
+                    <input type="hidden" name="IsAvailable" value="false" />
+
+                    <label class="toggle-row">
+                        <span class="toggle-row__text">
+                            <span class="toggle-row__title d-block">@aiLabel</span>
+                            <span class="toggle-row__desc d-block">@aiHelp</span>
+                        </span>
+                        <span class="switch switch--violet">
+                            <input type="checkbox" name="AiSommelierEnabled" value="true" />
+                            <span class="switch__track"></span>
+                        </span>
+                    </label>
+                    <input type="hidden" name="AiSommelierEnabled" value="false" />
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="button button--ghost" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="button button--primary">@Html.Icon("plus") <span>Add @nounLower</span></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit item -->
+<div class="modal fade" id="editItemModal" tabindex="-1" aria-labelledby="editItemLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form asp-action="UpdateArticle" method="post" data-loading>
+                <input type="hidden" name="Id" />
+                <input type="hidden" name="IsFood" value="@(isFood ? "true" : "false")" />
+
+                <div class="modal-header">
+                    <div class="modal-title">
+                        <span class="chip-icon">@Html.Icon("pencil")</span>
+                        <div>
+                            <div id="editItemLabel">Edit @nounLower</div>
+                            <div class="modal-sub">Changes apply to new orders immediately.</div>
+                        </div>
+                    </div>
+                    <button type="button" class="modal-close" data-bs-dismiss="modal" aria-label="Close">@Html.Icon("x")</button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="field">
+                        <label class="label" for="editName">Name</label>
+                        <input id="editName" name="Name" class="input" required maxlength="120" autocomplete="off" />
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-5">
+                            <div class="field">
+                                <label class="label" for="editPrice">Price (€)</label>
+                                <input id="editPrice" name="Price" type="number" inputmode="decimal" step="0.01" min="0" class="input" required />
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-7">
+                            <div class="field">
+                                <label class="label" for="editType">Type</label>
+                                <select id="editType" name="Type" class="select" required>
+                                    <option value="">Choose a type</option>
+                                    @foreach (var (value, label) in typeOptions)
+                                    {
+                                        <option value="@value">@label</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <label class="toggle-row" style="margin-top: 18px;">
+                        <span class="toggle-row__text">
+                            <span class="toggle-row__title d-block">Available</span>
+                            <span class="toggle-row__desc d-block">Staff can add it to orders.</span>
+                        </span>
+                        <span class="switch switch--success">
+                            <input type="checkbox" name="IsAvailable" value="true" id="editAvailable" />
+                            <span class="switch__track"></span>
+                        </span>
+                    </label>
+                    <input type="hidden" name="IsAvailable" value="false" />
+
+                    <label class="toggle-row">
+                        <span class="toggle-row__text">
+                            <span class="toggle-row__title d-block">@aiLabel</span>
+                            <span class="toggle-row__desc d-block">@aiHelp</span>
+                        </span>
+                        <span class="switch switch--violet">
+                            <input type="checkbox" name="AiSommelierEnabled" value="true" id="editAi" />
+                            <span class="switch__track"></span>
+                        </span>
+                    </label>
+                    <input type="hidden" name="AiSommelierEnabled" value="false" />
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="button button--ghost" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="button button--primary">@Html.Icon("save") <span>Save changes</span></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

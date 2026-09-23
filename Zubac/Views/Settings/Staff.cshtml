@@ -1,763 +1,233 @@
-﻿@model List<Zubac.Models.StaffViewModel>
+@model List<Zubac.Models.StaffViewModel>
 
 @{
-    ViewData["Title"] = "Staff Management";
+    ViewData["Title"] = "Staff";
+    var roleCounts = Model.GroupBy(s => s.UserRank).ToDictionary(g => g.Key, g => g.Count());
+    var index = 0;
 }
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-
-<style>
-    body {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%) !important;
-        min-height: 100vh;
-        color: rgba(255, 255, 255, 0.9);
-        font-family: 'Inter', sans-serif;
-    }
-
-    .nav-buttons {
-        display: flex;
-        gap: 12px;
-        margin-bottom: 2rem;
-        flex-wrap: wrap;
-    }
-
-    .nav-btn {
-        transition: all 0.2s ease;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px 16px;
-        border-radius: 8px;
-        font-weight: 500;
-        background: rgba(212, 175, 55, 0.1);
-        color: #d4af37;
-        border: 1px solid rgba(212, 175, 55, 0.3);
-        font-family: 'Inter', sans-serif;
-    }
-
-        .nav-btn:hover {
-            background: rgba(212, 175, 55, 0.2) !important;
-            transform: scale(1.05);
-            color: #d4af37;
-            text-decoration: none;
-        }
-
-    .main-container {
-        background: rgba(45, 45, 68, 0.8);
-        backdrop-filter: blur(10px);
-        border-radius: 16px;
-        padding: 2rem;
-        max-width: 1200px;
-        margin: 0 auto;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    }
-
-    .page-header {
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-
-    .page-title {
-        font-family: 'Playfair Display', serif;
-        color: #d4af37;
-        font-size: 2.2rem;
-        font-weight: 700;
-        margin: 0;
-        display: inline-flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    /* Staff Table Styling */
-    .staff-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 1.5rem 0;
-        animation: fadeIn 0.6s ease;
-    }
-
-    @@keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .table-header {
-        background: rgba(212, 175, 55, 0.15);
-        border: 1px solid rgba(212, 175, 55, 0.3);
-        border-radius: 10px 10px 0 0;
-        overflow: hidden;
-    }
-
-    .table-header-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr 200px;
-        padding: 1rem 1.5rem;
-    }
-
-    @@media (max-width: 768px) {
-        .table-header-row {
-            grid-template-columns: 1fr 1fr 180px;
-            padding: 0.8rem 1rem;
-        }
-    }
-
-    @@media (max-width: 576px) {
-        .table-header-row {
-            grid-template-columns: 1fr 1fr 160px;
-            padding: 0.6rem 0.8rem;
-        }
-    }
-
-    .header-cell {
-        color: #d4af37;
-        font-weight: 700;
-        font-size: 1rem;
-        font-family: 'Inter', sans-serif;
-        text-align: left;
-        padding: 0.5rem;
-    }
-
-    .table-body {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(212, 175, 55, 0.2);
-        border-top: none;
-        border-radius: 0 0 10px 10px;
-    }
-
-    .table-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr 200px;
-        padding: 1rem 1.5rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        transition: all 0.3s ease;
-        align-items: center;
-    }
-
-        .table-row:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateX(5px);
-        }
-
-        .table-row:last-child {
-            border-bottom: none;
-        }
-
-    @@media (max-width: 768px) {
-        .table-row {
-            grid-template-columns: 1fr 1fr 180px;
-            padding: 0.8rem 1rem;
-        }
-    }
-
-    @@media (max-width: 576px) {
-        .table-row {
-            grid-template-columns: 1fr 1fr 160px;
-            padding: 0.6rem 0.8rem;
-            gap: 8px;
-        }
-    }
-
-    .table-cell {
-        color: rgba(255, 255, 255, 0.9);
-        font-family: 'Inter', sans-serif;
-        font-weight: 500;
-        padding: 0.5rem;
-        display: flex;
-        align-items: center;
-    }
-
-    .username-cell {
-        font-weight: 600;
-    }
-
-    .role-cell {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .role-icon {
-        font-size: 1.1rem;
-    }
-
-    .role-badge {
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 600;
-    }
-
-    .role-admin {
-        background: rgba(220, 53, 69, 0.2);
-        color: #dc3545;
-    }
-
-    .role-manager {
-        background: rgba(13, 110, 253, 0.2);
-        color: #0d6efd;
-    }
-
-    .role-waiter {
-        background: rgba(25, 135, 84, 0.2);
-        color: #198754;
-    }
-
-    .role-bartender {
-        background: rgba(255, 193, 7, 0.2);
-        color: #ffc107;
-    }
-
-    .actions-cell {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-    }
-
-    .action-btn {
-        padding: 8px 12px;
-        border-radius: 6px;
-        font-weight: 600;
-        font-size: 0.85rem;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        font-family: 'Inter', sans-serif;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        text-decoration: none;
-    }
-
-    .btn-generate {
-        background: rgba(41, 182, 246, 0.2);
-        color: #29B6F6;
-        border: 1px solid rgba(41, 182, 246, 0.3);
-    }
-
-        .btn-generate:hover {
-            background: rgba(41, 182, 246, 0.3);
-            transform: translateY(-2px);
-        }
-
-    .btn-update {
-        background: rgba(255, 193, 7, 0.2);
-        color: #ffc107;
-        border: 1px solid rgba(255, 193, 7, 0.3);
-    }
-
-        .btn-update:hover {
-            background: rgba(255, 193, 7, 0.3);
-            transform: translateY(-2px);
-        }
-
-    .btn-delete {
-        background: rgba(220, 53, 69, 0.2);
-        color: #dc3545;
-        border: 1px solid rgba(220, 53, 69, 0.3);
-        padding: 8px 16px;
-    }
-
-        .btn-delete:hover {
-            background: rgba(220, 53, 69, 0.3);
-            transform: translateY(-2px);
-        }
-
-    /* Add Staff Button */
-    .add-staff-btn {
-        background: linear-gradient(135deg, #4CAF50, #66BB6A);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 12px 24px;
-        font-weight: 600;
-        font-size: 1rem;
-        transition: all 0.2s ease;
-        font-family: 'Inter', sans-serif;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        text-decoration: none;
-        margin: 2rem auto 0;
-    }
-
-        .add-staff-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(76, 175, 80, 0.3);
-            color: white;
-        }
-
-    .btn-center-container {
-        text-align: center;
-    }
-
-    /* Modal Styling */
-    .modal-content {
-        background: rgba(45, 45, 68, 0.95);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(212, 175, 55, 0.3);
-        border-radius: 12px;
-        color: rgba(255, 255, 255, 0.9);
-    }
-
-    .modal-header {
-        border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-        padding: 1.5rem;
-    }
-
-    .modal-title {
-        color: #d4af37;
-        font-family: 'Playfair Display', serif;
-        font-weight: 600;
-    }
-
-    .modal-body {
-        padding: 1.5rem;
-    }
-
-    .modal-footer {
-        border-top: 1px solid rgba(212, 175, 55, 0.2);
-        padding: 1rem 1.5rem;
-    }
-
-    .btn-close {
-        filter: invert(1);
-    }
-
-    .modal-input {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(212, 175, 55, 0.3);
-        color: rgba(255, 255, 255, 0.9);
-        border-radius: 8px;
-        padding: 10px 12px;
-        font-family: 'Inter', sans-serif;
-        transition: all 0.2s ease;
-        width: 100%;
-    }
-
-        .modal-input:focus {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: #d4af37;
-            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
-            color: rgba(255, 255, 255, 0.9);
-            outline: none;
-        }
-
-    .modal-label {
-        color: rgba(255, 255, 255, 0.8);
-        font-weight: 600;
-        font-size: 0.9rem;
-        font-family: 'Inter', sans-serif;
-        margin-bottom: 8px;
-        display: block;
-    }
-
-    /* Empty State */
-    .empty-state {
-        text-align: center;
-        padding: 3rem 0;
-        color: rgba(255, 255, 255, 0.5);
-        font-family: 'Inter', sans-serif;
-    }
-
-    .empty-icon {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-        opacity: 0.7;
-    }
-
-    /* Toast Notification */
-    .toast {
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        padding: 12px 24px;
-        border-radius: 8px;
-        font-family: 'Inter', sans-serif;
-        font-weight: 500;
-        z-index: 9999;
-        animation: fadeInOut 2s ease-in-out;
-    }
-
-    @@keyframes fadeInOut {
-        0%, 100% {
-            opacity: 0;
-            transform: translateX(-50%) translateY(10px);
-        }
-
-        10%, 90% {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-    }
-
-    .toast-success {
-        background: #4CAF50;
-        color: white;
-    }
-
-    .toast-info {
-        background: #29B6F6;
-        color: white;
-    }
-
-    .toast-error {
-        background: #dc3545;
-        color: white;
-    }
-
-    .toast-warning {
-        background: #ffc107;
-        color: #1a1a2e;
-    }
-
-    /* Responsive Actions */
-    @@media (max-width: 576px) {
-        .actions-cell {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .action-btn {
-            width: 100%;
-            justify-content: center;
-        }
-
-        .table-row {
-            grid-template-columns: 1fr;
-            gap: 12px;
-        }
-
-        .table-header-row {
-            display: none;
-        }
-
-        .table-cell {
-            display: grid;
-            grid-template-columns: 100px 1fr;
-            gap: 10px;
-            align-items: center;
-        }
-
-            .table-cell::before {
-                content: attr(data-label);
-                color: #d4af37;
-                font-weight: 600;
-                font-size: 0.9rem;
-            }
-    }
-</style>
-
-<div class="container py-4">
-    <!-- Navigation Buttons -->
-    <div class="nav-buttons">
-        <a asp-controller="Home" asp-action="Index" class="nav-btn">
-            <span style="font-size: 1.2rem;">🏠</span>
-            <span>Home</span>
-        </a>
-        <a asp-controller="Settings" asp-action="Index" class="nav-btn">
-            <span style="font-size: 1.2rem;">⬅</span>
-            <span>Back</span>
-        </a>
-    </div>
-
-    <!-- Header -->
-    <div class="page-header">
-        <h1 class="page-title">
-            <span style="font-size: 2.2rem;">👥</span>
-            Staff Management
-        </h1>
-    </div>
-
-    <!-- Main Container -->
-    <div class="main-container">
-        @if (!Model.Any())
-        {
-            <div class="empty-state">
-                <div class="empty-icon">👥</div>
-                <h3 style="color: rgba(255, 255, 255, 0.7); margin-bottom: 0.5rem;">
-                    No Staff Members
-                </h3>
-                <p>Add your first staff member to get started.</p>
+@Html.AntiForgeryToken()
+
+<div class="page page--mid">
+    <header class="page-head">
+        <div class="page-head__text">
+            <a asp-controller="Settings" asp-action="Index" class="back-link">@Html.Icon("chevron-left") Settings</a>
+            <div class="eyebrow reveal">Team</div>
+            <h1 class="page-title reveal" style="--i:1">Staff</h1>
+            <p class="page-sub reveal" style="--i:2">Manage who can sign in and what they can do. New members set their own password with a one-time link.</p>
+        </div>
+        <div class="page-head__actions reveal" style="--i:2">
+            <a asp-action="AddStaff" class="button button--primary">@Html.Icon("user-plus") Add member</a>
+        </div>
+    </header>
+
+    @if (!Model.Any())
+    {
+        <div class="card reveal" style="--i:3">
+            <div class="empty">
+                <div class="empty__icon">@Html.Icon("users")</div>
+                <div class="empty__title">No staff yet</div>
+                <p class="empty__text">Add your first team member to get started.</p>
+                <a asp-action="AddStaff" class="button button--primary">@Html.Icon("user-plus") Add member</a>
             </div>
-        }
-        else
-        {
-            <!-- Staff Table -->
-            <div class="staff-table">
-                <div class="table-header">
-                    <div class="table-header-row">
-                        <div class="header-cell">Username</div>
-                        <div class="header-cell">Role</div>
-                        <div class="header-cell">Actions</div>
+        </div>
+    }
+    else
+    {
+        <div class="row-gap reveal" style="--i:3; margin-bottom: 16px;">
+            <span class="tag" data-tone="muted">@Model.Count members</span>
+            @foreach (var rank in new[] { 3, 2, 1, 0 })
+            {
+                if (roleCounts.TryGetValue(rank, out var count))
+                {
+                    <span class="tag" data-tone="@UiHelpers.RankTone(rank)">@Html.Icon(UiHelpers.RankIcon(rank)) @count @UiHelpers.RankName(rank)@(count == 1 ? "" : "s")</span>
+                }
+            }
+        </div>
+
+        <div class="card card--flush staff-list reveal" style="--i:4">
+            <div class="list-head">
+                <span>Member</span>
+                <span>Role</span>
+                <span style="text-align: right;">Actions</span>
+            </div>
+
+            @foreach (var staff in Model.OrderByDescending(s => s.UserRank).ThenBy(s => s.Username))
+            {
+                var tone = UiHelpers.RankTone(staff.UserRank);
+                <div class="list-row reveal" style="--i:@(Math.Min(++index + 4, 16))">
+                    <div class="person">
+                        <span class="avatar avatar--lg" data-tone="@tone">@UiHelpers.Initials(staff.Username)</span>
+                        <div style="min-width: 0;">
+                            <div class="person__name">@staff.Username</div>
+                            <div class="person__sub">ID @staff.Id</div>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="tag" data-tone="@tone">@Html.Icon(UiHelpers.RankIcon(staff.UserRank)) @UiHelpers.RankName(staff.UserRank)</span>
+                    </div>
+                    <div class="cell-actions c-actions">
+                        <button type="button" class="button button--sm button--outline-gold" data-generate-link="@staff.Id" data-username="@staff.Username">
+                            @Html.Icon("key") <span>Password link</span>
+                        </button>
+                        <button type="button" class="button button--sm button--icon button--ghost"
+                                data-edit-staff
+                                data-id="@staff.Id"
+                                data-username="@staff.Username"
+                                data-rank="@staff.UserRank"
+                                aria-label="Edit @staff.Username" title="Edit">
+                            @Html.Icon("pencil")
+                        </button>
+                        <form asp-action="DeleteStaff" asp-route-id="@staff.Id" method="post" class="d-inline"
+                              data-confirm="@staff.Username will lose access immediately. This can't be undone."
+                              data-confirm-title="Remove @staff.Username?"
+                              data-confirm-ok="Remove member"
+                              data-confirm-tone="danger">
+                            <button type="submit" class="button button--sm button--icon button--danger-ghost" aria-label="Remove @staff.Username" title="Remove">
+                                @Html.Icon("trash")
+                            </button>
+                        </form>
                     </div>
                 </div>
-
-                <div class="table-body">
-                    @foreach (var staff in Model)
-                    {
-                        <div class="table-row">
-                            <div class="table-cell username-cell" data-label="Username">@staff.Username</div>
-                            <div class="table-cell role-cell" data-label="Role">
-                                @{
-                                    var rankName = staff.GetRankName();
-                                    var icon = "";
-                                    var badgeClass = "";
-
-                                    switch (rankName)
-                                    {
-                                        case "Admin":
-                                            icon = "👑";
-                                            badgeClass = "role-admin";
-                                            break;
-                                        case "Manager":
-                                            icon = "👔";
-                                            badgeClass = "role-manager";
-                                            break;
-                                        case "Waiter":
-                                            icon = "🍽️";
-                                            badgeClass = "role-waiter";
-                                            break;
-                                        case "Bartender":
-                                            icon = "🍸";
-                                            badgeClass = "role-bartender";
-                                            break;
-                                        default:
-                                            icon = "👤";
-                                            badgeClass = "role-admin";
-                                            break;
-                                    }
-                                }
-                                <span class="role-icon">@icon</span>
-                                <span class="role-badge @badgeClass">@rankName</span>
-                            </div>
-                            <div class="table-cell actions-cell" data-label="Actions">
-                                <button type="button" class="action-btn btn-generate" onclick="generateLink(@staff.Id)">
-                                    <span>🔑</span>
-                                    <span>Generate Link</span>
-                                </button>
-
-                                <button type="button" class="action-btn btn-update update-staff-btn"
-                                        data-id="@staff.Id"
-                                        data-username="@staff.Username"
-                                        data-userrank="@staff.GetRankName()">
-                                    <span>✏️</span>
-                                    <span>Update</span>
-                                </button>
-
-                                <form asp-action="DeleteStaff" asp-route-id="@staff.Id" method="post"
-                                      onsubmit="return confirmDelete()" style="display: inline;">
-                                    <button type="submit" class="action-btn btn-delete">
-                                        <span>🗑</span>
-                                        <span>Delete</span>
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    }
-                </div>
-            </div>
-        }
-
-        <!-- Add Staff Button -->
-        <div class="btn-center-container">
-            <a asp-action="AddStaff" class="add-staff-btn">
-                <span>➕</span>
-                <span>Add Staff Member</span>
-            </a>
+            }
         </div>
-    </div>
+    }
 </div>
 
-<!-- Modal za prikaz linka -->
+<!-- Generated link -->
 <div class="modal fade" id="linkModal" tabindex="-1" aria-labelledby="linkModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="linkModalLabel">
-                    <span style="margin-right: 8px;">🔗</span>
-                    Generated Password Link
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-title">
+                    <span class="chip-icon">@Html.Icon("link")</span>
+                    <div>
+                        <div id="linkModalLabel">Password link ready</div>
+                        <div class="modal-sub">Send this to <strong data-link-user></strong>. It works once and expires in 1 hour.</div>
+                    </div>
+                </div>
+                <button type="button" class="modal-close" data-bs-dismiss="modal" aria-label="Close">@Html.Icon("x")</button>
             </div>
             <div class="modal-body">
-                <input type="text" class="modal-input" id="generatedLink" readonly />
+                <div class="input-wrap input-wrap--action">
+                    @Html.Icon("link")
+                    <input type="text" class="input" id="generatedLink" readonly aria-label="Password link" />
+                    <button type="button" class="input-wrap__action" id="copyLinkBtn" aria-label="Copy link" title="Copy">@Html.Icon("copy")</button>
+                </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary" id="copyLinkBtn">📋 Copy Link</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="button button--ghost" data-bs-dismiss="modal">Done</button>
+                <button type="button" class="button button--primary" id="copyLinkBtn2">@Html.Icon("copy") Copy link</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal za update staff -->
-<div class="modal fade" id="updateStaffModal" tabindex="-1" aria-hidden="true">
+<!-- Edit member -->
+<div class="modal fade" id="updateStaffModal" tabindex="-1" aria-labelledby="updateStaffLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <form id="updateStaffForm" method="post" asp-action="UpdateStaff">
+            <form id="updateStaffForm" method="post" asp-action="UpdateStaff" data-loading>
                 <div class="modal-header">
-                    <h5 class="modal-title">
-                        <span style="margin-right: 8px;">✏️</span>
-                        Update Staff Member
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <div class="modal-title">
+                        <span class="chip-icon">@Html.Icon("pencil")</span>
+                        <div>
+                            <div id="updateStaffLabel">Edit member</div>
+                            <div class="modal-sub">Change the username or role.</div>
+                        </div>
+                    </div>
+                    <button type="button" class="modal-close" data-bs-dismiss="modal" aria-label="Close">@Html.Icon("x")</button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="Id" id="modalStaffId" />
 
-                    <div class="mb-3">
-                        <label class="modal-label">Username</label>
-                        <input type="text" name="Username" id="modalStaffUsername" class="modal-input" required />
+                    <div class="field">
+                        <label class="label" for="modalStaffUsername">Username</label>
+                        <div class="input-wrap">
+                            @Html.Icon("user")
+                            <input type="text" name="Username" id="modalStaffUsername" class="input" required autocomplete="off" />
+                        </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="modal-label">User Rank</label>
-                        <select name="UserRank" id="modalStaffUserRank" class="modal-input" required>
-                            <option value="3">👑 Admin</option>
-                            <option value="2">👔 Manager</option>
-                            <option value="1">🍽️ Waiter</option>
-                            <option value="0">🍸 Bartender</option>
+                    <div class="field">
+                        <label class="label" for="modalStaffUserRank">Role</label>
+                        <select name="UserRank" id="modalStaffUserRank" class="select" required>
+                            <option value="3">Admin</option>
+                            <option value="2">Manager</option>
+                            <option value="1">Waiter</option>
+                            <option value="0">Bartender</option>
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success">
-                        <span style="margin-right: 8px;">💾</span>
-                        Save Changes
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="button button--ghost" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="button button--primary">@Html.Icon("save") <span>Save changes</span></button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<script>
-    // Toast notification function
-    function showToast(message, type = 'success') {
-        const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
-        toast.textContent = message;
-        document.body.appendChild(toast);
+@section Scripts {
+    <script>
+        (function () {
+            const linkModalEl = document.getElementById('linkModal');
+            const linkInput = document.getElementById('generatedLink');
 
-        setTimeout(() => {
-            toast.remove();
-        }, 3000);
-    }
+            document.querySelectorAll('[data-generate-link]').forEach((btn) => {
+                btn.addEventListener('click', async () => {
+                    Zubac.setLoading(btn);
+                    try {
+                        const res = await fetch(`/Settings/GeneratePasswordLink/${btn.dataset.generateLink}`, {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                            }
+                        });
+                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                        const data = await res.json();
 
-    function generateLink(staffId) {
-        showToast('Generating password link...', 'info');
-
-        fetch(`/Settings/GeneratePasswordLink/${staffId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('generatedLink').value = data.link;
-                    var myModal = new bootstrap.Modal(document.getElementById('linkModal'));
-                    myModal.show();
-                    showToast('Link generated successfully!', 'success');
-                } else {
-                    // Proveri da li je poruka o demo korisniku
-                    if (data.message === "Demo user can't change passwords.") {
-                        alert('DEMO USER RESTRICTION\n\nPassword changes are not allowed for demo users.\n\nThis is a demo account limitation.');
-                        showToast('Demo user cannot change passwords!', 'warning');
-                    } else {
-                        alert('Error: ' + (data.message || 'Failed to generate link'));
-                        showToast(data.message || 'Error generating link.', 'error');
+                        if (data.success) {
+                            linkInput.value = data.link;
+                            linkModalEl.querySelector('[data-link-user]').textContent = btn.dataset.username;
+                            bootstrap.Modal.getOrCreateInstance(linkModalEl).show();
+                        } else {
+                            Zubac.toast(data.message || 'Could not generate the link.', data.message && data.message.startsWith('Demo') ? 'warning' : 'error');
+                        }
+                    } catch (err) {
+                        Zubac.toast('Network error — please try again.', 'error');
+                    } finally {
+                        Zubac.clearLoading(btn);
                     }
-                }
-            })
-            .catch(err => {
-                console.error('Error:', err);
-                alert('Network error: Could not connect to server. Please try again.');
-                showToast('Network error. Please try again.', 'error');
-            });
-    }
-
-    document.getElementById('copyLinkBtn').addEventListener('click', function () {
-        const input = document.getElementById('generatedLink');
-        if (input.value) {
-            input.select();
-            input.setSelectionRange(0, 99999);
-            navigator.clipboard.writeText(input.value)
-                .then(() => showToast('Link copied to clipboard!', 'success'))
-                .catch(() => {
-                    alert('Failed to copy link. Please copy manually.');
-                    showToast('Failed to copy link', 'error');
                 });
-        } else {
-            alert('No link to copy');
-        }
-    });
-
-    const rankMap = {
-        "Bartender": 0,
-        "Waiter": 1,
-        "Manager": 2,
-        "Admin": 3
-    };
-
-    document.querySelectorAll('.update-staff-btn').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const id = this.dataset.id;
-            const username = this.dataset.username;
-            const userrankStr = this.dataset.userrank;
-
-            document.getElementById('modalStaffId').value = id;
-            document.getElementById('modalStaffUsername').value = username;
-
-            // Convert string rank to int
-            const userrankInt = rankMap[userrankStr] ?? 0;
-            document.getElementById('modalStaffUserRank').value = userrankInt;
-
-            var modal = new bootstrap.Modal(document.getElementById('updateStaffModal'));
-            modal.show();
-        });
-    });
-
-    function confirmDelete() {
-        return confirm('Are you sure you want to delete this staff member? This action cannot be undone.');
-    }
-
-    // Add responsive labels for mobile
-    document.addEventListener('DOMContentLoaded', function () {
-        if (window.innerWidth <= 576) {
-            const cells = document.querySelectorAll('.table-cell');
-            cells.forEach(cell => {
-                const label = cell.classList.contains('username-cell') ? 'Username' :
-                    cell.classList.contains('role-cell') ? 'Role' :
-                        cell.classList.contains('actions-cell') ? 'Actions' : '';
-                cell.setAttribute('data-label', label);
             });
-        }
 
-        // Animate rows on load
-        const rows = document.querySelectorAll('.table-row');
-        rows.forEach((row, index) => {
-            row.style.opacity = '0';
-            row.style.transform = 'translateY(10px)';
-            setTimeout(() => {
-                row.style.opacity = '1';
-                row.style.transform = 'translateY(0)';
-            }, index * 100);
-        });
-    });
-</script>
+            async function copyLink() {
+                if (!linkInput.value) return;
+                try {
+                    await navigator.clipboard.writeText(linkInput.value);
+                    Zubac.toast('Link copied to clipboard');
+                } catch (err) {
+                    linkInput.select();
+                    Zubac.toast('Press Ctrl+C to copy the selected link', 'info');
+                }
+            }
+
+            document.getElementById('copyLinkBtn').addEventListener('click', copyLink);
+            document.getElementById('copyLinkBtn2').addEventListener('click', copyLink);
+            linkModalEl.addEventListener('shown.bs.modal', () => linkInput.select());
+
+            const editModalEl = document.getElementById('updateStaffModal');
+            document.querySelectorAll('[data-edit-staff]').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    document.getElementById('modalStaffId').value = btn.dataset.id;
+                    document.getElementById('modalStaffUsername').value = btn.dataset.username;
+                    document.getElementById('modalStaffUserRank').value = btn.dataset.rank;
+                    bootstrap.Modal.getOrCreateInstance(editModalEl).show();
+                });
+            });
+            editModalEl.addEventListener('shown.bs.modal', () => document.getElementById('modalStaffUsername').focus());
+        })();
+    </script>
+}

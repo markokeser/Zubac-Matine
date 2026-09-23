@@ -56,7 +56,10 @@ namespace Zubac.Services
                 PaidUserStats = paidStats,
                 FreeUserStats = freeStats,
                 TotalEarnings = totalEarnings,
-                TotalFreeOrders = totalFreeOrders
+                TotalFreeOrders = totalFreeOrders,
+                PeriodStart = startTime,
+                PeriodEnd = endTime,
+                IsRealtime = restaurantSettings.RealtimeCounting
             };
 
             var paidArticles = await _context.Articles

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,17 +11,26 @@ using Zubac.Services;
 
 namespace Zubac.Controllers
 {
+    [Authorize(Policy = "Admin")]
     public class SettingsController : Controller
     {
         private readonly ISettingsService _service;
+        private readonly ILogger<SettingsController> _logger;
 
-        public SettingsController(ISettingsService service)
+        public SettingsController(ISettingsService service, ILogger<SettingsController> logger)
         {
             _service = service;
+            _logger = logger;
+        }
+
+        private void Toast(string message, string type = "success")
+        {
+            TempData["Toast"] = message;
+            TempData["ToastType"] = type;
         }
 
         // GET: SettingsController
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             return View();
         }
@@ -47,11 +57,15 @@ namespace Zubac.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> SetPassword(string token)
         {
             var staffLink = await _service.GetStaffLinkByTokenAsync(token);
             if (staffLink == null)
-                return NotFound("Invalid or expired link.");
+            {
+                Toast("This password link is invalid or has expired. Ask your manager for a new one.", "error");
+                return RedirectToAction("Login", "Account");
+            }
 
             var staff = staffLink.Staff;
 
@@ -67,6 +81,8 @@ namespace Zubac.Controllers
 
         // POST: /Settings/SetPassword
         [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> SetPassword(SetPasswordViewModel model)
         {
             if (!ModelState.IsValid)
@@ -74,7 +90,10 @@ namespace Zubac.Controllers
 
             var success = await _service.SetStaffPasswordAsync(model.StaffId, model.NewPassword, model.Token);
             if (success)
+            {
+                Toast("Password saved — you can sign in now.");
                 return RedirectToAction("Login", "Account");
+            }
 
             ModelState.AddModelError("", "Unable to set password. Link might be invalid or expired.");
             return View(model);
@@ -101,6 +120,7 @@ namespace Zubac.Controllers
                 return View(model);
             }
 
+            Toast($"{model.Username} added — send them a password link to finish setup.");
             return RedirectToAction("Staff");
         }
 
@@ -112,6 +132,7 @@ namespace Zubac.Controllers
             if (!success)
                 return NotFound();
 
+            Toast("Team member removed");
             return RedirectToAction("Staff"); // ili "Index" ako ti je view za Staff tamo
         }
 
@@ -160,12 +181,11 @@ namespace Zubac.Controllers
 
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
+                Toast("Settings saved");
                 return RedirectToAction("RestaurantSettings");
             }
-            
-                
 
-            ModelState.AddModelError("", "Unable to save settings.");
+            ModelState.AddModelError("", "Unable to save settings. The start time can't be changed while there are open orders — finish them first.");
             return View("RestaurantSettings", model);
         }
 
@@ -195,6 +215,7 @@ namespace Zubac.Controllers
                 return RedirectToAction(model.IsFood ? "FoodSettings" : "DrinksSettings");
 
             await _service.AddArticleAsync(model);
+            Toast($"“{model.Name}” added to the menu");
             return RedirectToAction(model.IsFood ? "FoodSettings" : "DrinksSettings");
         }
 
@@ -202,6 +223,7 @@ namespace Zubac.Controllers
         public async Task<IActionResult> DeleteArticle(int id, bool isFood)
         {
             await _service.DeleteArticleAsync(id);
+            Toast("Removed from the menu");
             return RedirectToAction(isFood ? "FoodSettings" : "DrinksSettings");
         }
 
@@ -244,6 +266,7 @@ namespace Zubac.Controllers
             };
 
             await _service.UpdateArticleAsync(article);
+            Toast($"“{model.Name}” updated");
 
             if (model.IsFood)
                 return RedirectToAction("FoodSettings", "Settings");
@@ -262,6 +285,7 @@ namespace Zubac.Controllers
             if (!result)
                 return NotFound();
 
+            Toast($"{model.Username} updated");
             // Možeš vratiti JSON da frontend zna da je OK
             return RedirectToAction("Staff", "Settings");
         }
@@ -277,9 +301,17 @@ namespace Zubac.Controllers
             if (image == null || image.Length == 0)
                 return RedirectToAction(nameof(AiMenuBuilder));
 
-            var items = await _service.ParseMenuFromImageAsync(image);
-
-            return View("AiMenuBuilder", items);
+            try
+            {
+                var items = await _service.ParseMenuFromImageAsync(image);
+                return View("AiMenuBuilder", items);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "AI menu parsing failed");
+                ModelState.AddModelError("", "The AI couldn't read that photo. Try a sharper, well-lit image of the menu.");
+                return View("AiMenuBuilder");
+            }
         }
 
         [HttpPost]
@@ -293,7 +325,9 @@ namespace Zubac.Controllers
                 model.Items
             );
 
-            return RedirectToAction("Index");
+            var foodCount = model.Items.Count(i => i.IsFood);
+            Toast($"{model.Items.Count} items added to your menu");
+            return RedirectToAction(foodCount > model.Items.Count / 2 ? "FoodSettings" : "DrinksSettings");
         }
 
     }

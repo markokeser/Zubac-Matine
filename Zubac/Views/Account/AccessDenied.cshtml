@@ -1,0 +1,14 @@
+@{
+    ViewData["Title"] = "No access";
+}
+
+<div class="page page--narrow">
+    <div class="card reveal" style="margin-top: clamp(20px, 8vh, 80px);">
+        <div class="empty">
+            <div class="empty__icon">@Html.Icon("lock")</div>
+            <div class="empty__title">This area is for administrators</div>
+            <p class="empty__text">Your role doesn't include access to this page. Ask an admin if you think you should have it.</p>
+            <a asp-controller="Home" asp-action="Index" class="button button--primary">@Html.Icon("home") Back to dashboard</a>
+        </div>
+    </div>
+</div>
