@@ -1,382 +1,109 @@
-﻿@model Zubac.Models.LoginViewModel
+@model Zubac.Models.LoginViewModel
 
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Sign in";
+    ViewData["HideChrome"] = true;
 }
 
-<style>
-    /* Reset i osnovni stilovi */
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
+<div class="auth">
+    <aside class="auth__showcase">
+        <div class="brand">
+            <span class="brand__mark">Z</span>
+            <span class="brand__text">
+                <span class="brand__name">Zubac</span>
+                <span class="brand__sub">Restaurant OS</span>
+            </span>
+        </div>
 
-    html, body {
-        height: 100%;
-        width: 100%;
-        overflow: hidden; /* Sprečava scroll na nivou html i body */
-    }
+        <div>
+            <div class="eyebrow reveal">Front of house, simplified</div>
+            <h1 class="auth__headline reveal" style="--i:1">Run every table <em>beautifully.</em></h1>
+            <p class="auth__lead reveal" style="--i:2">Orders, bar tabs, menus and nightly numbers — in one calm, fast workspace built for busy service.</p>
 
-    body {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
-        font-family: 'Inter', sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        color: rgba(255, 255, 255, 0.9);
-        padding: 0;
-        margin: 0;
-    }
+            <div class="auth__features">
+                <div class="auth__feature reveal" style="--i:3">
+                    <span class="chip-icon">@Html.Icon("receipt")</span>
+                    <span>Tap-to-add ordering for tables and the bar</span>
+                </div>
+                <div class="auth__feature reveal" style="--i:4">
+                    <span class="chip-icon" data-tone="violet">@Html.Icon("sparkles")</span>
+                    <span>AI menu import and an AI sommelier for guests</span>
+                </div>
+                <div class="auth__feature reveal" style="--i:5">
+                    <span class="chip-icon" data-tone="success">@Html.Icon("trending")</span>
+                    <span>Live revenue and best-seller statistics</span>
+                </div>
+            </div>
+        </div>
 
-    .login-wrapper {
-        width: 100%;
-        height: 100vh; /* Koristi 100vh umesto 100% za tačnu visinu */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-        overflow: auto; /* Dozvoljava scroll samo unutar wrapper-a ako je potrebno */
-    }
+        <p class="auth__foot">© @DateTime.Now.Year Zubac</p>
+    </aside>
 
-    .login-container {
-        background: rgba(45, 45, 68, 0.95);
-        border-radius: 16px;
-        padding: clamp(1.2rem, 4vw, 2rem);
-        width: 100%;
-        max-width: min(380px, 90vw);
-        max-height: 90vh; /* Ograničava maksimalnu visinu */
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        border: 1px solid rgba(212, 175, 55, 0.2);
-        margin: auto;
-        overflow-y: auto; /* Dozvoljava scroll unutar kontejnera ako je potrebno */
-    }
-
-    .login-title {
-        color: #d4af37;
-        text-align: center;
-        font-family: 'Playfair Display', serif;
-        font-size: clamp(1.6rem, 5vw, 2rem);
-        font-weight: 700;
-        margin-bottom: 1.2rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        line-height: 1.2;
-    }
-
-    .form-label {
-        color: rgba(255, 255, 255, 0.8);
-        font-weight: 600;
-        font-size: clamp(0.8rem, 2.5vw, 0.9rem);
-        margin-bottom: 6px;
-        display: block;
-    }
-
-    .form-control {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(212, 175, 55, 0.3);
-        color: rgba(255, 255, 255, 0.9);
-        border-radius: 8px;
-        padding: 10px 14px;
-        width: 100%;
-        font-family: 'Inter', sans-serif;
-        transition: all 0.2s ease;
-        font-size: clamp(0.85rem, 2.5vw, 0.95rem);
-    }
-
-        .form-control:focus {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: #d4af37;
-            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
-            color: rgba(255, 255, 255, 0.9);
-            outline: none;
-        }
-
-        .form-control::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-            font-size: clamp(0.8rem, 2.5vw, 0.9rem);
-        }
-
-    .btn-login {
-        background: linear-gradient(135deg, #4CAF50, #66BB6A);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 12px;
-        font-weight: 700;
-        font-size: clamp(0.9rem, 2.5vw, 0.95rem);
-        width: 100%;
-        margin-top: 8px;
-        transition: all 0.2s ease;
-        font-family: 'Inter', sans-serif;
-        cursor: pointer;
-    }
-
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(76, 175, 80, 0.3);
-        }
-
-        .btn-login:active {
-            transform: translateY(0);
-        }
-
-    /* Demo dugme stilovi */
-    .btn-demo {
-        background: linear-gradient(135deg, #d4af37, #f0c45a);
-        color: #1a1a2e;
-        border: none;
-        border-radius: 8px;
-        padding: 12px;
-        font-weight: 700;
-        font-size: clamp(0.9rem, 2.5vw, 0.95rem);
-        width: 100%;
-        margin-top: 12px;
-        transition: all 0.2s ease;
-        font-family: 'Inter', sans-serif;
-        cursor: pointer;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-        .btn-demo:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(212, 175, 55, 0.3);
-            background: linear-gradient(135deg, #e6b422, #d4af37);
-        }
-
-        .btn-demo:active {
-            transform: translateY(0);
-        }
-
-    .divider {
-        display: flex;
-        align-items: center;
-        text-align: center;
-        color: rgba(255, 255, 255, 0.5);
-        font-size: clamp(0.75rem, 2vw, 0.85rem);
-        margin: 16px 0 8px 0;
-        font-weight: 500;
-    }
-
-        .divider::before,
-        .divider::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
-        }
-
-        .divider::before {
-            margin-right: 10px;
-        }
-
-        .divider::after {
-            margin-left: 10px;
-        }
-
-    .text-danger {
-        color: #ff6b6b;
-        font-size: clamp(0.7rem, 2vw, 0.8rem);
-        margin-top: 4px;
-        display: block;
-        word-wrap: break-word;
-        min-height: 1.2em; /* Fiksna visina da ne pomera elemente */
-    }
-
-    .validation-summary-errors {
-        background: rgba(244, 67, 54, 0.1);
-        border: 1px solid rgba(244, 67, 54, 0.3);
-        border-radius: 8px;
-        padding: 0.8rem;
-        margin-bottom: 1rem;
-        max-height: 150px; /* Ograničava visinu error poruka */
-        overflow-y: auto;
-    }
-
-        .validation-summary-errors ul {
-            margin: 0;
-            padding-left: 0.8rem;
-        }
-
-        .validation-summary-errors li {
-            color: #ff6b6b;
-            font-size: clamp(0.75rem, 2vw, 0.85rem);
-            margin-bottom: 0.2rem;
-            word-wrap: break-word;
-        }
-
-    .mb-3 {
-        margin-bottom: 1rem;
-    }
-
-    /* Media queries za specifične breakpoint-ove */
-    @@media (max-width: 480px) {
-        .login-wrapper {
-            padding: 10px;
-        }
-
-        .login-container {
-            padding: 1rem 0.8rem;
-            border-radius: 12px;
-            max-height: 95vh; /* Veći procenat visine na mobilnim */
-        }
-
-        .login-title {
-            margin-bottom: 1rem;
-        }
-
-        .btn-login {
-            padding: 11px;
-            margin-top: 6px;
-        }
-
-        .btn-demo {
-            padding: 11px;
-            margin-top: 10px;
-        }
-
-        .mb-3 {
-            margin-bottom: 0.8rem;
-        }
-
-        .divider {
-            margin: 14px 0 6px 0;
-        }
-    }
-
-    @@media (max-width: 320px) {
-        .login-container {
-            padding: 0.8rem 0.6rem;
-            max-width: 95vw;
-        }
-
-        .form-control {
-            padding: 8px 10px;
-        }
-
-        .btn-login {
-            padding: 10px;
-        }
-
-        .btn-demo {
-            padding: 10px;
-            margin-top: 8px;
-        }
-    }
-
-    /* Orijentacija landscape na telefonima */
-    @@media (max-height: 600px) and (orientation: landscape) {
-        .login-wrapper {
-            height: auto;
-            min-height: 100vh;
-            align-items: flex-start;
-            padding-top: 10px;
-        }
-
-        .login-container {
-            max-height: 95vh;
-            margin: 10px auto;
-        }
-    }
-
-    /* Za veoma male visine */
-    @@media (max-height: 500px) {
-        .login-container {
-            padding: 0.8rem;
-            max-height: 98vh;
-        }
-
-        .login-title {
-            margin-bottom: 0.8rem;
-            font-size: 1.4rem;
-        }
-
-        .mb-3 {
-            margin-bottom: 0.6rem;
-        }
-
-        .form-control {
-            padding: 8px 10px;
-        }
-
-        .btn-login {
-            padding: 10px;
-            margin-top: 5px;
-        }
-
-        .btn-demo {
-            padding: 10px;
-            margin-top: 8px;
-        }
-
-        .divider {
-            margin: 10px 0 4px 0;
-        }
-    }
-
-    /* Tablet stilovi */
-    @@media (min-width: 768px) and (max-width: 1024px) {
-        .login-container {
-            max-width: 400px;
-        }
-    }
-
-    /* Desktop stilovi */
-    @@media (min-width: 1025px) {
-        .login-container {
-            max-width: 420px;
-        }
-    }
-
-    /* Safari specific fix za 100vh */
-    @@supports (-webkit-touch-callout: none) {
-        .login-wrapper {
-            height: -webkit-fill-available;
-        }
-    }
-</style>
-
-<div class="login-wrapper">
-    <div class="login-container">
-        <h2 class="login-title">
-            Login
-        </h2>
-
-        <form asp-action="Login" method="post" novalidate>
-            <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
-
-            <div class="mb-3">
-                <label asp-for="Username" class="form-label"></label>
-                <input asp-for="Username" class="form-control" placeholder="Enter username" />
-                <span asp-validation-for="Username" class="text-danger"></span>
+    <section class="auth__panel">
+        <div class="auth-card reveal">
+            <div class="brand auth-card__brand">
+                <span class="brand__mark">Z</span>
+                <span class="brand__text">
+                    <span class="brand__name">Zubac</span>
+                    <span class="brand__sub">Restaurant OS</span>
+                </span>
             </div>
 
-            <div class="mb-3">
-                <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" class="form-control" placeholder="Enter password" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
+            <h2 class="auth-card__title">Welcome back</h2>
+            <p class="auth-card__sub">Sign in with your staff account to start service.</p>
 
-            <button type="submit" class="btn-login">Login</button>
+            <form asp-action="Login" method="post" class="auth-card__form" id="loginForm" data-loading>
+                <div asp-validation-summary="ModelOnly"></div>
 
-            <div class="divider">OR</div>
+                <div class="field">
+                    <label asp-for="Username" class="label"></label>
+                    <div class="input-wrap">
+                        @Html.Icon("user")
+                        <input asp-for="Username" class="input" placeholder="e.g. marko" autocomplete="username" autocapitalize="none" spellcheck="false" autofocus />
+                    </div>
+                    <span asp-validation-for="Username"></span>
+                </div>
 
-            <button type="button" class="btn-demo" onclick="loginDemo()">Login to Demo Account</button>
-        </form>
-    </div>
+                <div class="field">
+                    <label asp-for="Password" class="label"></label>
+                    <div class="input-wrap input-wrap--action">
+                        @Html.Icon("lock")
+                        <input asp-for="Password" class="input" placeholder="Your password" autocomplete="current-password" />
+                        <button type="button" class="input-wrap__action" data-toggle-password aria-label="Show password">@Html.Icon("eye")</button>
+                    </div>
+                    <span asp-validation-for="Password"></span>
+                </div>
+
+                <button type="submit" class="button button--primary button--lg button--block" style="margin-top: 8px;">
+                    <span>Sign in</span>
+                    @Html.Icon("arrow-right")
+                </button>
+            </form>
+
+            <div class="divider">or</div>
+
+            <button type="button" class="demo-card" id="demoLogin">
+                <span class="chip-icon">@Html.Icon("sparkles")</span>
+                <span>
+                    <span class="demo-card__title d-block">Explore the demo</span>
+                    <span class="demo-card__desc d-block">Jump in with a sample restaurant — no account needed.</span>
+                </span>
+                @Html.Icon("arrow-right")
+            </button>
+        </div>
+    </section>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('demoLogin').addEventListener('click', function () {
+            const form = document.getElementById('loginForm');
+            form.querySelector('input[name="Username"]').value = 'demo_user';
+            form.querySelector('input[name="Password"]').value = 'demo_pass';
+            this.disabled = true;
+            Zubac.setLoading(form.querySelector('[type="submit"]'));
+            form.submit();
+        });
+    </script>
 }
-<script>
-    function loginDemo() {
-        // Popuni polja sa demo kredencijalima koristeći name atribute
-        document.querySelector('input[name="Username"]').value = 'demo_user';
-        document.querySelector('input[name="Password"]').value = 'demo_pass';
-
-        // Opciono: automatski submit forme
-         document.querySelector('form').submit();
-    }
-</script>

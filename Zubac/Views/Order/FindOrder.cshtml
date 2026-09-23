@@ -1,567 +1,159 @@
-﻿@model Zubac.Models.FindOrderViewModel
+@model Zubac.Models.FindOrderViewModel
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+@{
+    ViewData["Title"] = "Find order";
+    var searched = Context.Request.Method == "POST";
+    var waiterNames = Model.Waiters.ToDictionary(w => w.Id, w => w.Username);
+    var orders = Model.Orders ?? new List<Zubac.Models.Order>();
+    decimal OrderTotal(Zubac.Models.Order o) => o.OrderArticles.Sum(a => a.Article.Price * a.Quantity);
+    var grandTotal = orders.Where(o => !o.IsFree).Sum(OrderTotal);
+    var index = 0;
+}
 
-<style>
-    body {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%) !important;
-        min-height: 100vh;
-        color: rgba(255, 255, 255, 0.9);
-        font-family: 'Inter', sans-serif;
-    }
+<div class="page">
+    <header class="page-head">
+        <div class="page-head__text">
+            <a asp-controller="Home" asp-action="Index" class="back-link">@Html.Icon("chevron-left") Dashboard</a>
+            <div class="eyebrow reveal">History</div>
+            <h1 class="page-title reveal" style="--i:1">Find order</h1>
+            <p class="page-sub reveal" style="--i:2">Look up past and open orders by table, staff member, or both.</p>
+        </div>
+    </header>
 
-    .home-btn {
-        transition: all 0.2s ease;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px 16px;
-        border-radius: 8px;
-        font-weight: 500;
-        background: rgba(212, 175, 55, 0.1);
-        color: #d4af37;
-        border: 1px solid rgba(212, 175, 55, 0.3);
-        margin-bottom: 2rem;
-    }
-
-        .home-btn:hover {
-            background: rgba(212, 175, 55, 0.2) !important;
-            transform: scale(1.05);
-            color: #d4af37;
-            text-decoration: none;
-        }
-
-    .main-container {
-        background: rgba(45, 45, 68, 0.8);
-        backdrop-filter: blur(10px);
-        border-radius: 16px;
-        padding: 2rem;
-        max-width: 800px;
-        margin: 0 auto;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    }
-
-    .page-header {
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-
-    .page-title {
-        font-family: 'Playfair Display', serif;
-        color: #d4af37;
-        font-size: 2.2rem;
-        font-weight: 700;
-        margin: 0;
-        display: inline-flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .form-control, select {
-        background: rgba(255, 255, 255, 0.05) !important;
-        border: 1px solid rgba(212, 175, 55, 0.3) !important;
-        color: rgba(255, 255, 255, 0.9) !important;
-        border-radius: 8px !important;
-        padding: 10px 12px !important;
-        font-family: 'Inter', sans-serif !important;
-        transition: all 0.2s ease !important;
-        width: 100% !important;
-    }
-
-        .form-control:focus, select:focus {
-            background: rgba(255, 255, 255, 0.1) !important;
-            border-color: #d4af37 !important;
-            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1) !important;
-            color: rgba(255, 255, 255, 0.9) !important;
-            outline: none !important;
-        }
-
-    .form-label {
-        color: rgba(255, 255, 255, 0.8);
-        font-weight: 600;
-        font-size: 0.9rem;
-        font-family: 'Inter', sans-serif;
-        margin-bottom: 8px;
-        display: block;
-    }
-
-    .search-btn {
-        background: linear-gradient(135deg, #29B6F6, #0288d1);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 14px 24px;
-        font-weight: 600;
-        font-size: 1rem;
-        width: 100%;
-        transition: all 0.2s ease;
-        font-family: 'Inter', sans-serif;
-        cursor: pointer;
-        margin-top: 1rem;
-    }
-
-        .search-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(41, 182, 246, 0.3);
-            color: white;
-        }
-
-    .divider {
-        border-top: 2px solid rgba(212, 175, 55, 0.2);
-        margin: 2rem 0;
-    }
-
-    .results-header {
-        font-family: 'Playfair Display', serif;
-        color: #d4af37;
-        font-size: 1.8rem;
-        margin-bottom: 1.5rem;
-        text-align: center;
-    }
-
-    .order-card {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(212, 175, 55, 0.2);
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        transition: all 0.3s ease;
-        animation: fadeIn 0.5s ease;
-    }
-
-    @@keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .order-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        border-color: rgba(212, 175, 55, 0.4);
-    }
-
-    .order-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-        padding-bottom: 0.8rem;
-        border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-    }
-
-    .order-title {
-        font-family: 'Inter', sans-serif;
-        font-weight: 700;
-        font-size: 1.3rem;
-        color: #d4af37;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .order-table {
-        background: rgba(212, 175, 55, 0.1);
-        color: #d4af37;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 0.9rem;
-    }
-
-    .order-info {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    .info-item {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .info-label {
-        color: rgba(255, 255, 255, 0.6);
-        font-size: 0.85rem;
-        font-family: 'Inter', sans-serif;
-        margin-bottom: 4px;
-    }
-
-    .info-value {
-        color: rgba(255, 255, 255, 0.9);
-        font-weight: 600;
-        font-size: 1rem;
-        font-family: 'Inter', sans-serif;
-    }
-
-    .items-section {
-        margin-top: 1rem;
-    }
-
-    .items-title {
-        color: rgba(255, 255, 255, 0.8);
-        font-weight: 600;
-        font-size: 1rem;
-        margin-bottom: 0.8rem;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .item-list {
-        list-style: none;
-        padding: 0;
-        margin: 0 0 1rem 0;
-    }
-
-        .item-list li {
-            padding: 0.6rem 0.8rem;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 6px;
-            margin-bottom: 0.5rem;
-            color: rgba(255, 255, 255, 0.8);
-            font-family: 'Inter', sans-serif;
-            border-left: 3px solid #d4af37;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-    .total-price {
-        text-align: right;
-        padding: 1rem;
-        background: rgba(212, 175, 55, 0.1);
-        border-radius: 8px;
-        margin-top: 1rem;
-        border: 1px solid rgba(212, 175, 55, 0.2);
-    }
-
-    .total-label {
-        color: rgba(255, 255, 255, 0.7);
-        font-weight: 600;
-        font-size: 1rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .total-amount {
-        color: #d4af37;
-        font-weight: 700;
-        font-size: 1.4rem;
-        font-family: 'Courier New', monospace;
-    }
-
-    .no-results {
-        text-align: center;
-        color: rgba(255, 255, 255, 0.5);
-        font-family: 'Inter', sans-serif;
-        padding: 3rem 0;
-        font-size: 1.1rem;
-    }
-
-    .empty-state {
-        text-align: center;
-        color: rgba(255, 255, 255, 0.5);
-        font-family: 'Inter', sans-serif;
-        padding: 3rem 0;
-        font-size: 1.1rem;
-    }
-
-    /* Grid system */
-    .search-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-
-    @@media (min-width: 768px) {
-        .search-grid {
-            grid-template-columns: 1fr 1fr;
-        }
-    }
-
-    /* Dropdown menu fixes */
-    select option {
-        background-color: #ffffff !important;
-        color: #000000 !important;
-        font-family: 'Inter', sans-serif !important;
-        padding: 10px !important;
-    }
-
-        select option:checked,
-        select option:focus,
-        select option:hover {
-            background-color: #f0f0f0 !important;
-            color: #000000 !important;
-        }
-
-    /* Custom dropdown for better visibility */
-    .custom-select-wrapper {
-        position: relative;
-    }
-
-    .custom-select {
-        appearance: none;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        padding-right: 2.5rem !important;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23d4af37' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") !important;
-        background-repeat: no-repeat !important;
-        background-position: right 12px center !important;
-        background-size: 16px !important;
-    }
-
-    /* Toast notification */
-    .toast {
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        padding: 12px 24px;
-        border-radius: 8px;
-        font-family: 'Inter', sans-serif;
-        font-weight: 500;
-        z-index: 9999;
-        animation: fadeInOut 2s ease-in-out;
-    }
-
-    @@keyframes fadeInOut {
-        0%, 100% {
-            opacity: 0;
-            transform: translateX(-50%) translateY(10px);
-        }
-
-        10%, 90% {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-    }
-
-    .toast-info {
-        background: #29B6F6;
-        color: white;
-    }
-</style>
-
-<div class="container py-4">
-    <!-- Home Button -->
-    <a asp-controller="Home" asp-action="Index" class="home-btn">
-        <span style="font-size: 1.2rem;">🏠</span>
-        <span>Home</span>
-    </a>
-
-    <!-- Header -->
-    <div class="page-header">
-        <h1 class="page-title">
-            <span style="font-size: 2.2rem;">🔍</span>
-            Find Orders
-        </h1>
-    </div>
-
-    <!-- Main Container -->
-    <div class="main-container">
-        <form asp-action="FindOrder" method="post">
-            <!-- Search Form -->
-            <div class="search-grid">
-                <div>
-                    <label class="form-label">Table Number</label>
-                    <select asp-for="TableNumber" class="form-control custom-select">
-                        <option value="">-- Any table --</option>
-                        @for (int i = 0; i <= 20; i++)
+    <form asp-action="FindOrder" method="post" class="card reveal" style="--i:3; margin-bottom: 24px;" data-loading>
+        <div class="row g-3 align-items-end">
+            <div class="col-12 col-md-4">
+                <div class="field">
+                    <label asp-for="TableNumber" class="label">@Html.Icon("hash") Table</label>
+                    <select asp-for="TableNumber" class="select">
+                        <option value="">Any table</option>
+                        <option value="0">Bar (no table)</option>
+                        @for (int i = 1; i <= 20; i++)
                         {
                             <option value="@i">Table @i</option>
                         }
                     </select>
                 </div>
-
-                <div class="custom-select-wrapper">
-                    <label class="form-label">Created By (Waiter)</label>
-                    <select asp-for="CreatedBy" class="form-control custom-select">
-                        <option value="">-- Any waiter --</option>
-                        @foreach (var w in Model.Waiters)
+            </div>
+            <div class="col-12 col-md-5">
+                <div class="field">
+                    <label asp-for="CreatedBy" class="label">@Html.Icon("user") Staff member</label>
+                    <select asp-for="CreatedBy" class="select">
+                        <option value="">Anyone</option>
+                        @foreach (var w in Model.Waiters.OrderBy(w => w.Username))
                         {
-                            <option value="@w.Id">@w.Username</option>
+                            <option value="@w.Id">@w.Username · @UiHelpers.RankName(w.UserRank)</option>
                         }
                     </select>
                 </div>
             </div>
+            <div class="col-12 col-md-3">
+                <button type="submit" class="button button--primary button--lg button--block">
+                    @Html.Icon("search") <span>Search</span>
+                </button>
+            </div>
+        </div>
+    </form>
 
-            <!-- Search Button -->
-            <button type="submit" class="search-btn">
-                <span style="margin-right: 8px;">🔍</span>
-                Search Orders
-            </button>
-        </form>
+    @if (orders.Count > 0)
+    {
+        <div class="row-gap" style="margin-bottom: 14px; justify-content: space-between;">
+            <h2 class="section-title" style="margin: 0;">@orders.Count @(orders.Count == 1 ? "result" : "results")</h2>
+            <span class="muted" style="font-size: .88rem;">Paid total <strong class="num gold">@UiHelpers.Money(grandTotal)</strong></span>
+        </div>
 
-        <!-- Divider -->
-        <div class="divider"></div>
+        <div class="orders-grid">
+            @foreach (var order in orders)
+            {
+                var total = OrderTotal(order);
+                var itemCount = order.OrderArticles.Sum(a => a.Quantity);
+                var waiter = waiterNames.TryGetValue(order.CreatedBy, out var name) ? name : $"User #{order.CreatedBy}";
+                var isBar = order.OnBar || order.TableNumber == 0;
 
-        <!-- Results Section -->
-        @if (Model.Orders != null && Model.Orders.Count > 0)
-        {
-            <h3 class="results-header">Search Results</h3>
-
-            <div class="orders-grid">
-                @foreach (var order in Model.Orders)
-                {
-                    // Calculate total price for this order
-                    decimal orderTotal = 0;
-                    @foreach (var item in order.OrderArticles)
-                    {
-                        orderTotal += item.Article.Price * item.Quantity;
-                    }
-
-                    <div class="order-card">
-                        <div class="order-header">
-                            <div class="order-title">
-                                <span>📋</span>
-                                Order #@order.Id
-                            </div>
-                            <div class="order-table">
-                                Table @order.TableNumber
+                <article class="card order-card reveal" style="--i:@(Math.Min(++index + 3, 14))">
+                    <div class="order-card__head">
+                        <div class="table-badge @(isBar ? "table-badge--bar" : "")">
+                            <small>@(isBar ? "Bar" : "Table")</small>
+                            @if (isBar)
+                            {
+                                @Html.Icon("martini", "icon--lg")
+                            }
+                            else
+                            {
+                                <strong>@order.TableNumber</strong>
+                            }
+                        </div>
+                        <div style="min-width: 0;">
+                            <div class="order-card__title">Order <span class="num">#@order.Id</span></div>
+                            <div class="order-card__meta">
+                                <span>@Html.Icon("user") @waiter</span>
+                                <span>@Html.Icon("calendar") @order.Created.ToString("dd MMM yyyy, HH:mm", CultureInfo.InvariantCulture)</span>
                             </div>
                         </div>
-
-                        <div class="order-info">
-                            <div class="info-item">
-                                <span class="info-label">Waiter ID:</span>
-                                <span class="info-value">@order.CreatedBy</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Created:</span>
-                                <span class="info-value">@order.Created.ToString("dd.MM.yyyy HH:mm")</span>
-                            </div>
-                        </div>
-
-                        <div class="items-section">
-                            <div class="items-title">
-                                <span>🍽️</span>
-                                Order Items
-                            </div>
-                            <ul class="item-list">
-                                @foreach (var item in order.OrderArticles)
-                                {
-                                    <li>
-                                        <span>@item.Article.Name × @item.Quantity</span>
-                                        <span style="color: #d4af37; font-weight: 600;">
-                                            @((item.Article.Price * item.Quantity).ToString("F2"))€
-                                        </span>
-                                    </li>
-                                }
-                            </ul>
-
-                            <!-- Total Price Display -->
-                            <div class="total-price">
-                                <div class="total-label">Order Total:</div>
-                                <div class="total-amount">@orderTotal.ToString("F2")€</div>
-                            </div>
+                        <div class="order-card__total">
+                            <div class="order-card__amount">@UiHelpers.Money(total)</div>
+                            <div class="order-card__count">@itemCount @(itemCount == 1 ? "item" : "items")</div>
                         </div>
                     </div>
-                }
-            </div>
-        }
-        else if (Context.Request.Method == "POST")
-        {
-            <div class="no-results">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
-                <h3 style="color: rgba(255, 255, 255, 0.7); margin-bottom: 0.5rem;">No Orders Found</h3>
-                <p>Try different search criteria.</p>
-            </div>
-        }
-        else
-        {
-            <div class="empty-state">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
-                <h3 style="color: rgba(255, 255, 255, 0.7); margin-bottom: 0.5rem;">Search for Orders</h3>
-                <p>Enter table number and/or select a waiter to find orders.</p>
-            </div>
-        }
-    </div>
-</div>
 
-<script>
-    // Form submission animation
-    document.querySelector('form').addEventListener('submit', function (e) {
-        const searchBtn = document.querySelector('.search-btn');
-        const originalText = searchBtn.innerHTML;
+                    <div class="row-gap">
+                        @if (order.Finished)
+                        {
+                            <span class="tag tag--dot" data-tone="success">Finished</span>
+                        }
+                        else
+                        {
+                            <span class="tag tag--dot" data-tone="gold">Open</span>
+                        }
+                        @if (order.OnBar)
+                        {
+                            <span class="tag" data-tone="violet">@Html.Icon("martini") Bar</span>
+                        }
+                        @if (order.IsFree)
+                        {
+                            <span class="tag" data-tone="rose">@Html.Icon("gift") On the house</span>
+                        }
+                    </div>
 
-        // Show loading state
-        searchBtn.innerHTML = '<span>⏳</span> Searching...';
-        searchBtn.disabled = true;
-        searchBtn.style.opacity = '0.8';
-
-        // Re-enable button after 3 seconds (in case of error)
-        setTimeout(() => {
-            searchBtn.innerHTML = originalText;
-            searchBtn.disabled = false;
-            searchBtn.style.opacity = '1';
-        }, 3000);
-    });
-
-    // Toast notification function
-    function showToast(message, type = 'info') {
-        const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
-        toast.textContent = message;
-        document.body.appendChild(toast);
-
-        setTimeout(() => {
-            toast.remove();
-        }, 2000);
+                    <details class="disclosure">
+                        <summary>
+                            @Html.Icon("clipboard")
+                            <span class="disclosure__preview">@string.Join(", ", order.OrderArticles.Select(a => $"{a.Quantity}× {a.Article.Name}"))</span>
+                            @Html.Icon("chevron-down")
+                        </summary>
+                        <ul class="lines">
+                            @foreach (var item in order.OrderArticles)
+                            {
+                                <li>
+                                    <span class="lines__qty">@item.Quantity×</span>
+                                    <span class="lines__name">@item.Article.Name</span>
+                                    <span class="lines__price">@UiHelpers.Money(item.Article.Price * item.Quantity)</span>
+                                </li>
+                            }
+                        </ul>
+                    </details>
+                </article>
+            }
+        </div>
     }
-
-    // Show toast on page load if coming from search
-    @if (Context.Request.Method == "POST")
+    else if (searched)
     {
-        <text>
-            document.addEventListener('DOMContentLoaded', function () {
-                setTimeout(() => {
-                    showToast('Search completed', 'info');
-                }, 500);
-            });
-        </text>
+        <div class="card reveal" style="--i:4">
+            <div class="empty">
+                <div class="empty__icon">@Html.Icon("search")</div>
+                <div class="empty__title">No orders found</div>
+                <p class="empty__text">Nothing matches those filters. Try another table or staff member.</p>
+            </div>
+        </div>
     }
-
-        // Initialize table dropdown on page load
-        document.addEventListener('DOMContentLoaded', function () {
-            // Add custom arrow to dropdowns
-            const selects = document.querySelectorAll('.custom-select');
-            selects.forEach(select => {
-                // Ensure proper styling
-                select.style.backgroundImage = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23d4af37' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E\")";
-                select.style.backgroundRepeat = "no-repeat";
-                select.style.backgroundPosition = "right 12px center";
-                select.style.backgroundSize = "16px";
-
-                // Force black text on options
-                const options = select.options;
-                for (let i = 0; i < options.length; i++) {
-                    options[i].style.backgroundColor = "#ffffff";
-                    options[i].style.color = "#000000";
-                }
-            });
-        });
-
-    // Fix for dropdown options on change
-    document.querySelectorAll('select').forEach(select => {
-        select.addEventListener('click', function () {
-            // Force black text when dropdown opens
-            setTimeout(() => {
-                const options = document.querySelectorAll('option');
-                options.forEach(option => {
-                    option.style.backgroundColor = "#ffffff !important";
-                    option.style.color = "#000000 !important";
-                });
-            }, 10);
-        });
-    });
-</script>
+    else
+    {
+        <div class="card reveal" style="--i:4">
+            <div class="empty">
+                <div class="empty__icon">@Html.Icon("clipboard")</div>
+                <div class="empty__title">Search the order history</div>
+                <p class="empty__text">Choose a table and/or a staff member above, then hit search. Leave both empty to see everything.</p>
+            </div>
+        </div>
+    }
+</div>

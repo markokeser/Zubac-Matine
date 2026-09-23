@@ -1,762 +1,145 @@
-﻿@{
-    ViewData["Title"] = "Restaurant";
-}
 @{
+    ViewData["Title"] = "Dashboard";
+
     var userRank = User.FindFirst("UserRank")?.Value;
-    var userName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+    var userName = User.FindFirst(ClaimTypes.Name)?.Value;
     var restaurantName = User.FindFirst("RestaurantName")?.Value;
     bool freeDrinksEnabled = User.HasClaim("FreeDrinksEnabled", "True");
-    string rankName = UserRanks
-                     .RankNames
-                     .ElementAtOrDefault(Convert.ToInt32(userRank)) ?? "Unknown";
+    bool foodEnabled = User.HasClaim("FoodEnabled", "True");
+
+    bool canServeTables = userRank == "1" || userRank == "2" || userRank == "3";
+    bool canServeBar = userRank == "0" || userRank == "2" || userRank == "3";
+    bool isManager = userRank == "2" || userRank == "3";
+    bool isAdmin = userRank == "3";
+
+    var index = 0;
 }
 
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurant Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <style>
-        /* RESET */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html, body {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
-            overflow-x: hidden;
-        }
-
-        body {
-            color: rgba(255, 255, 255, 0.9);
-            font-family: 'Inter', sans-serif;
-            position: relative;
-        }
-
-        .menu-btn {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: block;
-            text-decoration: none;
-            width: 100%;
-        }
-
-            .menu-btn:hover {
-                transform: translateY(-4px);
-                box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
-            }
-
-            .menu-btn:active {
-                transform: translateY(-2px);
-            }
-
-        .gradient-border {
-            position: relative;
-            border-radius: 20px;
-        }
-
-            .gradient-border::before {
-                content: '';
-                position: absolute;
-                inset: 0;
-                border-radius: inherit;
-                padding: 2px;
-                background: linear-gradient(135deg, #d4af37, #f4e4ba, #d4af37);
-                -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-                -webkit-mask-composite: xor;
-                mask-composite: exclude;
-            }
-
-        /* MOBILNA VERZIJA - JOS SMANJENO */
-        @@media (max-width: 639px) {
-            /* Main container - JOS MANJE */
-            .main-container {
-                padding-top: 3.5rem !important;
-                padding-left: 0 !important;
-                padding-right: 0 !important;
-                width: 100% !important;
-                display: flex !important;
-                flex-direction: column !important;
-                align-items: center !important;
-                position: relative;
-            }
-            /* Header - JOS MANJE */
-            .header-content {
-                text-align: center;
-                padding: 0 0.75rem;
-                width: 100%;
-                margin-top: 0 !important;
-                margin-bottom: 1.5rem !important;
-            }
-
-            .header-title {
-                font-size: 1.8rem !important;
-                line-height: 1.1;
-            }
-
-            .header-icon {
-                font-size: 1.8rem !important;
-            }
-
-            .header-description {
-                font-size: 0.9rem !important;
-                margin-top: 0.25rem;
-                display: none; /* Sakrij opis na mobile */
-            }
-            /* User Info Card - Mobile - JOS MANJE */
-            .user-card-mobile {
-                position: absolute;
-                top: 0.75rem;
-                right: 0.5rem;
-                z-index: 50;
-                background: rgba(255, 255, 255, 0.05);
-                backdrop-filter: blur(10px);
-                border-radius: 12px;
-                padding: 0.5rem 0.6rem;
-                border: 1px solid rgba(212, 175, 55, 0.2);
-                max-width: 140px;
-            }
-
-            .user-info-mobile {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-            }
-
-            .user-avatar-mobile {
-                width: 32px;
-                height: 32px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background: linear-gradient(135deg, #d4af37, #f4e4ba);
-                font-size: 0.9rem;
-                flex-shrink: 0;
-            }
-
-            .user-text-mobile {
-                display: flex;
-                flex-direction: column;
-                min-width: 0;
-            }
-
-            .username-mobile {
-                font-weight: 600;
-                font-size: 0.75rem;
-                color: white;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                line-height: 1;
-            }
-
-            .rank-mobile {
-                font-size: 0.65rem;
-                color: #d4af37;
-                background: rgba(212, 175, 55, 0.2);
-                padding: 0.1rem 0.4rem;
-                border-radius: 8px;
-                display: inline-flex;
-                align-items: center;
-                gap: 0.15rem;
-                width: fit-content;
-                margin-top: 0.15rem;
-            }
-            /* Grid - JOS MANJE */
-            #menu-grid {
-                display: grid !important;
-                grid-template-columns: 1fr !important;
-                gap: 1rem !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                padding: 0 0.75rem !important;
-                margin: 0.5rem auto 0 auto !important;
-            }
-            /* Dugmići - JOS MANJE */
-            .menu-btn {
-                width: 100% !important;
-                max-width: 100% !important;
-                min-height: 130px !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            /* Button content - JOS MANJE */
-            .btn-content {
-                height: 100%;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                text-align: center;
-                width: 100%;
-                padding: 1.25rem 0.75rem;
-            }
-
-            .btn-icon {
-                font-size: 2.5rem !important;
-                margin-bottom: 0.75rem !important;
-            }
-
-            .btn-title {
-                font-size: 1.2rem !important;
-                font-weight: 700 !important;
-                margin-bottom: 0.25rem !important;
-                line-height: 1.1 !important;
-            }
-
-            .btn-description {
-                font-size: 0.8rem !important;
-                line-height: 1.2 !important;
-                display: none; /* Sakrij opis na mobile */
-            }
-            /* Debug panel - JOS MANJE */
-            .debug-panel {
-                margin-top: 1.5rem !important;
-                padding: 0.5rem !important;
-                width: 100% !important;
-                max-width: 100% !important;
-            }
-
-                .debug-panel p {
-                    margin-bottom: 0.5rem !important;
-                    font-size: 0.75rem !important;
-                }
-        }
-
-        /* TABLET VERZIJA - JOS SMANJENO */
-        @@media (min-width: 640px) and (max-width: 1023px) {
-            /* JOS MANJE */
-            .main-container {
-                padding-top: 4.5rem !important;
-            }
-
-            #menu-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
-                gap: 1.5rem !important;
-                max-width: 700px !important;
-                padding: 0 1.25rem !important;
-            }
-            /* JOS MANJA visina dugmića */
-            .menu-btn {
-                min-height: 170px;
-            }
-            /* JOS MANJEN font header */
-            .header-title {
-                font-size: 2.5rem !important;
-            }
-
-            .header-icon {
-                font-size: 2.5rem !important;
-            }
-            /* JOS MANJEN margin header */
-            .header-content {
-                margin-bottom: 1.75rem !important;
-            }
-
-            .header-description {
-                font-size: 1rem !important;
-                margin-top: 0.25rem;
-            }
-
-            .user-card-desktop {
-                position: absolute;
-                top: 1.25rem;
-                right: 1rem;
-                z-index: 50;
-                background: rgba(255, 255, 255, 0.05);
-                backdrop-filter: blur(10px);
-                border-radius: 16px;
-                padding: 0.7rem 1rem;
-                border: 1px solid rgba(212, 175, 55, 0.2);
-                max-width: 200px;
-            }
-
-                .user-card-desktop .user-avatar {
-                    width: 45px;
-                    height: 45px;
-                    font-size: 1.3rem;
-                }
-
-                .user-card-desktop .username {
-                    font-size: 0.9rem;
-                }
-
-                .user-card-desktop .rank {
-                    font-size: 0.8rem;
-                    padding: 0.2rem 0.6rem;
-                }
-        }
-
-        /* DESKTOP VERZIJA - JOS SMANJENO */
-        @@media (min-width: 1024px) {
-            /* JOS MANJE */
-            .main-container {
-                padding-top: 5.5rem !important;
-            }
-
-            #menu-grid {
-                grid-template-columns: repeat(3, 1fr) !important;
-                gap: 1.75rem !important;
-                max-width: 1100px !important;
-                padding: 0 1.5rem !important;
-            }
-            /* JOS MANJA visina dugmića */
-            .menu-btn {
-                min-height: 200px;
-            }
-            /* JOS MANJEN font header */
-            .header-title {
-                font-size: 3rem !important;
-            }
-
-            .header-icon {
-                font-size: 3rem !important;
-            }
-            /* JOS MANJEN margin header */
-            .header-content {
-                margin-bottom: 2rem !important;
-            }
-
-            .header-description {
-                font-size: 1.1rem !important;
-                margin-top: 0.25rem;
-            }
-
-            .user-card-desktop {
-                position: absolute;
-                top: 1.5rem;
-                right: 1.5rem;
-                z-index: 50;
-                background: rgba(255, 255, 255, 0.05);
-                backdrop-filter: blur(10px);
-                border-radius: 18px;
-                padding: 0.8rem 1.25rem;
-                border: 1px solid rgba(212, 175, 55, 0.2);
-                max-width: 240px;
-            }
-
-                .user-card-desktop .user-avatar {
-                    width: 48px;
-                    height: 48px;
-                    font-size: 1.4rem;
-                }
-
-                .user-card-desktop .username {
-                    font-size: 0.95rem;
-                }
-
-                .user-card-desktop .rank {
-                    font-size: 0.85rem;
-                    padding: 0.25rem 0.7rem;
-                }
-        }
-
-        /* Button content styling - zajedničko - JOS SMANJENO */
-        .btn-content {
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 1.75rem 1.25rem;
-        }
-
-        .btn-icon {
-            font-size: 3.5rem;
-            margin-bottom: 1.25rem;
-        }
-
-        .btn-title {
-            font-size: 1.6rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            line-height: 1.2;
-            color: #ffffff;
-            font-family: 'Playfair Display', serif;
-        }
-
-        .btn-description {
-            font-size: 1rem;
-            line-height: 1.3;
-            color: rgba(255, 255, 255, 0.7);
-            font-family: 'Inter', sans-serif;
-            opacity: 0.9;
-        }
-
-        /* Header styling - JOS SMANJENO */
-        .header-content {
-            text-align: center;
-            width: 100%;
-        }
-
-        .header-title {
-            font-family: 'Playfair Display', serif;
-            color: #d4af37;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .header-description {
-            color: rgba(255,255,255,0.8);
-            font-family: 'Inter', sans-serif;
-            font-weight: 500;
-        }
-
-        /* User Card Styling - Desktop - JOS SMANJENO */
-        .user-card-desktop .user-info {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .user-card-desktop .user-avatar {
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #d4af37, #f4e4ba);
-            flex-shrink: 0;
-        }
-
-        .user-card-desktop .user-text {
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
-        }
-
-        .user-card-desktop .username {
-            font-weight: 600;
-            color: white;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            line-height: 1.2;
-        }
-
-        .user-card-desktop .rank {
-            color: #d4af37;
-            background: rgba(212, 175, 55, 0.2);
-            border-radius: 12px;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.3rem;
-            width: fit-content;
-            margin-top: 0.25rem;
-        }
-
-        /* Logout button special */
-        .logout-btn .btn-icon {
-            color: #ff6b6b;
-        }
-
-        /* Debug panel - JOS SMANJENO */
-        .debug-panel {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            border: 1px solid rgba(212, 175, 55, 0.1);
-            margin-top: 2rem;
-            padding: 1rem;
-            width: 100%;
-            max-width: 1000px;
-        }
-
-            .debug-panel p {
-                text-align: center;
-                color: rgba(255,255,255,0.6);
-                font-size: 0.85rem;
-                margin-bottom: 0.75rem;
-            }
-
-            .debug-panel > div {
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 0.5rem;
-            }
-
-        /* Dodatne optimizacije za kompaktnost */
-        .main-container > *:not(:last-child) {
-            margin-bottom: 1rem !important;
-        }
-
-        .main-container {
-            padding-bottom: 2rem !important;
-        }
-    </style>
-</head>
-<body>
-    <!-- User Info Card - Mobile -->
-    <div class="user-card-mobile d-block d-sm-none">
-        <div class="user-info-mobile">
-            <div class="user-avatar-mobile">
-                👤
-            </div>
-            <div class="user-text-mobile">
-                <div class="username-mobile">
-                    @userName
-                </div>
-                <div class="rank-mobile">
-                    @if (userRank == "0")
-                    {
-                        <span>🍸</span>
-                    }
-                    else if (userRank == "1")
-                    {
-                        <span>🍽️</span>
-                    }
-                    else if (userRank == "2")
-                    {
-                        <span>👔</span>
-                    }
-                    else if (userRank == "3")
-                    {
-                        <span>👑</span>
-                    }
-                    else
-                    {
-                        <span>👤</span>
-                    }
-                    <span>@rankName</span>
-                </div>
-            </div>
+<div class="page">
+    <header class="page-head">
+        <div class="page-head__text">
+            <div class="eyebrow reveal">@(string.IsNullOrWhiteSpace(restaurantName) ? "Dashboard" : restaurantName)</div>
+            <h1 class="page-title reveal" style="--i:1"><span data-greeting>Welcome back</span>, <em>@userName</em></h1>
+            <p class="page-sub reveal" style="--i:2">What would you like to do?</p>
         </div>
-    </div>
-
-    <!-- User Info Card - Desktop -->
-    <div class="user-card-desktop d-none d-sm-block">
-        <div class="user-info">
-            <div class="user-avatar">
-                👤
-            </div>
-            <div class="user-text">
-                <div class="username">
-                    @userName
-                </div>
-                <div class="rank">
-                    @if (userRank == "0")
-                    {
-                        <span>🍸</span>
-                    }
-                    else if (userRank == "1")
-                    {
-                        <span>🍽️</span>
-                    }
-                    else if (userRank == "2")
-                    {
-                        <span>👔</span>
-                    }
-                    else if (userRank == "3")
-                    {
-                        <span>👑</span>
-                    }
-                    else
-                    {
-                        <span>👤</span>
-                    }
-                    <span>@rankName</span>
-                </div>
-            </div>
+        <div class="page-head__actions reveal" style="--i:2">
+            <span class="tag tag--dot" data-tone="@(foodEnabled ? "success" : "muted")">Food @(foodEnabled ? "on" : "off")</span>
+            <span class="tag tag--dot" data-tone="@(freeDrinksEnabled ? "success" : "muted")">Free drinks @(freeDrinksEnabled ? "on" : "off")</span>
         </div>
-    </div>
+    </header>
 
-    <!-- Main Content -->
-    <div class="main-container w-full min-h-screen flex flex-col items-center py-4">
-        <!-- Header -->
-        <div class="header-content">
-            <div class="inline-flex items-center gap-3 mb-3 justify-center">
-                <span class="text-4xl md:text-5xl header-icon">🍽️</span>
-                <h1 class="text-4xl md:text-5xl font-bold header-title">
-                    @restaurantName
-                </h1>
-            </div>
-            <p class="text-base md:text-lg header-description">
-                Restaurant Management Dashboard
-            </p>
-        </div>
-
-        <!-- Menu Grid -->
-        <div id="menu-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-7xl mx-auto px-3">
-            <!-- Dynamic buttons based on Razor logic -->
-            @if (userRank == "1" || userRank == "2" || userRank == "3")
+    @if (canServeTables || canServeBar || freeDrinksEnabled)
+    {
+        <h2 class="section-title reveal" style="--i:2">Service</h2>
+        <div class="tiles" style="margin-bottom: 36px;">
+            @if (canServeTables)
             {
-                <a href="@Url.Action("Index", "Order")" class="menu-btn gradient-border" style="background: linear-gradient(135deg, #2d2d44, #1f1f30);">
-                    <div class="btn-content">
-                        <span class="btn-icon">🧾</span>
-                        <span class="btn-title">
-                            Active Orders
-                        </span>
-                        <span class="btn-description">
-                            View and manage current orders
-                        </span>
+                <a asp-controller="Order" asp-action="Create" class="tile tile--feature reveal" style="--i:@(++index + 2)">
+                    <div class="tile__top">
+                        <span class="chip-icon chip-icon--lg">@Html.Icon("plus")</span>
+                        <span class="tile__arrow">@Html.Icon("arrow-right")</span>
+                    </div>
+                    <div class="tile__body">
+                        <div class="tile__title">New order</div>
+                        <div class="tile__desc">Pick a table and send an order</div>
                     </div>
                 </a>
 
-                <a href="@Url.Action("Create", "Order")" class="menu-btn gradient-border" style="background: linear-gradient(135deg, #2d2d44, #1f1f30);">
-                    <div class="btn-content">
-                        <span class="btn-icon">➕</span>
-                        <span class="btn-title">
-                            New Order
-                        </span>
-                        <span class="btn-description">
-                            Create a new food order
-                        </span>
+                <a asp-controller="Order" asp-action="Index" class="tile reveal" style="--i:@(++index + 2)">
+                    <div class="tile__top">
+                        <span class="chip-icon chip-icon--lg" data-tone="info">@Html.Icon("receipt")</span>
+                        <span class="tile__arrow">@Html.Icon("arrow-right")</span>
+                    </div>
+                    <div class="tile__body">
+                        <div class="tile__title">Active orders</div>
+                        <div class="tile__desc">Review open tables and close them</div>
                     </div>
                 </a>
             }
 
-            @if (userRank == "0" || userRank == "2" || userRank == "3")
+            @if (canServeBar)
             {
-                <a href="@Url.Action("OrderOnBar", "Order")" class="menu-btn gradient-border" style="background: linear-gradient(135deg, #2d2d44, #1f1f30);">
-                    <div class="btn-content">
-                        <span class="btn-icon">🍸</span>
-                        <span class="btn-title">
-                            Bar Order
-                        </span>
-                        <span class="btn-description">
-                            Create bar and drink orders
-                        </span>
+                <a asp-controller="Order" asp-action="OrderOnBar" class="tile reveal" style="--i:@(++index + 2)">
+                    <div class="tile__top">
+                        <span class="chip-icon chip-icon--lg" data-tone="violet">@Html.Icon("martini")</span>
+                        <span class="tile__arrow">@Html.Icon("arrow-right")</span>
+                    </div>
+                    <div class="tile__body">
+                        <div class="tile__title">Bar order</div>
+                        <div class="tile__desc">Ring up drinks served at the bar</div>
                     </div>
                 </a>
             }
 
             @if (freeDrinksEnabled)
             {
-                <a href="@Url.Action("FreeDrink", "Order")" class="menu-btn gradient-border" style="background: linear-gradient(135deg, #2d2d44, #1f1f30);">
-                    <div class="btn-content">
-                        <span class="btn-icon">🎁</span>
-                        <span class="btn-title">
-                            Free Drink
-                        </span>
-                        <span class="btn-description">
-                            Claim your free drink
-                        </span>
+                <a asp-controller="Order" asp-action="FreeDrink" class="tile reveal" style="--i:@(++index + 2)">
+                    <div class="tile__top">
+                        <span class="chip-icon chip-icon--lg" data-tone="rose">@Html.Icon("gift")</span>
+                        <span class="tile__arrow">@Html.Icon("arrow-right")</span>
+                    </div>
+                    <div class="tile__body">
+                        <div class="tile__title">Free drink</div>
+                        <div class="tile__desc">Log a drink on the house</div>
                     </div>
                 </a>
             }
+        </div>
+    }
 
-            @if (userRank == "3")
+    @if (isManager)
+    {
+        <h2 class="section-title reveal" style="--i:@(index + 3)">Management</h2>
+        <div class="tiles">
+            @if (isAdmin)
             {
-                <a href="@Url.Action("FindOrder", "Order")" class="menu-btn gradient-border" style="background: linear-gradient(135deg, #2d2d44, #1f1f30);">
-                    <div class="btn-content">
-                        <span class="btn-icon">🔎</span>
-                        <span class="btn-title">
-                            Find Order
-                        </span>
-                        <span class="btn-description">
-                            Search for specific orders
-                        </span>
+                <a asp-controller="Statistics" asp-action="Index" class="tile reveal" style="--i:@(++index + 3)">
+                    <div class="tile__top">
+                        <span class="chip-icon chip-icon--lg" data-tone="success">@Html.Icon("chart")</span>
+                        <span class="tile__arrow">@Html.Icon("arrow-right")</span>
+                    </div>
+                    <div class="tile__body">
+                        <div class="tile__title">Statistics</div>
+                        <div class="tile__desc">Revenue, best sellers and staff performance</div>
                     </div>
                 </a>
 
-                <a href="@Url.Action("Index", "Statistics")" class="menu-btn gradient-border" style="background: linear-gradient(135deg, #2d2d44, #1f1f30);">
-                    <div class="btn-content">
-                        <span class="btn-icon">📊</span>
-                        <span class="btn-title">
-                            Statistics
-                        </span>
-                        <span class="btn-description">
-                            View sales and performance data
-                        </span>
+                <a asp-controller="Order" asp-action="FindOrder" class="tile reveal" style="--i:@(++index + 3)">
+                    <div class="tile__top">
+                        <span class="chip-icon chip-icon--lg" data-tone="teal">@Html.Icon("search")</span>
+                        <span class="tile__arrow">@Html.Icon("arrow-right")</span>
                     </div>
-                </a>
-
-                <a href="@Url.Action("Index", "Settings")" class="menu-btn gradient-border" style="background: linear-gradient(135deg, #2d2d44, #1f1f30);">
-                    <div class="btn-content">
-                        <span class="btn-icon">⚙️</span>
-                        <span class="btn-title">
-                            Settings
-                        </span>
-                        <span class="btn-description">
-                            Configure restaurant settings
-                        </span>
+                    <div class="tile__body">
+                        <div class="tile__title">Find order</div>
+                        <div class="tile__desc">Search the order history by table or staff</div>
                     </div>
                 </a>
             }
 
-            <!-- Logout Button -->
-            <a href="@Url.Action("Logout", "Account")"
-               class="menu-btn gradient-border logout-btn"
-               style="background: linear-gradient(135deg, #2d2d44, #1f1f30);"
-               onclick="return confirm('Are you sure you want to logout?');">
-                <div class="btn-content">
-                    <span class="btn-icon">🚪</span>
-                    <span class="btn-title">
-                        Logout
-                    </span>
-                    <span class="btn-description">
-                        Sign out of your account
-                    </span>
+            <a asp-controller="AiSommelier" asp-action="Index" class="tile reveal" style="--i:@(++index + 3)">
+                <div class="tile__top">
+                    <span class="chip-icon chip-icon--lg" data-tone="amber">@Html.Icon("wine")</span>
+                    <span class="tile__arrow">@Html.Icon("arrow-right")</span>
+                </div>
+                <div class="tile__body">
+                    <div class="tile__title">AI Sommelier</div>
+                    <div class="tile__desc">Guest-facing drink pairing assistant</div>
                 </div>
             </a>
-        </div>
 
-        <!-- Debug Panel -->
-        <div class="debug-panel">
-            <p>Session Information</p>
-            <div>
-                <div class="px-2.5 py-1 rounded-md text-xs font-medium" style="background: rgba(212, 175, 55, 0.15); color: #d4af37;">
-                    Rank: @rankName
-                </div>
-                <div class="px-2.5 py-1 rounded-md text-xs font-medium" style="background: rgba(212, 175, 55, 0.15); color: #d4af37;">
-                    User: @userName
-                </div>
-                <div class="px-2.5 py-1 rounded-md text-xs font-medium" style="background: rgba(212, 175, 55, 0.15); color: #d4af37;">
-                    Free Drinks: @(freeDrinksEnabled ? "Enabled" : "Disabled")
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            console.log('Dashboard loaded');
-
-            // Hover efekti za dugmiće
-            const menuButtons = document.querySelectorAll('.menu-btn');
-            menuButtons.forEach(button => {
-                button.addEventListener('mouseenter', function () {
-                    this.style.transform = 'translateY(-4px)';
-                    this.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.25)';
-                });
-
-                button.addEventListener('mouseleave', function () {
-                    this.style.transform = 'translateY(0)';
-                    this.style.boxShadow = 'none';
-                });
-            });
-
-            // Logout confirmation
-            const logoutBtn = document.querySelector('.logout-btn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', function (e) {
-                    if (!confirm('Are you sure you want to logout?')) {
-                        e.preventDefault();
-                    }
-                });
+            @if (isAdmin)
+            {
+                <a asp-controller="Settings" asp-action="Index" class="tile reveal" style="--i:@(++index + 3)">
+                    <div class="tile__top">
+                        <span class="chip-icon chip-icon--lg">@Html.Icon("settings")</span>
+                        <span class="tile__arrow">@Html.Icon("arrow-right")</span>
+                    </div>
+                    <div class="tile__body">
+                        <div class="tile__title">Settings</div>
+                        <div class="tile__desc">Staff, menu and restaurant configuration</div>
+                    </div>
+                </a>
             }
-
-            // Sakrij opis na mobile - dodatna provera
-            const adjustMobileLayout = () => {
-                if (window.innerWidth < 640) {
-                    const descriptions = document.querySelectorAll('.btn-description');
-                    descriptions.forEach(desc => {
-                        desc.style.display = 'none';
-                    });
-                }
-            };
-
-            adjustMobileLayout();
-            window.addEventListener('resize', adjustMobileLayout);
-        });
-    </script>
-</body>
-</html>
+        </div>
+    }
+</div>

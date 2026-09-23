@@ -1,0 +1,189 @@
+@model Zubac.Models.MakeOrderViewModel
+@*
+    Shared tap-to-add order builder used by Create (table), OrderOnBar (bar) and FreeDrink (free).
+    ViewData: "Mode" = table | bar | free, "FormAction" = form action name, "SubmitText" = button label.
+*@
+@{
+    var mode = ViewData["Mode"] as string ?? "table";
+    var action = ViewData["FormAction"] as string ?? "Create";
+    var submitText = ViewData["SubmitText"] as string ?? "Send order";
+    var isFree = mode == "free";
+
+    bool foodEnabled = User.HasClaim("FoodEnabled", "True");
+    var articles = Model.Articles.Where(a => foodEnabled || !a.IsFood).ToList();
+
+    var hasFood = articles.Any(a => a.IsFood);
+    var hasDrinks = articles.Any(a => !a.IsFood);
+    var types = articles
+        .GroupBy(a => UiHelpers.TypeLabel(a.Type))
+        .Select(g => new { Label = g.Key, Count = g.Count() })
+        .ToList();
+
+    var initialCart = Model.SelectedArticles
+        .Where(s => s.IsSelected && s.Quantity > 0)
+        .Select(s => new { id = s.ArticleId, qty = s.Quantity });
+}
+
+<form method="post" asp-action="@action" class="pos" data-mode="@mode" id="orderForm" novalidate>
+    <div class="pos__main">
+        <div asp-validation-summary="All" style="margin-bottom: 0;"></div>
+
+        @if (mode == "table")
+        {
+            <section class="card reveal" style="--i:2">
+                <div class="card__head">
+                    <h2 class="card__title">
+                        <span class="chip-icon chip-icon--sm">@Html.Icon("hash")</span>
+                        Table
+                    </h2>
+                    <span class="tag" data-tone="gold" data-table-label>Select a table</span>
+                </div>
+                <div class="table-picker" role="radiogroup" aria-label="Table number">
+                    @for (int i = 1; i <= 20; i++)
+                    {
+                        <label class="table-opt">
+                            <input type="radio" name="TableNumber" value="@i" @(Model.TableNumber == i ? "checked" : "") />
+                            <span>@i</span>
+                        </label>
+                    }
+                </div>
+            </section>
+        }
+
+        <section class="card reveal" style="--i:3">
+            <div class="card__head" style="margin-bottom: 14px;">
+                <h2 class="card__title">
+                    <span class="chip-icon chip-icon--sm">@Html.Icon("layers")</span>
+                    Menu
+                </h2>
+                <span class="muted num" style="font-size: .84rem;">@articles.Count items</span>
+            </div>
+
+            @if (!articles.Any())
+            {
+                <div class="empty empty--sm">
+                    <div class="empty__icon">@Html.Icon("inbox")</div>
+                    <div class="empty__title">Nothing on the menu yet</div>
+                    <p class="empty__text">Add items (and mark them as available) in Settings to start taking orders.</p>
+                </div>
+            }
+            else
+            {
+                <div class="menu-toolbar">
+                    <div class="input-wrap">
+                        @Html.Icon("search")
+                        <input type="search" class="input" placeholder="Search the menu…" data-menu-search aria-label="Search the menu" />
+                    </div>
+
+                    <div class="chips" role="toolbar" aria-label="Filter menu">
+                        <button type="button" class="chip is-active" data-filter="all" aria-pressed="true">All <span class="chip__count">@articles.Count</span></button>
+                        @if (hasFood && hasDrinks)
+                        {
+                            <button type="button" class="chip" data-filter="drink" aria-pressed="false">@Html.Icon("wine") Drinks</button>
+                            <button type="button" class="chip" data-filter="food" aria-pressed="false">@Html.Icon("utensils") Food</button>
+                        }
+                        @if (types.Count > 1)
+                        {
+                            foreach (var type in types)
+                            {
+                                <button type="button" class="chip" data-filter="@type.Label" aria-pressed="false">@type.Label <span class="chip__count">@type.Count</span></button>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <div class="menu-grid">
+                    @foreach (var article in articles)
+                    {
+                        var typeLabel = UiHelpers.TypeLabel(article.Type);
+                        <button type="button" class="product" data-product
+                                data-id="@article.Id"
+                                data-name="@article.Name"
+                                data-price="@UiHelpers.Invariant(article.Price)"
+                                data-type="@typeLabel"
+                                data-kind="@(article.IsFood ? "food" : "drink")">
+                            <span class="product__type">@typeLabel</span>
+                            <span class="product__name">@article.Name</span>
+                            <span class="product__foot">
+                                <span class="product__price">
+                                    @if (isFree)
+                                    {
+                                        <s>@UiHelpers.Money(article.Price)</s>
+                                        <span>Free</span>
+                                    }
+                                    else
+                                    {
+                                        @UiHelpers.Money(article.Price)
+                                    }
+                                </span>
+                                <span class="product__add">@Html.Icon("plus")</span>
+                            </span>
+                            <span class="product__qty" data-qty hidden>0</span>
+                        </button>
+                    }
+                </div>
+
+                <div class="empty empty--sm" data-menu-empty hidden>
+                    <div class="empty__icon">@Html.Icon("search")</div>
+                    <div class="empty__title">No matches</div>
+                    <p class="empty__text">Try a different name or filter.</p>
+                </div>
+            }
+        </section>
+    </div>
+
+    <aside class="pos__cart reveal" style="--i:4">
+        <div class="card cart card--glow">
+            <div class="card__head">
+                <h2 class="card__title">
+                    <span class="chip-icon chip-icon--sm">@Html.Icon(isFree ? "gift" : "cart")</span>
+                    @(isFree ? "On the house" : "Current order")
+                </h2>
+                <button type="button" class="link-button link-button--danger" data-cart-clear hidden>
+                    @Html.Icon("rotate") Clear
+                </button>
+            </div>
+
+            <div class="cart__lines" data-cart-lines aria-live="polite"></div>
+
+            <div class="empty empty--sm" data-cart-empty>
+                <div class="empty__icon">@Html.Icon("cart")</div>
+                <div class="empty__title">No items yet</div>
+                <p class="empty__text">Tap anything on the menu to add it here.</p>
+            </div>
+
+            <div class="cart__summary">
+                <div class="cart__row">
+                    <span data-cart-count>0 items</span>
+                    @if (isFree)
+                    {
+                        <span>Value <span class="num" data-cart-value>0.00&nbsp;€</span></span>
+                    }
+                </div>
+                <div class="cart__row cart__total-row">
+                    <span>@(isFree ? "Charged" : "Total")</span>
+                    <span class="cart__total" data-cart-total>0.00&nbsp;€</span>
+                </div>
+                <button type="submit" class="button button--primary button--lg button--block" data-submit>
+                    @Html.Icon("check")
+                    <span>@submitText</span>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <div data-hidden-fields hidden></div>
+    <script type="application/json" data-cart-initial>@Json.Serialize(initialCart)</script>
+
+    <div class="cart-bar">
+        <div class="cart-bar__meta">
+            <span class="cart-bar__count" data-cart-count>0 items</span>
+            <span class="cart-bar__total" data-cart-total>0.00&nbsp;€</span>
+        </div>
+        <button type="button" class="button button--outline-gold" data-cart-jump>Review</button>
+        <button type="submit" class="button button--primary" data-submit>
+            @Html.Icon("check")
+            <span>Send</span>
+        </button>
+    </div>
+</form>

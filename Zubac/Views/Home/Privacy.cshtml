@@ -1,6 +1,17 @@
-﻿@{
-    ViewData["Title"] = "Privacy Policy";
+@{
+    ViewData["Title"] = "Privacy";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="page page--narrow">
+    <header class="page-head">
+        <div class="page-head__text">
+            <a asp-controller="Home" asp-action="Index" class="back-link">@Html.Icon("chevron-left") Dashboard</a>
+            <div class="eyebrow">Legal</div>
+            <h1 class="page-title">Privacy</h1>
+        </div>
+    </header>
+
+    <div class="card">
+        <p class="text-2">Zubac stores only what it needs to run service: staff usernames and hashed passwords, your menu, and the orders placed by your team. A single sign-in cookie keeps you logged in on this device.</p>
+    </div>
+</div>

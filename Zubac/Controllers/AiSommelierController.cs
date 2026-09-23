@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Zubac.Interfaces;
 using Zubac.Models;
 
 namespace Zubac.Controllers
 {
+    [Authorize]
     public class AiSommelierController : Controller
     {
         private readonly IAiSommelierService _service;
@@ -47,7 +49,8 @@ namespace Zubac.Controllers
             {
                 success = true,
                 message = drink.Explanation,
-                drinkId = drink.Id
+                drinkId = drink.Id,
+                drinkName = drink.Name
             });
         }
     }

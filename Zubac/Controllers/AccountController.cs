@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -20,6 +20,9 @@ namespace Zubac.Controllers
         [HttpGet]
         public IActionResult Login()
         {
+            if (User.Identity?.IsAuthenticated == true)
+                return RedirectToAction("Index", "Home");
+
             return View();
         }
 
@@ -41,21 +44,20 @@ namespace Zubac.Controllers
 
             RestaurantData restaurantData = await _service.GetRestaurantData(user.RestaurantId);
 
-           var claims = new List<Claim>
-           {
-     new Claim(ClaimTypes.Name, user.Username),
-     new Claim("UserId", user.Id.ToString()),
-     new Claim("UserRank", user.UserRank.ToString()),
-     new Claim("RestaurantId", user.RestaurantId.ToString()),
-     new Claim("RestaurantName", restaurantData.Name),
-     new Claim("FoodEnabled", restaurantData.FoodEnabled.ToString()),
-     new Claim("FreeDrinksEnabled", restaurantData.FreeDrinksEnabled.ToString())
-           };
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim("UserId", user.Id.ToString()),
+                new Claim("UserRank", user.UserRank.ToString()),
+                new Claim("RestaurantId", user.RestaurantId.ToString()),
+                new Claim("RestaurantName", restaurantData?.Name ?? ""),
+                new Claim("FoodEnabled", (restaurantData?.FoodEnabled ?? false).ToString()),
+                new Claim("FreeDrinksEnabled", (restaurantData?.FreeDrinksEnabled ?? false).ToString())
+            };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
-            HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal)
-    .GetAwaiter().GetResult();   
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
             return RedirectToAction("Index", "Home");
         }
@@ -63,8 +65,6 @@ namespace Zubac.Controllers
         [HttpGet] // Promenjeno sa POST na GET
         public async Task<IActionResult> Logout()
         {
-            Console.WriteLine("DEBUG: Logout called via GET");
-
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
             // Brišemo cookie-je
@@ -74,6 +74,12 @@ namespace Zubac.Controllers
             }
 
             return RedirectToAction("Login", "Account");
+        }
+
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }

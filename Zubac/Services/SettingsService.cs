@@ -61,7 +61,7 @@ namespace Zubac.Services
         {
             var response = await _context.StaffLinks
                 .Include(sl => sl.Staff)
-                .FirstOrDefaultAsync(sl => sl.Token == token && !sl.IsUsed);
+                .FirstOrDefaultAsync(sl => sl.Token == token && !sl.IsUsed && (sl.ExpiresAt == null || sl.ExpiresAt > DateTime.Now));
             return response;
         }
 
@@ -71,7 +71,7 @@ namespace Zubac.Services
             if (staff == null) return false;
 
             var staffLink = await _context.StaffLinks
-                .FirstOrDefaultAsync(sl => sl.Token == token && sl.StaffId == staffId && !sl.IsUsed);
+                .FirstOrDefaultAsync(sl => sl.Token == token && sl.StaffId == staffId && !sl.IsUsed && (sl.ExpiresAt == null || sl.ExpiresAt > DateTime.Now));
 
             if (staffLink == null) return false;
 
@@ -148,18 +148,23 @@ namespace Zubac.Services
             var settings = await _context.RestaurantSettings
                 .FirstOrDefaultAsync(s => s.Id == model.Id);
 
-            if(settings.StartTime != model.StartTime)
+            if (settings == null) return false;
+
+            // The settings form edits times to the minute, so compare at minute precision.
+            static DateTime ToMinute(DateTime d) => new DateTime(d.Year, d.Month, d.Day, d.Hour, d.Minute, 0, d.Kind);
+            var startChanged = ToMinute(settings.StartTime) != ToMinute(model.StartTime);
+
+            if(startChanged)
             {
                 List<Order> orders = await _context.Orders.Where(x => x.RestaurantId == model.Id && x.Finished == false).ToListAsync();
                 if(orders.Count > 0)
                 return false;
             }
 
-            if (settings == null) return false;
-
             settings.FoodEnabled = model.FoodEnabled;
             settings.FreeDrinksEnabled = model.FreeDrinksEnabled;
-            settings.StartTime = model.StartTime;
+            if (startChanged)
+                settings.StartTime = model.StartTime;
             settings.UpdatedAt = DateTime.Now;
 
             if(model.RealtimeCounting == true)
